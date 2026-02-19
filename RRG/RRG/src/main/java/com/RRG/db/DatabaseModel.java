@@ -3,65 +3,46 @@ package com.RRG.db;
 import com.RRG.model.*;
 
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class DatabaseModel 
 {
-    private Database database;
+    private DBConnect database;
+    private DBQuery query;
+    private ObjectCreator creator;
 
     public DatabaseModel()
     {
-        this.database = new Database();
+        this.database = new DBConnect();
+        this.query = new DBQuery(database);
+        this.creator = new ObjectCreator();
     }
 
     public boolean createUser(User user) throws SQLException
     {
         String sql = "INSERT INTO users (email, password) VALUES (?, ?)";
 
-        try (PreparedStatement stmt = database.getConnection().prepareStatement(sql))
-        {
-            stmt.setString(1, user.getEmail());
-            stmt.setString(2, user.getPassword());
-            return stmt.executeUpdate() > 0;
-        }
+        return query.executeUpdate(sql, user.getEmail(), user.getPassword()) > 0;
     }
 
     public User getUserByEmail(String email) throws SQLException
     {
         String sql = "SELECT * FROM users WHERE email = ?";
+        ResultSet rs = query.executeQuery(sql, email);
 
-        try (PreparedStatement stmt = database.getConnection().prepareStatement(sql))
+        if (rs.next())
         {
-            stmt.setString(1, email);
-            ResultSet rs = stmt.executeQuery();
-
-            if (rs.next())
-            {
-                return new User(rs.getInt("id"), rs.getString("email"), rs.getString("password"));
-
-            }
-            return null;
+            return creator.createUser(rs);
         }
+        return null;
     }
 
-    public List<Recipe> searchRecipeByName(String name) throws SQLException
+    public ArrayList<Recipe> searchRecipeByName(String name) throws SQLException
     {
-        List<Recipe> recipes = new ArrayList<>();
         String sql = "SELECT * FROM recipes WHERE name LIKE ?";
+        ResultSet rs = query.executeQuery(sql, "%" + name + "%");
 
-        try (PreparedStatement stmt = database.getConnection().prepareStatement(sql))
-        {
-            stmt.setString(1, "%" + name + "%");
-            ResultSet rs = stmt.executeQuery();
-
-            while (rs.next())
-            {
-                recipes.add(new Recipe(rs.getInt("id"), rs.getString("name")));
-            }
-        }
-
-        return recipes;
+        return creator.createRecipeList(rs);
     }
 
     public void saveFavorite(int userId, int recipeId) throws SQLException
@@ -106,7 +87,7 @@ public class DatabaseModel
         String sql = "INSERT INTO ratings (user_id, recipe_id, rating) VALUES (?, ?, ?) " + 
         "ON DUPLICATE KEY UPDATE rating = ?";
 
-        try (PreparedStatement stmt = database.getConnection().prepareStatement(sql)
+        try (PreparedStatement stmt = database.getConnection().prepareStatement(sql))
         {
             stmt.setInt(1, userID);
             stmt.setInt((2), recipeId);
@@ -114,5 +95,11 @@ public class DatabaseModel
             stmt.setInt(4, rating);
             stmt.executeUpdate();
         }
+    }
+
+    public Favorite createFavorite(int favoriteID) throws SQLException
+    {
+        // TODO
+        return new Favorite(0,0,0);
     }
 }
