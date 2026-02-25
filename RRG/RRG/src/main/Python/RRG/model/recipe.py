@@ -15,7 +15,9 @@ class Recipe(Base):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(255), nullable = False)
+    area = Column()
     instructions = Column(Text, nullable=True)
+    
 
     # This relationship is automatically created via the backref in User and explicitely identified here.
     favorited_by = relationship("User", secondary = "user_favorites", back_populates = "favorites")
