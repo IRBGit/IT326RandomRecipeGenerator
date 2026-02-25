@@ -4,7 +4,8 @@ from sqlalchemy.orm import sessionmaker, Session
 from sqlalchemy.exc import SQLAlchemyError
 
 class DBConnect:
-    URL = ""  # Example: "oracle+oracledb://username:password@host:port/service_name"
+
+    URL = "oracle+oracledb://IT326S01:store55@10.110.10.90:1521/oracle"
 
     def __init__(self):
         self.engine = None
