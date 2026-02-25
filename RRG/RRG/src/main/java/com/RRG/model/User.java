@@ -1,9 +1,12 @@
 package com.RRG.model;
 
+import java.util.ArrayList;
+
 public class User {
     private int id;
     private String email;
     private String password;
+    private ArrayList<Recipe> favorites;
 
     public User(int id, String email, String password)
     {
@@ -14,5 +17,8 @@ public class User {
 
     public String getEmail() { return email; }
 
-    public String getPassword() {return password; }
+    public boolean checkPassword(String password)
+    {
+        return this.password.equals(password);
+    }
 }
