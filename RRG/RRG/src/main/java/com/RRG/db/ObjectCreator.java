@@ -2,6 +2,7 @@ package com.RRG.db;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 
 import com.RRG.model.*;
 
@@ -23,5 +24,12 @@ public class ObjectCreator
             rs.getString("name"),
             rs.getString("instructions")
         );
+    }
+
+        public ArrayList<Recipe> createRecipeList(ResultSet rs)
+    {
+        // TODO
+
+        return new ArrayList<Recipe>();
     }
 }
