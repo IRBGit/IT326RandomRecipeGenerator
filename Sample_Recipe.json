@@ -1,0 +1,42 @@
+{
+    "Recipe" : [
+        {
+            "recipeName" : "Funnel Cake",
+            "steps" : " Gather all ingredients.\nHeat oil to 375 degrees F (190 degrees C) in a heavy skillet.\nBeat milk and eggs together in a large bowl.\nCombine flour, baking powder, cinnamon, and salt in a separate bowl.\nStir into egg mixture until smooth\nUse your finger to cover the funnel hole; pour in 1 cup of batter.\nStarting in the center of the skillet, remove your finger and move the funnel in a swirling motion to make a 6- or 7-inch round.\nFry in hot oil until bottom is golden brown; flip and continue cooking until golden brown all over, about 1 minute per side.\nDrain on paper towels.\nContinue cooking remaining batter. \nSprinkle with confectioners' sugar and serve warm.",
+            "ingredients" : [
+                {
+                    "ingredientName" : "Vegetable Oil",
+                    "ingredientQuantity" : "1 quart"
+                },
+                {
+                    "ingredientName" : "Milk",
+                    "ingredientQuantity" : "1.5 cups"
+                },
+                {
+                    "ingredientName" : "Large Eggs",
+                    "ingredientQuantity" : "2"
+                },
+                {
+                    "ingredientName" : "All Purpose Flour",
+                    "ingredientQuantity" : "2 cups"
+                },
+                {
+                    "ingredientName" : "Backing Powder",
+                    "ingredientQuantity" : "1 teaspoon"
+                },
+                {
+                    "ingredientName" : "Ground Cinnamon",
+                    "ingredientQuantity" : "0.5 teaspoon"
+                },
+                {
+                    "ingredientName" : "Salt",
+                    "ingredientQuantity" : "0.5 teaspoon"
+                },
+                {
+                    "ingredientName" : "Confectioners' Sugar",
+                    "ingredientQuantity" : "0.75 cups"
+                }
+                    ]
+        }
+    ]
+}
