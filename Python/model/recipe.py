@@ -19,7 +19,7 @@ class Recipe(Base):
     instructions = Column(Text, nullable=True)
     
 
-    # This relationship is automatically created via the backref in User and explicitely identified here.
+    # This relationship is automatically created via the backref in User and explicitly identified here.
     favorited_by = relationship("User", secondary = "user_favorites", back_populates = "favorites")
 
     def __init__(self, name: str, instructions: str = None):

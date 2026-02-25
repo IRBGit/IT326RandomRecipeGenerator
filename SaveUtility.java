@@ -1,5 +1,7 @@
 // Made by Alysa Solomon
 
+//Depreciated
+
 //imports to write files and read/write JSON objects
 import java.io.FileWriter;
 import java.io.IOException;
