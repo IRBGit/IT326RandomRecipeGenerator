@@ -3,6 +3,8 @@ from sqlalchemy import Column, Integer, String, Table, ForeignKey
 from sqlalchemy.orm import relationship, declarative_base
 from model.recipe import Recipe
 
+# This file is for handling user data. 
+
 # Assuming Base is already defined earlier
 Base = declarative_base()
 

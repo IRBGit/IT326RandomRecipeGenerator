@@ -2,6 +2,11 @@ from sqlalchemy.orm import relationship, declarative_base
 from sqlalchemy import Column, Integer, String, ForeignKey, Table
 import model.recipe
 
+# This class is for the backend of ingredients
+
+#TODO: include methods for the different Use Cases, acording to Class Diagram
+#TODO: Add setters/getters
+
 Base = declarative_base()
 
 recipe_ingredients = Table(

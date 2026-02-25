@@ -2,7 +2,7 @@
 from sqlalchemy.exc import SQLAlchemyError
 
 class DBQuery:
-    """Handles queries and transactions using SQLAlchemy."""
+    # Handles queries and transactions using SQLAlchemy.
 
     def __init__(self, db_connect):
         self.db_connect = db_connect
