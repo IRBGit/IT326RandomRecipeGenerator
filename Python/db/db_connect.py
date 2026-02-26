@@ -1,11 +1,12 @@
 # db_connect.py
-# This class does the database handling. 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, Session
 from sqlalchemy.exc import SQLAlchemyError
 
 class DBConnect:
-    URL = "oracle+oracledb://IT326:store55@10.110.10.90:1521/?sid=oracle"
+    # You must be connected to the VPN via Cisco SecureClient to be
+    # able to connect to the database
+    URL = "oracle+oracledb://IT326S01:store55@10.110.10.90:1521/oracle"
 
     def __init__(self):
         self.engine = None
@@ -17,6 +18,7 @@ class DBConnect:
             try:
                 self.engine = create_engine(self.URL, echo=False, future=True)
                 self.SessionLocal = sessionmaker(bind=self.engine, autoflush=False, autocommit=False)
+                print("Connected successfully")
             except SQLAlchemyError as e:
                 print(f"Database connection failed: {e}")
                 self.engine = None
@@ -38,8 +40,9 @@ class DBConnect:
         if self.engine is None:
             return False
         try:
-            with self.engine.connect() as conn:
-                conn.execute("SELECT 1 FROM DUAL")
+            with self.engine.connect():
+                print("Engine connection opened")
             return True
-        except SQLAlchemyError:
+        except SQLAlchemyError as e:
+            print (f"COnnection failed iwth error: {e}")
             return False
