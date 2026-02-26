@@ -12,12 +12,12 @@ Base = declarative_base()
 recipe_ingredients = Table(
     "recipe_ingredients", Base.metadata,
     Column("recipe_id", Integer, ForeignKey("recipes.id"), primary_key=True),
-    Column("ingredient_id", Integer, ForeignKey("ingredients.id"), primary_key=True)
+    Column("ingredient_id", Integer, ForeignKey("ingredient.id"), primary_key=True)
     
 )
 
 class Ingredient(Base):
-    __tablename__ = "ingredients"
+    __tablename__ = "ingredient"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(255), nullable=False, unique=True)
@@ -26,7 +26,7 @@ class Ingredient(Base):
     recipes = relationship(
         "Recipe",
         secondary=recipe_ingredients,
-        back_populates="ingredients"
+        back_populates="ingredient"
     )
 
     def __init__(self, name: str):
