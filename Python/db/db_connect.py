@@ -1,4 +1,5 @@
 # db_connect.py
+# This class does the database handling. 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, Session
 from sqlalchemy.exc import SQLAlchemyError

@@ -1,7 +1,6 @@
-
-
+# This class is built to create objects for methods
 class ObjectCreator:
-    """Static class for creating ORM objects."""
+    # Static class for creating ORM objects.
 
     @staticmethod
     def create_recipe(name: str, instructions: str = None):
