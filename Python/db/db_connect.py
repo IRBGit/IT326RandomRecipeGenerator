@@ -45,5 +45,5 @@ class DBConnect:
                 print("Engine connection opened")
             return True
         except SQLAlchemyError as e:
-            print (f"COnnection failed iwth error: {e}")
+            print (f"Connection failed with error: {e}")
             return False
