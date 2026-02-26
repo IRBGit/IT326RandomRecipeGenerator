@@ -36,8 +36,10 @@ class DBConnect:
 
     def is_connected(self) -> bool:
         if self.engine is None:
+            print("self.engine is None")
             return False
         try:
+            print("try statement")
             with self.engine.connect() as conn:
                 conn.execute("SELECT 1 FROM DUAL")
             return True
