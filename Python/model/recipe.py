@@ -1,3 +1,8 @@
+# This class handles the data of Recipes
+
+#TODO: include methods for the different Use Cases, acording to Class Diagram
+#TODO: Add setters/getters
+
 from sqlalchemy.orm import declarative_base, relationship
 from sqlalchemy import Column, Integer, String, Text, Table, Column, ForeignKey
 
@@ -16,10 +21,10 @@ class Recipe(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(255), nullable = False)
     area = Column()
-    instructions = Column(Text, nullable=True)
+    instructions = Column(Text, nullable=False)
     
 
-    # This relationship is automatically created via the backref in User and explicitely identified here.
+    # This relationship is automatically created via the backref in User and explicitly identified here.
     favorited_by = relationship("User", secondary = "user_favorites", back_populates = "favorites")
 
     def __init__(self, name: str, instructions: str = None):
