@@ -1,6 +1,6 @@
 # This class handles the data of Recipes
 
-#TODO: include methods for the different Use Cases, acording to Class Diagram
+#TODO: include methods for the different Use Cases, according to Class Diagram
 #TODO: Add setters/getters
 
 from sqlalchemy.orm import declarative_base, relationship
@@ -21,8 +21,13 @@ class Recipe(Base):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(255), nullable = False)
+    category = Column(String)
     area = Column(String)
-    instructions = Column(ARRAY(String), nullable=False)
+    ingredients = relationship("ingredients", backref="Recipe")
+    instructions = Column(String, nullable=False)
+    tags = Column(String)
+    video = Column(String)
+
 
     
 
