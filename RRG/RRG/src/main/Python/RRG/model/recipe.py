@@ -1,5 +1,6 @@
 from sqlalchemy.orm import declarative_base, relationship
-from sqlalchemy import Column, Integer, String, Text, Table, Column, ForeignKey
+from sqlalchemy import Column, Integer, String, Text, Table, Column, ForeignKey, List
+
 
 Base = declarative_base()
 
@@ -15,8 +16,9 @@ class Recipe(Base):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(255), nullable = False)
-    area = Column()
-    instructions = Column(Text, nullable=True)
+    area = Column(String)
+    instructions = Column(ARRAY(String), nullable=True)
+
     
 
     # This relationship is automatically created via the backref in User and explicitely identified here.
