@@ -38,6 +38,7 @@ class DBConnect:
 
     def is_connected(self) -> bool:
         if self.engine is None:
+            print("self.engine is None")
             return False
         try:
             with self.engine.connect():
