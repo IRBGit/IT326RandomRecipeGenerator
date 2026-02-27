@@ -4,7 +4,8 @@
 #TODO: Add setters/getters
 
 from sqlalchemy.orm import declarative_base, relationship
-from sqlalchemy import Column, Integer, String, Text, Table, Column, ForeignKey, List
+from sqlalchemy import Column, Integer, String, Text, Table, Column, ForeignKey
+from typing import List
 
 
 Base = declarative_base()
@@ -19,7 +20,7 @@ recipe_ingredients = Table(
 class Recipe(Base):
     __tablename__ = "recipe" # Table name in the SQL database
 
-    id = Column(Integer, primary_key=True, autoincrement=True)
+    id = Column(Integer, primary_key=True, autoincrement=True) 
     name = Column(String(255), nullable = False)
     category = Column(String)
     area = Column(String)
@@ -34,9 +35,37 @@ class Recipe(Base):
     # This relationship is automatically created via the backref in User and explicitly identified here.
     favorited_by = relationship("User", secondary = "user_favorites", back_populates = "favorites")
 
-    def __init__(self, name: str, instructions: str = None):
+    # init includes name, category, instructions, tags, and video as setters
+    def __init__(self, name: str, instructions: str = None, category: str = None, tags = None, video: str = None):
         self.name = name
+        self.category = None
+        self.area = None
+        self.ingredients = None # for now, including all variables, change later
         self.instructions = instructions
+        self.category = category
+        self.tags = tags
+        self.video = video
 
     def __repr__(self):
         return f"<Recipe(id = {self.id}, name ='{self.name}')>"
+    
+    # prints a recipe to terminal
+    def print(self):
+        print(self.name)
+        if (self.category):
+            print(self.category)
+
+        if (self.area):
+            print(self.area)
+
+        if (self.ingredients):
+            print(self.ingredients)
+
+        if (self.instructions):
+            print(self.instructions)
+
+        if (self.tags):
+            print(self.tags)
+
+        if (self.video):
+            print(self.video)
