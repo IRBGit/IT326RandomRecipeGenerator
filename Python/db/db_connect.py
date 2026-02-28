@@ -37,6 +37,12 @@ class DBConnect:
             self.session = None
 
     def is_connected(self) -> bool:
+        """
+        Check if you have a connection to the databse.
+
+        Returns:
+            connected(bool): True if connected, False is not.
+        """
         if self.engine is None:
             return False
         try:
