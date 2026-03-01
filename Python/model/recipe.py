@@ -18,7 +18,10 @@ class Recipe(Base):
     
 
     # This relationship is automatically created via the backref in User and explicitly identified here.
-    favorited_by = relationship("User", secondary = user_favorites, back_populates = "favorites")
+    favorited_by = relationship(
+        "User", 
+        secondary = user_favorites, 
+        back_populates = "favorites")
 
     ingredients = relationship(
         "Ingredient",

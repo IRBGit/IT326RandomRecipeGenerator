@@ -18,7 +18,7 @@ class User(Base):
     favorites = relationship(
         "Recipe",
         secondary=user_favorites,
-        backref="favorited_by"
+        back_populates="favorited_by"
     )
 
     pantry_items = relationship(
