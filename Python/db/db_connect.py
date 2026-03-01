@@ -2,6 +2,7 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, Session
 from sqlalchemy.exc import SQLAlchemyError
+from model.base import Base
 
 class DBConnect:
     # You must be connected to the VPN via Cisco SecureClient to be
@@ -52,3 +53,12 @@ class DBConnect:
         except SQLAlchemyError as e:
             print (f"COnnection failed iwth error: {e}")
             return False
+    
+    def get_engine(self):
+        if self.engine is None:
+            self.connect()
+        return self.engine
+    
+    def create_tables(self):
+        engine = self.get_engine()
+        Base.metadata.create_all(engine)

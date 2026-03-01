@@ -1,10 +1,10 @@
-from sqlalchemy import create_engine
-from model.base import Base
-
-from model.user import User, user_favorites
+from model.user import User
 from model.ingredient import Ingredient
 from model.pantry import PantryItem
-from model.recipe import Recipe, recipe_ingredients
+from model.recipe import Recipe
+from model.associations import recipe_ingredients, user_favorites
 
 from db.db_connect import DBConnect
 
+db = DBConnect()
+db.create_tables()
