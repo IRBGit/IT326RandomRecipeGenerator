@@ -1,20 +1,14 @@
-from sqlalchemy.orm import relationship, declarative_base
+from sqlalchemy.orm import relationship
 from sqlalchemy import Column, Integer, String, ForeignKey, Table
-import model.recipe
+from model.base import Base
+from model.associations import recipe_ingredients
 
 # This class is for the backend of ingredients
 
 #TODO: include methods for the different Use Cases, acording to Class Diagram
 #TODO: Add setters/getters
 
-Base = declarative_base()
 
-recipe_ingredients = Table(
-    "recipe_ingredients", Base.metadata,
-    Column("recipe_id", Integer, ForeignKey("recipes.id"), primary_key=True),
-    Column("ingredient_id", Integer, ForeignKey("ingredients.id"), primary_key=True)
-    
-)
 
 class Ingredient(Base):
     __tablename__ = "ingredients"
@@ -28,6 +22,11 @@ class Ingredient(Base):
         secondary=recipe_ingredients,
         back_populates="ingredients"
     )
+
+    pantry_items = relationship(
+    "PantryItem",
+    back_populates="ingredient"
+)
 
     def __init__(self, name: str):
         self.name = name

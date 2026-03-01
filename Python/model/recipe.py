@@ -3,17 +3,11 @@
 #TODO: include methods for the different Use Cases, acording to Class Diagram
 #TODO: Add setters/getters
 
-from sqlalchemy.orm import declarative_base, relationship
+from sqlalchemy.orm import relationship
 from sqlalchemy import Column, Integer, String, Text, Table, Column, ForeignKey
-
-Base = declarative_base()
-
-recipe_ingredients = Table(
-    "recipe_ingredients", Base.metadata,
-    Column("recipe_id", Integer, ForeignKey("recipes.id"), primary_key=True),
-    Column("ingredient_id", Integer, ForeignKey("ingredients.id"), primary_key=True)
-    
-)
+from model.base import Base
+from model.ingredient import recipe_ingredients
+from model.associations import user_favorites
 
 class Recipe(Base):
     __tablename__ = "recipes" # Table name in the SQL database
