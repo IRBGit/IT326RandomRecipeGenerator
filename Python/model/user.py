@@ -1,19 +1,11 @@
 # models.py (continuing from Recipe)
 from sqlalchemy import Column, Integer, String, Table, ForeignKey
-from sqlalchemy.orm import relationship, declarative_base
-from model.recipe import Recipe
-
-# This file is for handling user data. 
-
-# Assuming Base is already defined earlier
-Base = declarative_base()
+from sqlalchemy.orm import relationship
+from model.base import Base
+from model.associations import user_favorites
 
 # Association table for many-to-many relationship between User and Recipe
-user_favorites = Table(
-    'user_favorites', Base.metadata,
-    Column('user_id', Integer, ForeignKey('users.id'), primary_key=True),
-    Column('recipe_id', Integer, ForeignKey('recipes.id'), primary_key=True)
-)
+
 
 class User(Base):
     __tablename__ = "users"
@@ -26,7 +18,13 @@ class User(Base):
     favorites = relationship(
         "Recipe",
         secondary=user_favorites,
-        backref="favorited_by"
+        back_populates="favorited_by"
+    )
+
+    pantry_items = relationship(
+        "PantryItem",
+        back_populates="user",
+        cascade="all, delete-orphan"
     )
 
     def __init__(self, email: str, password: str):
