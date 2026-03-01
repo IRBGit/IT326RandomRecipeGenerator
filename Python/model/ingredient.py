@@ -11,7 +11,7 @@ from model.associations import recipe_ingredients
 
 
 class Ingredient(Base):
-    __tablename__ = "ingredients"
+    __tablename__ = "ingredient"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(255), nullable=False, unique=True)

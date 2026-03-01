@@ -45,13 +45,14 @@ class DBConnect:
             connected(bool): True if connected, False is not.
         """
         if self.engine is None:
+            print("self.engine is None")
             return False
         try:
             with self.engine.connect():
                 print("Engine connection opened")
             return True
         except SQLAlchemyError as e:
-            print (f"COnnection failed iwth error: {e}")
+            print (f"Connection failed with error: {e}")
             return False
     
     def get_engine(self):
