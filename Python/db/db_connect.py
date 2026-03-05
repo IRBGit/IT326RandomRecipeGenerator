@@ -3,11 +3,14 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, Session
 from sqlalchemy.exc import SQLAlchemyError
 from model.base import Base
+import os
+from dotenv import load_dotenv
+load_dotenv()
 
 class DBConnect:
     # You must be connected to the VPN via Cisco SecureClient to be
     # able to connect to the database
-    URL = "oracle+oracledb://IT326S01:store55@10.110.10.90:1521/oracle"
+    URL = f"oracle+oracledb://IT326S01:{os.getenv("DB_PW")}@10.110.10.90:1521/oracle"
 
     def __init__(self):
         self.engine = None
