@@ -7,7 +7,7 @@ from model.associations import recipe_ingredients, user_favorites
 from db.db_connect import DBConnect
 
 # THIS WILL ONLY CREATE NEW TABLES!!! IT WILL NOT UPDATE EXISTING TABLES!
-# TO REPLACE A TABLE USE THE DLL COMMAND IN SQL DEVELOPER:
+# TO REPLACE A TABLE USE THE DDL COMMAND IN SQL DEVELOPER:
 ## DROP TABLE ******* CASCADE CONSTRAINTS; ##
 
 db = DBConnect()
