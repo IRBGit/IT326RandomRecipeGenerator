@@ -1,7 +1,7 @@
 # driver.py
 # This file tests if the database is connected to the file.
 
-from db_connect import DBConnect
+from db.db_connect import DBConnect
 
 def main():
     # Create DBConnect instance

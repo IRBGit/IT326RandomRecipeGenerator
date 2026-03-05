@@ -13,6 +13,7 @@ class ObjectCreator:
         Return:
             Recipe: A new recipe object.
         """
+        from model.user import User
         return recipe_model
     
     @staticmethod
@@ -26,6 +27,7 @@ class ObjectCreator:
         Return:
             Ingredient: A new Ingredient object.
         """
+        from model.ingredient import Ingredient
         return ingredient_model
     
     @staticmethod
