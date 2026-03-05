@@ -10,10 +10,10 @@ def main():
     print("Attempting to connect to database...")
 
     try:
-        print("1")
+        #print("1")
         # Initialize engine
         db_connect.connect()
-        print("2")
+        #print("2")
 
         # Check connection
         if db_connect.is_connected():
