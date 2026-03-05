@@ -4,21 +4,16 @@
 #TODO: Add setters/getters
 
 from sqlalchemy.orm import relationship
-from sqlalchemy import Column, Integer, String, Text, Table, Column, ForeignKey
+from sqlalchemy import Column, Integer, String, Text, Column, Sequence
 from model.base import Base
 from model.associations import user_favorites, recipe_ingredients
 
-recipe_ingredients = Table(
-    "recipe_ingredients", Base.metadata,
-    Column("recipe_id", Integer, ForeignKey("recipes.id"), primary_key=True),
-    Column("ingredient_id", Integer, ForeignKey("ingredients.id"), primary_key=True)
-    
-)
-
 class Recipe(Base):
-    __tablename__ = "recipe" # Table name in the SQL database
+    __tablename__ = "recipes" # Table name in the SQL database
 
-    id = Column(Integer, primary_key=True, autoincrement=True)
+    id = Column(Integer, 
+                Sequence('recipe_id_seq'),
+                primary_key=True)
     name = Column(String(255), nullable = False)
     # area = Column() # I don't know what this is supposed to be but it can't be an empty column to write to the database.
     instructions = Column(Text, nullable=False)

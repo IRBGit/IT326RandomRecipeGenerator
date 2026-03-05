@@ -11,4 +11,5 @@ from db.db_connect import DBConnect
 ## DROP TABLE ******* CASCADE CONSTRAINTS; ##
 
 db = DBConnect()
+db.drop_tables()
 db.create_tables()

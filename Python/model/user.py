@@ -1,18 +1,21 @@
 # models.py (continuing from Recipe)
-from sqlalchemy import Column, Integer, String, Table, ForeignKey
+from sqlalchemy import Column, Integer, String, Sequence
 from sqlalchemy.orm import relationship
 from model.base import Base
 from model.associations import user_favorites
-
-# Association table for many-to-many relationship between User and Recipe
-
+from model.pw_hash import PWHash
 
 class User(Base):
     __tablename__ = "users"
 
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    email = Column(String(255), unique=True, nullable=False)
-    password = Column(String(255), nullable=False)
+    id = Column(Integer, 
+                Sequence('user_id_seq'),
+                primary_key=True)
+    email = Column(String(255), 
+                   unique=True, 
+                   nullable=False)
+    password = Column(String(255), 
+                      nullable=False)
 
     # Many-to-many relationship to Recipe
     favorites = relationship(
@@ -29,10 +32,10 @@ class User(Base):
 
     def __init__(self, email: str, password: str):
         self.email = email
-        self.password = password
+        self.password = PWHash().hashPassword(password)
 
-    def check_password(self, password: str) -> bool:
-        return self.password == password
+    def check_password(self, toCheck: str) -> bool:
+        return PWHash().verify(hash = self.password, password = toCheck)
 
     def __repr__(self):
         return f"<User(id={self.id}, email='{self.email}')>"
