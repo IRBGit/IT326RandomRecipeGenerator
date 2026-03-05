@@ -65,6 +65,9 @@ class Recipe(Base):
         if (self.instructions):
             print(self.instructions)
 
+        if (self.category):
+            print(self.category)
+            
         if (self.tags):
             print(self.tags)
 
