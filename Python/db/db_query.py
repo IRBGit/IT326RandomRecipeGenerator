@@ -1,5 +1,6 @@
 # db_query.py
 from sqlalchemy.exc import SQLAlchemyError
+from db.db_connect import DBConnect
 
 class DBQuery:
     """ Handles queries and transactions using SQLAlchemy and oracledb"""

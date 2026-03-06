@@ -3,16 +3,22 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, Session
 from sqlalchemy.exc import SQLAlchemyError
 from model.base import Base
+import os
+from dotenv import load_dotenv
+load_dotenv()
 
 class DBConnect:
-    # You must be connected to the VPN via Cisco SecureClient to be
-    # able to connect to the database
-    URL = "oracle+oracledb://IT326S01:store55@10.110.10.90:1521/oracle"
-
+    """
+    You must be connected via Cisco Secure Client VPN to the ISU network to access the database.
+    """
     def __init__(self):
         self.engine = None
         self.SessionLocal = None
         self.session = None
+        db_pw = os.getenv("DB_PW")
+        if not db_pw:
+            raise ValueError("DB_PW not found in environment variables")
+        self.URL = f"oracle+oracledb://IT326S01:{db_pw}@10.110.10.90:1521/oracle"
 
     def connect(self):
         if self.engine is None:
@@ -26,6 +32,9 @@ class DBConnect:
                 raise
 
     def get_session(self) -> Session:
+        """
+        Return a session.
+        """
         if self.SessionLocal is None:
             self.connect()
         if self.session is None:
@@ -33,6 +42,9 @@ class DBConnect:
         return self.session
 
     def close_session(self):
+        """
+        Close the session.
+        """
         if self.session is not None:
             self.session.close()
             self.session = None
@@ -63,3 +75,13 @@ class DBConnect:
     def create_tables(self):
         engine = self.get_engine()
         Base.metadata.create_all(engine)
+
+    def drop_tables(self):
+        engine = self.get_engine()
+        try:
+            print("Attempting to drop all tables...")
+            Base.metadata.drop_all(engine)
+            print("All tables dropped successfully.")
+        except SQLAlchemyError as e:
+            print(f"Failed to drop tables: {e}")
+            raise

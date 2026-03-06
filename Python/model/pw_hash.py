@@ -30,8 +30,7 @@ class PWHash:
             hash(str): The hash string to be used to check the password.
 
         Returns:
-            True: If the password string after hashing matches the hash string it will return true.
-            False: If the password string after hashing does not match the hash string, it wil return false.
+            verified(bool): Returns True if the password matches the hash. Returns False if the password does not match the hash.
         """
         try:
             self.ph.verify(hash, password)
