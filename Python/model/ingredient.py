@@ -1,9 +1,11 @@
-from flask import session
+"""
+    Authors: Jon Bailey and Thaanvi Ambala
+"""
+
 from sqlalchemy.orm import relationship
 from sqlalchemy import Column, Integer, String, ForeignKey
 from model.base import Base
 from model.associations import recipe_ingredients
-from model import User, PantryItem
 
 # This class is for the backend of ingredients
 
@@ -35,16 +37,20 @@ class Ingredient(Base):
     def __repr__(self):
         return f"<Ingredient(id={self.id}, name='{self.name}')>"
 
-    def add_ingredient_to_pantry(self, session, user: User, ingredient_name: str, quantity=None, unit=None):
+    # PLEASE DO NOT USE DATABASE LAYER INSIDE THE DATA LAYER
+    def add_ingredient_to_pantry(self, session, user, ingredient_name, quantity=None, unit=None):
         """
         Saves an ingredient into the user's pantry.
         - If the ingredient doesn't exist in the ingredients table, it creates it.
         - Then it creates a PantryItem linking user <-> ingredient.
         """
+        from model import User, PantryItem
         # 1) Find or create the ingredient
+        # This should not be happening at the model level. Queries need to be performed
+        # from the Database level!
         ingredient = session.query(Ingredient).filter_by(name=ingredient_name).first()
         if ingredient is None:
-            ingredient = Ingredient(name=ingredient_name)
+            ingredient = Ingredient(name=ingredient_name) 
             session.add(ingredient)
             session.flush()  # gives ingredient an id without committing yet
 
@@ -73,8 +79,10 @@ class Ingredient(Base):
         return pantry_item
 
 
-    def remove_ingredient_from_pantry(self, session, user: User, ingredient_name: str):
+    def remove_ingredient_from_pantry(self, session, user, ingredient_name):
         """Removes an ingredient from the user's pantry (if it exists)."""
+        from model import User, PantryItem
+
         ingredient = session.query(Ingredient).filter_by(name=ingredient_name).first()
         if ingredient is None:
             return False

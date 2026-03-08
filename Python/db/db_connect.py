@@ -1,4 +1,7 @@
 # db_connect.py
+"""
+    Author: Jon Bailey
+"""
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, Session
 from sqlalchemy.exc import SQLAlchemyError

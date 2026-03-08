@@ -1,12 +1,17 @@
 # db_query.py
+"""
+    Author: Jon Bailey
+"""
+
 from sqlalchemy.exc import SQLAlchemyError
 from db.db_connect import DBConnect
+from sqlalchemy.orm import Query
 
 class DBQuery:
     """ Handles queries and transactions using SQLAlchemy and oracledb"""
     # Handles queries and transactions using SQLAlchemy.
 
-    def __init__(self, db_connect):
+    def __init__(self, db_connect: DBConnect):
         """
         The constructor for this class.
 
@@ -44,7 +49,7 @@ class DBQuery:
             print(f"Delete failed: {e}")
             raise
 
-    def query(self, model):
+    def query(self, model) -> Query:
         """
         Start a query for the given ORM model.
         
