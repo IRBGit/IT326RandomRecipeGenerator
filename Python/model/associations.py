@@ -1,3 +1,7 @@
+"""
+    Author: Jon Bailey
+"""
+
 from sqlalchemy import Table, Column, Integer, ForeignKey
 from model.base import Base
 
