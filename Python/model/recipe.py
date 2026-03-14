@@ -1,3 +1,7 @@
+"""
+    Authors: Jon Bailey and 
+"""
+
 # This class handles the data of Recipes
 
 #TODO: include methods for the different Use Cases, according to Class Diagram

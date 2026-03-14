@@ -1,3 +1,7 @@
+"""
+    Authors: Jon Bailey and 
+"""
+
 from sqlalchemy import Column, Integer, ForeignKey, Float, String
 from sqlalchemy.orm import relationship
 from model.base import Base

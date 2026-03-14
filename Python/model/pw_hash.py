@@ -1,3 +1,7 @@
+"""
+    Author: Jon Bailey
+"""
+
 from argon2 import PasswordHasher
 
 class PWHash:
@@ -11,7 +15,7 @@ class PWHash:
     def __init__(self):
         self.ph = PasswordHasher()
     
-    def hashPassword(self, password):
+    def hashPassword(self, password) -> str:
         """
         A method to hash a password into a hashstring to be stored in the database.
 
@@ -21,7 +25,7 @@ class PWHash:
         hash = self.ph.hash(password)
         return hash
     
-    def verify(self, hash, password):
+    def verify(self, hash, password) -> bool:
         """
         A method that returns true or false based on it matching the stored hash from the database.
 
