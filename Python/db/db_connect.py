@@ -40,6 +40,10 @@ class DBConnect:
         """
         if self.SessionLocal is None:
             self.connect()
+
+        if self.SessionLocal is None:
+            raise RuntimeError("Failed to create SessionLocal. Check your database connection.")
+        
         if self.session is None:
             self.session = self.SessionLocal()
         return self.session
