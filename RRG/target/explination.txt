@@ -1,3 +1,0 @@
-By: Alysa Solomon
-
-This file system is what the automated systems use to save class files. Previously for Java. This is probobaly a remnant from Maven, but unknown at this time. 
