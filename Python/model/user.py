@@ -3,13 +3,19 @@
 """
 
 # models.py (continuing from Recipe)
+from __future__ import annotations # delays type checking to prevent runtime errors.
+from typing import Optional, TYPE_CHECKING, Any
+
 from sqlalchemy import Column, Integer, String, Sequence
 from sqlalchemy.orm import relationship
 from model.base import Base
 from model.associations import user_favorites
 from model.pw_hash import PWHash
-from __future__ import annotations # delays type checking to prevent runtime errors.
-from typing import Optional
+
+if TYPE_CHECKING:
+    from model.ingredient import Ingredient
+    from model.pantry import PantryItem
+
 
 class User(Base):
     __tablename__ = "users"
@@ -92,7 +98,7 @@ class User(Base):
     def remove_ingredient_from_pantry(
             self, 
             ingredient: Ingredient
-            ) -> PantryItem:
+            ) -> PantryItem | None:
         """
         Remove an ingredient from the user's pantry.
         """
@@ -124,7 +130,7 @@ class User(Base):
                 return item
         return None
     
-    def get_pantry(self) -> list[dict[str, any]] | None:
+    def get_pantry(self) -> list[dict[str, Any]] | None:
         """
         Returns the items in the user's pantry.
 

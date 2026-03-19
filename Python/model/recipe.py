@@ -8,7 +8,7 @@
 #TODO: Add setters/getters
 
 from sqlalchemy.orm import relationship
-from sqlalchemy import Column, Integer, String, Text, Column, Sequence
+from sqlalchemy import Column, Integer, String, Column, Sequence, JSON
 from model.base import Base
 from model.associations import user_favorites, recipe_ingredients
 
@@ -20,7 +20,7 @@ class Recipe(Base):
                 primary_key=True)
     name = Column(String(255), nullable = False)
     # area = Column() # I don't know what this is supposed to be but it can't be an empty column to write to the database.
-    instructions = Column(Text, nullable=False)
+    instructions = Column(JSON, nullable=False)
     
 
     # This relationship is automatically created via the backref in User and explicitly identified here.
@@ -40,7 +40,7 @@ class Recipe(Base):
         self.name = name
         self.category = None
         self.area = None
-        self.ingredients = None # for now, including all variables, change later
+        self.ingredients = instructions if instructions is not None else [] # for now, including all variables, change later
         self.instructions = instructions
         self.category = category
         self.tags = tags

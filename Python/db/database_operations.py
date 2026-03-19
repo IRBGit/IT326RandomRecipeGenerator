@@ -18,8 +18,8 @@ class PantryService:
             self, 
             user: User, 
             ingredient: Ingredient, 
-            quantity: int = None, 
-            unit: str = None
+            quantity: Optional[int | None] = None, 
+            unit: Optional[str | None] = None
             ) -> PantryItem | None:
         """
         Add an ingredient to a user's pantry.
@@ -72,8 +72,8 @@ class PantryService:
             self, 
             user: User, 
             ingredient: Ingredient, 
-            quantity: int = None, 
-            unit: str = None
+            quantity: Optional[int | None ]= None, 
+            unit: str | None = None
             ) -> PantryItem | None:
         """
         Update the quantity or unit of items in the pantry.
@@ -143,11 +143,11 @@ class UserService:
         Returns:
             user(User): The User ORM object from the database.
         """
-        user = {
+        user = (
             self.db.query(User)
             .filter_by(email = email)
             .first()
-        }
+        )
 
         if user is None:
             return None
@@ -215,9 +215,9 @@ class IngredientService:
         Returns:
             Optional(Ingredient): The Ingredient or None is returned.
         """
-        return {self.db.query(Ingredient)
+        return (self.db.query(Ingredient)
                 .filter_by(name = name)
-                .first()}
+                .first())
     
     def add_ingredient(
             self, 
@@ -279,15 +279,16 @@ class RecipeService:
             self,
             name: str
             ) -> Recipe | None:
-        return {self.db.query(Recipe)
-                .filter_by(name = name)
-                .first()
-                }
+        return (self.db.
+                query(Recipe).
+                filter_by(name = name).
+                first())
+                
 
     def add_recipe(
             self,
             name:str,
-            instructions: str,
+            instructions: list[str],
             ingredients: Optional[list[Ingredient]] = None
             ) -> Recipe | None:
         """
@@ -308,7 +309,8 @@ class RecipeService:
             print(f"A recipe with the name '{name}' already exists.")
             return None
         
-        recipe = Recipe(name = name, instruction = instructions)
+        recipe = Recipe(name = name, 
+                        instructions = instructions)
 
         if ingredients:
             recipe.ingredients.extend(ingredients)
@@ -321,6 +323,7 @@ class RecipeService:
             self.db.rollback_transaction()
             print(f"Failed to create recipe. Error: {e}")
             return None
+        
     def delete_recipe(
             self,
             recipe: Recipe

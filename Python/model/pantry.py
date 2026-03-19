@@ -17,8 +17,10 @@ class PantryItem(Base):
     unit = Column(String(50), nullable=False)
 
     # Relationships
-    user = relationship("User", back_populates="pantry_items")
-    ingredient = relationship("Ingredient", back_populates="pantry_items")
+    user = relationship("User", 
+                        back_populates="pantry_items")
+    ingredient = relationship("Ingredient", 
+                              back_populates="pantry_items")
 
     def __repr__(self):
         return f"<PantryItem(user_id={self.user_id}, ingredient_id={self.ingredient_id}, quantity={self.quantity}, unit='{self.unit}')>"
