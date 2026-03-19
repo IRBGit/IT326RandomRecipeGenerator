@@ -2,13 +2,14 @@
     Author: Jon Bailey
 """
 
+from __future__ import annotations
+
 # models.py (continuing from Recipe)
 from sqlalchemy import Column, Integer, String, Sequence
 from sqlalchemy.orm import relationship
 from model.base import Base
 from model.associations import user_favorites
 from model.pw_hash import PWHash
-from __future__ import annotations # delays type checking to prevent runtime errors.
 from typing import Optional
 
 class User(Base):
