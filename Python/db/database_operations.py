@@ -169,6 +169,7 @@ class UserService:
             return None
         
         try:
+            self.db.add(user)
             self.db.commit_transaction()
             return user
         except Exception as e:
@@ -233,7 +234,7 @@ class IngredientService:
 
         if ingredient is None:
             ingredient = Ingredient(name = name)
-            self.db.add(Ingredient)
+            self.db.add(ingredient)
             self.db.commit_transaction()
 
         return ingredient
@@ -345,3 +346,17 @@ class RecipeService:
             self.db.rollback_transaction()
             print(f"Failed to delete recipe. Error: {e}")
             return False
+    
+    def rate_recipe(self, user: User, recipe: Recipe, rating: int):
+        """
+        Add or update a rating for a recipe by a user.
+        """
+
+        try:
+            rating_obj = user.rate_recipe(recipe, rating)
+            self.db.commit_transaction()
+            return rating_obj
+        except Exception as e:
+            self.db.rollback_transaction()
+            print(f"Failed to rate recipe: {e}")
+            return None

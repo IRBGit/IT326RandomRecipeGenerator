@@ -36,6 +36,12 @@ class User(Base):
         back_populates="favorited_by"
     )
 
+    ratings = relationship(
+        "Rating", 
+        back_populates = "user", 
+        cascade = "add, delete-orphan"
+        )
+
     pantry_items = relationship(
         "PantryItem",
         back_populates="user",
@@ -150,4 +156,17 @@ class User(Base):
             for item in self.pantry_items
         ] 
 
-    
+    def rate_recipe(self, recipe, value: int):
+        from model.rating import Rating
+
+        if value < 0 or value > 5:
+            raise ValueError("Rating must be between 0 and 5")
+
+        for r in self.ratings:
+            if r.recipe == recipe:
+                r.rating = value
+                return r
+
+        rating = Rating(user = self, recipe = recipe, rating = value)
+        self.rating.append(rating)
+        return rating

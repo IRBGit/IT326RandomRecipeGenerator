@@ -3,7 +3,7 @@
 """
 
 from sqlalchemy.orm import relationship
-from sqlalchemy import Column, Integer, String, ForeignKey
+from sqlalchemy import Column, Integer, String, Sequence
 from model.base import Base
 from model.associations import recipe_ingredients
 
@@ -14,9 +14,9 @@ from model.associations import recipe_ingredients
 
 
 class Ingredient(Base):
-    __tablename__ = "ingredient"
+    __tablename__ = "ingredients"
 
-    id = Column(Integer, primary_key=True, autoincrement=True)
+    id = Column(Integer, Sequence("ingredient_id_seq"), primary_key=True)
     name = Column(String(255), nullable=False, unique=True)
 
     # Recipes that use this ingredient
