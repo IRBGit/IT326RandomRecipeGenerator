@@ -5,12 +5,19 @@
 from __future__ import annotations
 
 # models.py (continuing from Recipe)
+from __future__ import annotations # delays type checking to prevent runtime errors.
+from typing import Optional, TYPE_CHECKING, Any
+
 from sqlalchemy import Column, Integer, String, Sequence
 from sqlalchemy.orm import relationship
 from model.base import Base
 from model.associations import user_favorites
 from model.pw_hash import PWHash
-from typing import Optional
+
+if TYPE_CHECKING:
+    from model.ingredient import Ingredient
+    from model.pantry import PantryItem
+
 
 class User(Base):
     __tablename__ = "users"
@@ -30,6 +37,12 @@ class User(Base):
         secondary=user_favorites,
         back_populates="favorited_by"
     )
+
+    ratings = relationship(
+        "Rating", 
+        back_populates = "user", 
+        cascade = "add, delete-orphan"
+        )
 
     pantry_items = relationship(
         "PantryItem",
@@ -93,7 +106,7 @@ class User(Base):
     def remove_ingredient_from_pantry(
             self, 
             ingredient: Ingredient
-            ) -> PantryItem:
+            ) -> PantryItem | None:
         """
         Remove an ingredient from the user's pantry.
         """
@@ -125,7 +138,7 @@ class User(Base):
                 return item
         return None
     
-    def get_pantry(self) -> list[dict[str, any]] | None:
+    def get_pantry(self) -> list[dict[str, Any]] | None:
         """
         Returns the items in the user's pantry.
 
@@ -145,4 +158,17 @@ class User(Base):
             for item in self.pantry_items
         ] 
 
-    
+    def rate_recipe(self, recipe, value: int):
+        from model.rating import Rating
+
+        if value < 0 or value > 5:
+            raise ValueError("Rating must be between 0 and 5")
+
+        for r in self.ratings:
+            if r.recipe == recipe:
+                r.rating = value
+                return r
+
+        rating = Rating(user = self, recipe = recipe, rating = value)
+        self.rating.append(rating)
+        return rating

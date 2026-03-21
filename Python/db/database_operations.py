@@ -3,6 +3,7 @@
 """
 
 from db.db_query import DBQuery
+from db.db_connect import DBConnect
 from model import Ingredient, User, PantryItem, Recipe, recipe_ingredients, user_favorites
 import re
 from typing import Optional
@@ -18,8 +19,8 @@ class PantryService:
             self, 
             user: User, 
             ingredient: Ingredient, 
-            quantity: int = None, 
-            unit: str = None
+            quantity: Optional[int | None] = None, 
+            unit: Optional[str | None] = None
             ) -> PantryItem | None:
         """
         Add an ingredient to a user's pantry.
@@ -72,8 +73,8 @@ class PantryService:
             self, 
             user: User, 
             ingredient: Ingredient, 
-            quantity: int = None, 
-            unit: str = None
+            quantity: Optional[int | None ]= None, 
+            unit: str | None = None
             ) -> PantryItem | None:
         """
         Update the quantity or unit of items in the pantry.
@@ -143,11 +144,11 @@ class UserService:
         Returns:
             user(User): The User ORM object from the database.
         """
-        user = {
+        user = (
             self.db.query(User)
             .filter_by(email = email)
             .first()
-        }
+        )
 
         if user is None:
             return None
@@ -169,6 +170,7 @@ class UserService:
             return None
         
         try:
+            self.db.add(user)
             self.db.commit_transaction()
             return user
         except Exception as e:
@@ -215,9 +217,9 @@ class IngredientService:
         Returns:
             Optional(Ingredient): The Ingredient or None is returned.
         """
-        return {self.db.query(Ingredient)
+        return (self.db.query(Ingredient)
                 .filter_by(name = name)
-                .first()}
+                .first())
     
     def add_ingredient(
             self, 
@@ -233,7 +235,7 @@ class IngredientService:
 
         if ingredient is None:
             ingredient = Ingredient(name = name)
-            self.db.add(Ingredient)
+            self.db.add(ingredient)
             self.db.commit_transaction()
 
         return ingredient
@@ -241,7 +243,7 @@ class IngredientService:
     def remove_ingredient(
             self,
             name: str
-            ) -> bool | None:
+            ) -> bool:
         """
         Remove an ingredient from the database.
 
@@ -264,6 +266,22 @@ class IngredientService:
             print("Error: Could not delete ingredient: {e}")
             self.db.rollback_transaction()
             return False
+    
+    def remove_ingredient_obj(
+            self,
+            ingredient: Ingredient
+    ) -> bool:
+        if ingredient is None:
+            return False
+        
+        try:
+            self.db.delete(ingredient)
+            self.db.commit_transaction()
+            return True
+        except Exception as e:
+            print("Error: No object to delete: {e}")
+            self.db.rollback_transaction()
+            return False
 
 class RecipeService:
     """
@@ -279,15 +297,16 @@ class RecipeService:
             self,
             name: str
             ) -> Recipe | None:
-        return {self.db.query(Recipe)
-                .filter_by(name = name)
-                .first()
-                }
+        return (self.db.
+                query(Recipe).
+                filter_by(name = name).
+                first())
+                
 
     def add_recipe(
             self,
             name:str,
-            instructions: str,
+            instructions: list[str],
             ingredients: Optional[list[Ingredient]] = None
             ) -> Recipe | None:
         """
@@ -308,7 +327,8 @@ class RecipeService:
             print(f"A recipe with the name '{name}' already exists.")
             return None
         
-        recipe = Recipe(name = name, instruction = instructions)
+        recipe = Recipe(name = name, 
+                        instructions = instructions)
 
         if ingredients:
             recipe.ingredients.extend(ingredients)
@@ -321,6 +341,7 @@ class RecipeService:
             self.db.rollback_transaction()
             print(f"Failed to create recipe. Error: {e}")
             return None
+        
     def delete_recipe(
             self,
             recipe: Recipe
@@ -342,3 +363,143 @@ class RecipeService:
             self.db.rollback_transaction()
             print(f"Failed to delete recipe. Error: {e}")
             return False
+    
+    def rate_recipe(self, user: User, recipe: Recipe, rating: int):
+        """
+        Add or update a rating for a recipe by a user.
+        """
+
+        try:
+            rating_obj = user.rate_recipe(recipe, rating)
+            self.db.commit_transaction()
+            return rating_obj
+        except Exception as e:
+            self.db.rollback_transaction()
+            print(f"Failed to rate recipe: {e}")
+            return None
+        
+class ServiceContainer:
+    def __init__(self):
+        self.db_connect = DBConnect()
+        self.db_query = DBQuery(self.db_connect)
+
+        self.user_service = UserService(self.db_query)
+        self.ingredient_service = IngredientService(self.db_query)
+        self.pantry_service = PantryService(self.db_query)
+        self.recipe_service = RecipeService(self.db_query)
+
+    #User Service
+    def create_user(
+            self, 
+            email: str, 
+            password:str
+        ) -> User | None:
+        return self.user_service.create_user(email, password)
+    
+    def get_user_by_email(
+            self, 
+            email: str
+        ) -> User | None:
+        return self.user_service.get_user_by_email(email)
+    
+    def delete_user(
+            self, 
+            user: User
+        ) -> bool:
+        return self.user_service.delete_user(user)
+    
+    #Ingredient Service
+    def add_ingredient(
+            self, 
+            name: str
+        ) -> Ingredient | None:
+        return self.ingredient_service.add_ingredient(name)
+    
+    def remove_ingredient(
+            self, 
+            name: str
+        ) -> bool:
+        return self.ingredient_service.remove_ingredient(name)
+    
+    def find_ingredient(
+            self, 
+            name: str
+        ) -> Ingredient | None:
+        return self.ingredient_service.find_ingredient(name)
+    
+    def remove_ingredient_obj(
+            self, 
+            ingredient: Ingredient
+        ) -> bool:
+        return self.ingredient_service.remove_ingredient_obj(ingredient)
+    
+    #Pantry Service
+    def add_to_pantry(
+            self,
+            user: User,
+            ingredients: Ingredient,
+            quantity: Optional[int] = None,
+            unit: Optional[str] = None
+    ) -> PantryItem | None:
+        return self.pantry_service.add_ingredient_to_pantry(
+            user, ingredients, quantity, unit
+        )
+    
+    def remove_from_pantry(
+            self,
+            user: User,
+            ingredient: Ingredient
+    ) -> PantryItem | None:
+        return self.pantry_service.remove_ingredient_from_pantry(
+            user, ingredient
+        )
+    
+    def update_pantry(
+            self,
+            user: User,
+            ingredient: Ingredient,
+            quantity: Optional[int] = None,
+            unit: Optional[str] = None
+    ) -> PantryItem | None:
+        return self.pantry_service.update_pantry_item(
+            user, ingredient, quantity, unit
+        )
+    
+    #Recipe Service
+    def add_recipe(
+            self,
+            name: str,
+            instructions: list[str],
+            ingredients: Optional[list[Ingredient]] = None
+    ) -> Recipe | None:
+        return self.recipe_service.add_recipe(
+            name, instructions, ingredients
+        )
+    
+    def delete_recipe(self, recipe: Recipe) -> bool:
+        return self.recipe_service.delete_recipe(recipe)
+
+    def find_recipe(self, name: str) -> Recipe | None:
+        return self.recipe_service.find_recipe(name)
+
+    def rate_recipe(
+        self,
+        user: User,
+        recipe: Recipe,
+        rating: int
+    ):
+        return self.recipe_service.rate_recipe(user, recipe, rating)
+
+    # ==================== DB CONTROL ==================== #
+
+    def reset_database(self):
+        self.db_connect.drop_tables()
+        self.db_connect.create_tables()
+
+    def close(self):
+        """
+        Use this to close the database connection at application
+        close.
+        """
+        from sqlalchemy.orm import Session
+        self.db_query.close()

@@ -4,5 +4,13 @@ from .user import User
 from .recipe import Recipe
 from .ingredient import Ingredient
 from .pantry import PantryItem
+from .rating import Rating
 
-__all__ = ["Base", "User", "Recipe", "Ingredient", "PantryItem"]
+__all__ = [
+    "Base", 
+    "User", 
+    "Recipe", 
+    "Ingredient", 
+    "PantryItem", 
+    "Rating"
+]

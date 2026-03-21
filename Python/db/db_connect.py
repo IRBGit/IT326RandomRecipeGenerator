@@ -2,55 +2,59 @@
 """
     Author: Jon Bailey
 """
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, Session
-from sqlalchemy.exc import SQLAlchemyError
-from model.base import Base
-import os
-from dotenv import load_dotenv
-load_dotenv()
+from sqlalchemy.orm import Session
 
 class DBConnect:
     """
     You must be connected via Cisco Secure Client VPN to the ISU network to access the database.
     """
+    _instance = None
+
+    def __new__(cls):
+        if cls._instance is None:
+            cls._instance = super(DBConnect, cls).__new__(cls)
+        return cls._instance
+    
     def __init__(self):
-        self.engine = None
-        self.SessionLocal = None
-        self.session = None
+        if hasattr(self, "_initialized") and self._initialized:
+            return
+        
+        from sqlalchemy import create_engine
+        from sqlalchemy.orm import sessionmaker
+        from sqlalchemy.exc import SQLAlchemyError
+        from model import Base
+        import os
+        from dotenv import load_dotenv
+
+        load_dotenv()
+
         db_pw = os.getenv("DB_PW")
         if not db_pw:
-            raise ValueError("DB_PW not found in environment variables")
+            raise ValueError("DB_PW not found")
+        
         self.URL = f"oracle+oracledb://IT326S01:{db_pw}@10.110.10.90:1521/oracle"
 
-    def connect(self):
-        if self.engine is None:
-            try:
-                self.engine = create_engine(self.URL, echo=False, future=True)
-                self.SessionLocal = sessionmaker(bind=self.engine, autoflush=False, autocommit=False)
+        try:
+            self.engine = create_engine(self.URL, echo = False, future = True)
+            self.SessionLocal = sessionmaker(
+                bind = self.engine, 
+                autoflush = False, 
+                autocommit = False
+            )
+            if self.SessionLocal:
                 print("Connected successfully")
-            except SQLAlchemyError as e:
-                print(f"Database connection failed: {e}")
-                self.engine = None
-                raise
+        except SQLAlchemyError as e:
+            print(f"Database connection failed: {e}")
+            self.engine = None
+            raise
+
+        self._initialized = True
 
     def get_session(self) -> Session:
         """
         Return a session.
         """
-        if self.SessionLocal is None:
-            self.connect()
-        if self.session is None:
-            self.session = self.SessionLocal()
-        return self.session
-
-    def close_session(self):
-        """
-        Close the session.
-        """
-        if self.session is not None:
-            self.session.close()
-            self.session = None
+        return self.SessionLocal()
 
     def is_connected(self) -> bool:
         """
@@ -59,6 +63,7 @@ class DBConnect:
         Returns:
             connected(bool): True if connected, False is not.
         """
+        from sqlalchemy.exc import SQLAlchemyError
         if self.engine is None:
             print("self.engine is None")
             return False
@@ -70,20 +75,22 @@ class DBConnect:
             print (f"Connection failed with error: {e}")
             return False
     
-    def get_engine(self):
-        if self.engine is None:
-            self.connect()
-        return self.engine
-    
     def create_tables(self):
-        engine = self.get_engine()
-        Base.metadata.create_all(engine)
+        from model import Base
+        if self.engine is None:
+            raise RuntimeError("Engine not initialized")
+        
+        Base.metadata.create_all(self.engine)
 
     def drop_tables(self):
-        engine = self.get_engine()
+        from model import Base
+        from sqlalchemy.exc import SQLAlchemyError
+        if self.engine is None:
+            raise RuntimeError("Engine not initialize")
+        
         try:
             print("Attempting to drop all tables...")
-            Base.metadata.drop_all(engine)
+            Base.metadata.drop_all(self.engine)
             print("All tables dropped successfully.")
         except SQLAlchemyError as e:
             print(f"Failed to drop tables: {e}")
