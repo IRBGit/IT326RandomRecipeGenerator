@@ -5,11 +5,17 @@
 
 from sqlalchemy.exc import SQLAlchemyError
 from db.db_connect import DBConnect
-from sqlalchemy.orm import Query
+from sqlalchemy.orm import Query, Session
+
 
 class DBQuery:
     """ Handles queries and transactions using SQLAlchemy and oracledb"""
-    # Handles queries and transactions using SQLAlchemy.
+    _instance = None
+
+    def __new__(cls, db_connect):
+        if cls._instance is None:
+            cls._instance = super(DBQuery, cls).__new__(cls)
+        return cls._instance
 
     def __init__(self, db_connect: DBConnect):
         """
@@ -19,8 +25,20 @@ class DBQuery:
             db_connect(DBConnect) = A DBConnect object.
         
         """
+        if hasattr(self, "_initialized") and self._initialized:
+            return
+        
         self.db_connect = db_connect
         self.session = self.db_connect.get_session()
+
+        self._initialized = True
+
+        print("DBQuery initialized (singleton)")
+    
+    def _get_session(self) -> Session:
+        if self.session is None:
+            self.session = self.db_connect.get_session()
+        return self.session
 
     # -------------------- CRUD / Query Methods -------------------- #
     def add(self, obj):
@@ -30,8 +48,11 @@ class DBQuery:
         Args:
             obj(model): The model object that is being loaded (User, Recipe, etc.)
         """
+        
+        session = self._get_session()
+
         try:
-            self.session.add(obj)
+            session.add(obj)
         except SQLAlchemyError as e:
             print(f"Add failed: {e}")
             raise
@@ -43,8 +64,10 @@ class DBQuery:
         Args:
             obj(model): The model object that is being deleted (User, Recipe, etc.)
         """
+        session = self._get_session()
+
         try:
-            self.session.delete(obj)
+            session.delete(obj)
         except SQLAlchemyError as e:
             print(f"Delete failed: {e}")
             raise
@@ -56,36 +79,46 @@ class DBQuery:
         Args:
             model: The model object / table that you are querying (User, Recipe, etc...)
         """
-        return self.session.query(model)
+        session = self._get_session()
+
+        return session.query(model)
 
     # -------------------- Transaction Methods -------------------- #
     def begin_transaction(self):
         """
         Initiate this before doing any database actions.
         """
-        self.session.begin()
+        session = self._get_session()
+
+        if not session.in_transaction():
+            session.begin()
 
     def commit_transaction(self):
         """
         Initiate this to commit data to the databse.
         """
+        session = self._get_session()
+
         try:
-            self.session.commit()
+            session.commit()
         except SQLAlchemyError as e:
             print(f"Commit failed: {e}")
-            self.session.rollback()
+            session.rollback()
             raise
 
     def rollback_transaction(self):
         """
         Initiate this to undo the last commit to the database.
         """
-        self.session.rollback()
+        session = self._get_session()
+
+        session.rollback()
 
     # -------------------- Utility -------------------- #
     def close(self):
         """
         Close the database connection.
         """
-        self.session.close()
-        self.session = None
+        if self.session:
+            self.session.close()
+            self.session = None

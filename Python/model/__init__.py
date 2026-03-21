@@ -6,4 +6,11 @@ from .ingredient import Ingredient
 from .pantry import PantryItem
 from .rating import Rating
 
-__all__ = ["Base", "User", "Recipe", "Ingredient", "PantryItem", "Rating"]
+__all__ = [
+    "Base", 
+    "User", 
+    "Recipe", 
+    "Ingredient", 
+    "PantryItem", 
+    "Rating"
+]

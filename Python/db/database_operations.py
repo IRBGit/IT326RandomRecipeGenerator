@@ -381,7 +381,6 @@ class RecipeService:
 class ServiceContainer:
     def __init__(self):
         self.db_connect = DBConnect()
-        self.db_connect.connect()
         self.db_query = DBQuery(self.db_connect)
 
         self.user_service = UserService(self.db_query)
@@ -502,5 +501,5 @@ class ServiceContainer:
         Use this to close the database connection at application
         close.
         """
+        from sqlalchemy.orm import Session
         self.db_query.close()
-        self.db_connect.close_session()
