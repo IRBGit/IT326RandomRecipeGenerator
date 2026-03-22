@@ -2,6 +2,8 @@
     Author: Jon Bailey
 """
 
+from __future__ import annotations
+
 # models.py (continuing from Recipe)
 from __future__ import annotations # delays type checking to prevent runtime errors.
 from typing import Optional, TYPE_CHECKING, Any, List
