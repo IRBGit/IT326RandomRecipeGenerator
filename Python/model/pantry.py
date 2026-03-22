@@ -1,25 +1,29 @@
 """
     Authors: Jon Bailey and 
 """
-
+from __future__ import annotations
 from sqlalchemy import Column, Integer, ForeignKey, Float, String
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, Mapped, mapped_column
 from model.base import Base
+from typing import TYPE_CHECKING, List
+
+if TYPE_CHECKING:
+    from model import User, Ingredient
 
 
 class PantryItem(Base):
     __tablename__ = "pantry_items"
 
-    user_id = Column(Integer, ForeignKey("users.id"), primary_key=True)
-    ingredient_id = Column(Integer, ForeignKey("ingredients.id"), primary_key=True)
+    user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"), primary_key=True)
+    ingredient_id: Mapped[int] = mapped_column(Integer, ForeignKey("ingredients.id"), primary_key=True)
 
-    quantity = Column(Float, nullable=False)
-    unit = Column(String(50), nullable=False)
+    quantity: Mapped[float] = mapped_column(Float, nullable = True)
+    unit: Mapped[str] = mapped_column(String(50), nullable = True)
 
     # Relationships
-    user = relationship("User", 
+    user: Mapped["User"] = relationship("User", 
                         back_populates="pantry_items")
-    ingredient = relationship("Ingredient", 
+    ingredient: Mapped["Ingredient"] = relationship("Ingredient", 
                               back_populates="pantry_items")
 
     def __repr__(self):

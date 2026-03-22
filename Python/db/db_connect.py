@@ -7,6 +7,8 @@ from sqlalchemy.orm import Session
 class DBConnect:
     """
     You must be connected via Cisco Secure Client VPN to the ISU network to access the database.
+
+    If you are on ISUs network wifi, you need to ensure you are not using a private VPN.
     """
     _instance = None
 
@@ -56,24 +58,27 @@ class DBConnect:
         """
         return self.SessionLocal()
 
-    def is_connected(self) -> bool:
-        """
-        Check if you have a connection to the databse.
-
-        Returns:
-            connected(bool): True if connected, False is not.
-        """
-        from sqlalchemy.exc import SQLAlchemyError
+    def test_connection(self) -> bool:
+        from sqlalchemy import text
         if self.engine is None:
-            print("self.engine is None")
             return False
         try:
-            with self.engine.connect():
-                print("Engine connection opened")
+            with self.engine.connect() as conn:
+                conn.execute(text("SELECT 1 FROM DUAL"))
             return True
-        except SQLAlchemyError as e:
-            print (f"Connection failed with error: {e}")
+        except Exception as e:
+            print (f"COnnection test failed: {e}")
             return False
+        
+    def shutdown(self):
+        """
+        Clean up database resources (Close connection pool).
+
+        CALL ONLY WHEN EXITING THE PROGRAM.
+        """
+        if self.engine:
+            print("Freeing database engine")
+            self.engine.dispose()
     
     def create_tables(self):
         from model import Base
@@ -86,7 +91,7 @@ class DBConnect:
         from model import Base
         from sqlalchemy.exc import SQLAlchemyError
         if self.engine is None:
-            raise RuntimeError("Engine not initialize")
+            raise RuntimeError("Engine not initialized")
         
         try:
             print("Attempting to drop all tables...")
