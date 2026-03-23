@@ -1,6 +1,7 @@
 # search_engine.py
 # SearchEngine is marked as <<Interface>> in the UML diagram.
 # In Python, we simulate an interface using an Abstract Base Class (ABC).
+<<<<<<< Updated upstream
 from abc import ABC, abstractmethod  # Built-in Python module for abstract classes
 from Filter import Filter            # We import Filter because it's used as a parameter type
  
@@ -12,11 +13,38 @@ class SearchEngine(ABC):  # ABC = Abstract Base Class — acts like an <<Interfa
     Any class that inherits from SearchEngine MUST implement
     every method marked with @abstractmethod below.
  
+=======
+#
+# An abstract class means:
+#   - You CANNOT create a SearchEngine() object directly.
+#   - You MUST create a subclass (e.g. RecipeSearchEngine) that
+#     implements all the @abstractmethod methods.
+#
+# The dashed arrow (dependency) to Filter means:
+#   - Filter is NOT stored inside SearchEngine as an attribute.
+#   - Filter is passed AS A PARAMETER into the methods that need it.
+
+from abc import ABC, abstractmethod  # Built-in Python module for abstract classes
+from Filter import Filter            # We import Filter because it's used as a parameter type
+
+
+class SearchEngine(ABC):  # ABC = Abstract Base Class — acts like an <<Interface>>
+    """
+    Abstract interface for searching recipes.
+
+    Any class that inherits from SearchEngine MUST implement
+    every method marked with @abstractmethod below.
+
+>>>>>>> Stashed changes
     Dependency on Filter (the dashed arrow in the diagram):
         Filter is passed into methods as a parameter — it is NOT
         stored as self.filter. SearchEngine just *uses* it temporarily.
     """
+<<<<<<< Updated upstream
  
+=======
+
+>>>>>>> Stashed changes
     def __init__(self):
         # These are the private attributes shown in the UML diagram.
         # Subclasses will connect these to real services.
@@ -26,110 +54,201 @@ class SearchEngine(ABC):  # ABC = Abstract Base Class — acts like an <<Interfa
         self._ingredient_service = None  # Manages ingredient data
         self._pantry_service = None      # Manages the user's pantry
         self._recipe_service = None      # Manages recipe storage/retrieval
+<<<<<<< Updated upstream
  
     # ── Abstract methods ───────────────────────────────────────────────────
     # Each method below MUST be implemented by any subclass.
     # If a subclass skips even one, Python will raise a TypeError.
  
+=======
+
+    # ── Abstract methods ───────────────────────────────────────────────────
+    # Each method below MUST be implemented by any subclass.
+    # If a subclass skips even one, Python will raise a TypeError.
+
+>>>>>>> Stashed changes
     @abstractmethod
     def get_recipe_by_id(self, recipe_id: int) -> dict:
         """
         Fetch a single recipe using its unique ID.
+<<<<<<< Updated upstream
  
         Args:
             recipe_id: The unique number that identifies the recipe.
  
+=======
+
+        Args:
+            recipe_id: The unique number that identifies the recipe.
+
+>>>>>>> Stashed changes
         Returns:
             A recipe dictionary, or None if not found.
         """
         pass  # No body here — subclasses must write the real logic
+<<<<<<< Updated upstream
  
+=======
+
+>>>>>>> Stashed changes
     @abstractmethod
     def search_recipes_by_name(self, name: str) -> list:
         """
         Find recipes whose name contains the search term.
+<<<<<<< Updated upstream
  
         Args:
             name: A word or phrase to look for (e.g. "pasta").
  
+=======
+
+        Args:
+            name: A word or phrase to look for (e.g. "pasta").
+
+>>>>>>> Stashed changes
         Returns:
             A list of matching recipe dictionaries.
         """
         pass
+<<<<<<< Updated upstream
  
+=======
+
+>>>>>>> Stashed changes
     @abstractmethod
     def search_recipes_by_ingredients(self, ingredients: list) -> list:
         """
         Find recipes that contain ALL of the specified ingredients.
+<<<<<<< Updated upstream
  
         Args:
             ingredients: A list of ingredient names (e.g. ["chicken", "garlic"]).
  
+=======
+
+        Args:
+            ingredients: A list of ingredient names (e.g. ["chicken", "garlic"]).
+
+>>>>>>> Stashed changes
         Returns:
             A list of matching recipe dictionaries.
         """
         pass
+<<<<<<< Updated upstream
  
+=======
+
+>>>>>>> Stashed changes
     @abstractmethod
     def search_recipes_by_category(self, category: str) -> list:
         """
         Find all recipes in a given category.
+<<<<<<< Updated upstream
  
         Args:
             category: Category name (e.g. "pasta", "salad", "asian").
  
+=======
+
+        Args:
+            category: Category name (e.g. "pasta", "salad", "asian").
+
+>>>>>>> Stashed changes
         Returns:
             A list of matching recipe dictionaries.
         """
         pass
+<<<<<<< Updated upstream
  
+=======
+
+>>>>>>> Stashed changes
     @abstractmethod
     def get_random_recipes(self, count: int) -> list:
         """
         Return a random selection of recipes.
+<<<<<<< Updated upstream
  
         Args:
             count: How many random recipes to return.
  
+=======
+
+        Args:
+            count: How many random recipes to return.
+
+>>>>>>> Stashed changes
         Returns:
             A list of randomly chosen recipe dictionaries.
         """
         pass
+<<<<<<< Updated upstream
  
+=======
+
+>>>>>>> Stashed changes
     @abstractmethod
     def search_with_filter(self, recipes: list, pantry: list, recipe_filter: Filter) -> list:
         """
         Apply a Filter object to a list of recipes and return matches.
+<<<<<<< Updated upstream
  
         This method is where the DEPENDENCY on Filter is shown:
             - Filter is passed in as a parameter (not stored as self.filter).
             - SearchEngine temporarily uses it, then discards it.
  
+=======
+
+        This method is where the DEPENDENCY on Filter is shown:
+            - Filter is passed in as a parameter (not stored as self.filter).
+            - SearchEngine temporarily uses it, then discards it.
+
+>>>>>>> Stashed changes
         Args:
             recipes:        The list of recipes to filter.
             pantry:         The user's available ingredients.
             recipe_filter:  A Filter object with the user's preferences.
+<<<<<<< Updated upstream
  
+=======
+
+>>>>>>> Stashed changes
         Returns:
             A filtered list of recipe dictionaries.
         """
         pass
+<<<<<<< Updated upstream
  
  
 # ── Concrete implementation ────────────────────────────────────────────────
 # This is a real, working subclass of SearchEngine.
 # It implements every @abstractmethod so Python allows us to create instances.
  
+=======
+
+
+# ── Concrete implementation ────────────────────────────────────────────────
+# This is a real, working subclass of SearchEngine.
+# It implements every @abstractmethod so Python allows us to create instances.
+
+>>>>>>> Stashed changes
 class RecipeSearchEngine(SearchEngine):
     """
     A concrete (real) implementation of the SearchEngine interface.
     Uses an in-memory list of recipes so you can run this file immediately
     without any database or API setup.
     """
+<<<<<<< Updated upstream
  
     def __init__(self):
         super().__init__()  # Run the parent __init__ to set up service attributes
  
+=======
+
+    def __init__(self):
+        super().__init__()  # Run the parent __init__ to set up service attributes
+
+>>>>>>> Stashed changes
         # Demo recipe data — replace with real DB/API calls in production
         self._recipes = [
             {
@@ -173,18 +292,30 @@ class RecipeSearchEngine(SearchEngine):
                 "calories": 220,
             },
         ]
+<<<<<<< Updated upstream
  
+=======
+
+>>>>>>> Stashed changes
     def get_recipe_by_id(self, recipe_id: int) -> dict | None:
         for recipe in self._recipes:
             if recipe["id"] == recipe_id:
                 return recipe
         print(f"No recipe found with id {recipe_id}.")
         return None
+<<<<<<< Updated upstream
  
     def search_recipes_by_name(self, name: str) -> list:
         name_lower = name.lower()
         return [r for r in self._recipes if name_lower in r["name"].lower()]
  
+=======
+
+    def search_recipes_by_name(self, name: str) -> list:
+        name_lower = name.lower()
+        return [r for r in self._recipes if name_lower in r["name"].lower()]
+
+>>>>>>> Stashed changes
     def search_recipes_by_ingredients(self, ingredients: list) -> list:
         search_terms = [i.lower() for i in ingredients]
         results = []
@@ -193,16 +324,27 @@ class RecipeSearchEngine(SearchEngine):
             if all(term in recipe_ings for term in search_terms):
                 results.append(recipe)
         return results
+<<<<<<< Updated upstream
  
     def search_recipes_by_category(self, category: str) -> list:
         return [r for r in self._recipes if r["category"].lower() == category.lower()]
  
+=======
+
+    def search_recipes_by_category(self, category: str) -> list:
+        return [r for r in self._recipes if r["category"].lower() == category.lower()]
+
+>>>>>>> Stashed changes
     def get_random_recipes(self, count: int) -> list:
         import random
         shuffled = self._recipes.copy()
         random.shuffle(shuffled)
         return shuffled[:count]
+<<<<<<< Updated upstream
  
+=======
+
+>>>>>>> Stashed changes
     def search_with_filter(self, recipes: list, pantry: list, recipe_filter: Filter) -> list:
         """
         Uses the Filter object temporarily to narrow down recipes.
@@ -210,4 +352,54 @@ class RecipeSearchEngine(SearchEngine):
         an association. We just call recipe_filter.apply() and move on.
         This reflects the dashed dependency arrow in the UML diagram.
         """
+<<<<<<< Updated upstream
         return recipe_filter.apply(recipes, pantry)  # Delegate filtering to Filter
+=======
+        return recipe_filter.apply(recipes, pantry)  # Delegate filtering to Filter
+
+
+# ── Quick demo ─────────────────────────────────────────────────────────────
+if __name__ == "__main__":
+
+    # This would raise a TypeError — you can't instantiate an abstract class:
+    # engine = SearchEngine()  ← NOT allowed!
+
+    # Use the concrete subclass instead:
+    engine = RecipeSearchEngine()
+
+    print("=== Get recipe by ID ===")
+    recipe = engine.get_recipe_by_id(3)
+    if recipe:
+        print(f"  Found: {recipe['name']}\n")
+
+    print("=== Search by name: 'salad' ===")
+    for r in engine.search_recipes_by_name("salad"):
+        print(f"  - {r['name']}")
+
+    print("\n=== Search by ingredients: ['chicken', 'garlic'] ===")
+    for r in engine.search_recipes_by_ingredients(["chicken", "garlic"]):
+        print(f"  - {r['name']}")
+
+    print("\n=== Search by category: 'pasta' ===")
+    for r in engine.search_recipes_by_category("pasta"):
+        print(f"  - {r['name']}")
+
+    print("\n=== 2 random recipes ===")
+    for r in engine.get_random_recipes(2):
+        print(f"  - {r['name']}")
+
+    print("\n=== Search with Filter (dependency in action!) ===")
+    # Build a Filter object — it is NOT stored inside the engine
+    my_filter = Filter()
+    my_filter.max_cook_time = 25      # Quick meals only
+    my_filter.max_calories = 400      # Under 400 calories
+
+    my_pantry = ["spaghetti", "tomato sauce", "penne", "olive oil",
+                 "zucchini", "bell pepper", "romaine lettuce",
+                 "croutons", "parmesan", "caesar dressing"]
+
+    # Pass Filter as a parameter — SearchEngine uses it and lets it go
+    results = engine.search_with_filter(engine._recipes, my_pantry, my_filter)
+    for r in results:
+        print(f"  - {r['name']} ({r['cook_time']} min, {r['calories']} cal)")
+>>>>>>> Stashed changes
