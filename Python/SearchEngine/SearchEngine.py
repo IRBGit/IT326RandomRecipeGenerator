@@ -28,7 +28,7 @@ class SearchEngine(ABC):  # ABC = Abstract Base Class — acts like an <<Interfa
         self._pantry_service = None      # Manages the user's pantry
         self._recipe_service = None      # Manages recipe storage/retrieval
 
-    # ── Abstract methods ───────────────────────────────────────────────────
+    # Abstract methods 
     # Each method below MUST be implemented by any subclass.
     # If a subclass skips even one, Python will raise a TypeError.
 
@@ -117,7 +117,7 @@ class SearchEngine(ABC):  # ABC = Abstract Base Class — acts like an <<Interfa
         pass
 
 
-# ── Concrete implementation ────────────────────────────────────────────────
+# Concrete implementation 
 # This is a real, working subclass of SearchEngine.
 # It implements every @abstractmethod so Python allows us to create instances.
 
@@ -212,49 +212,3 @@ class RecipeSearchEngine(SearchEngine):
         This reflects the dashed dependency arrow in the UML diagram.
         """
         return recipe_filter.apply(recipes, pantry)  # Delegate filtering to Filter
-
-
-# ── Quick demo ─────────────────────────────────────────────────────────────
-if __name__ == "__main__":
-
-    # This would raise a TypeError — you can't instantiate an abstract class:
-    # engine = SearchEngine()  ← NOT allowed!
-
-    # Use the concrete subclass instead:
-    engine = RecipeSearchEngine()
-
-    print("=== Get recipe by ID ===")
-    recipe = engine.get_recipe_by_id(3)
-    if recipe:
-        print(f"  Found: {recipe['name']}\n")
-
-    print("=== Search by name: 'salad' ===")
-    for r in engine.search_recipes_by_name("salad"):
-        print(f"  - {r['name']}")
-
-    print("\n=== Search by ingredients: ['chicken', 'garlic'] ===")
-    for r in engine.search_recipes_by_ingredients(["chicken", "garlic"]):
-        print(f"  - {r['name']}")
-
-    print("\n=== Search by category: 'pasta' ===")
-    for r in engine.search_recipes_by_category("pasta"):
-        print(f"  - {r['name']}")
-
-    print("\n=== 2 random recipes ===")
-    for r in engine.get_random_recipes(2):
-        print(f"  - {r['name']}")
-
-    print("\n=== Search with Filter (dependency in action!) ===")
-    # Build a Filter object — it is NOT stored inside the engine
-    my_filter = Filter()
-    my_filter.max_cook_time = 25      # Quick meals only
-    my_filter.max_calories = 400      # Under 400 calories
-
-    my_pantry = ["spaghetti", "tomato sauce", "penne", "olive oil",
-                 "zucchini", "bell pepper", "romaine lettuce",
-                 "croutons", "parmesan", "caesar dressing"]
-
-    # Pass Filter as a parameter — SearchEngine uses it and lets it go
-    results = engine.search_with_filter(engine._recipes, my_pantry, my_filter)
-    for r in results:
-        print(f"  - {r['name']} ({r['cook_time']} min, {r['calories']} cal)")
