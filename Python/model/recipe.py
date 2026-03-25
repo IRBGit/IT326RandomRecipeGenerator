@@ -56,14 +56,14 @@ class Recipe(Base):
     # init includes name, category, instructions, tags, and video as setters
     def __init__(self, name: str, ingredients: str = None, instructions: str = None, category: str = None, tags = None, video: str = None):
         self.name = name # in database
-        self.category = None 
-        self.area = None
+        # self.category = None 
+        # self.area = None
         self.ingredients = ingredients or [] # for now, including all variables, change later
         # ingredients in database
         self.instructions = instructions # in database
-        self.category = category
-        self.tags = tags
-        self.video = video
+        # self.category = category
+        # self.tags = tags
+        # self.video = video
 
     def __repr__(self):
         return f"<Recipe(id = {self.id}, name ='{self.name}')>"
