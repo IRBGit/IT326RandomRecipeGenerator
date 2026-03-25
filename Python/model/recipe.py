@@ -43,17 +43,6 @@ class Recipe(Base):
         back_populates="recipes"
     )
 
-    # init includes name, category, instructions, tags, and video as setters
-    def __init__(self, name: str, instructions: str = None, category: str = None, tags = None, video: str = None):
-        self.name = name
-        self.category = None
-        self.area = None
-        self.ingredients = instructions if instructions is not None else [] # for now, including all variables, change later
-        self.instructions = instructions
-        self.category = category
-        self.tags = tags
-        self.video = video
-    
     ratings: Mapped[List["Rating"]] = relationship(
         "Rating",
         back_populates = "recipe",
@@ -63,6 +52,18 @@ class Recipe(Base):
     # def __init__(self, name: str, instructions: list[str] | None = None):
     #     self.name = name
     #     self.instructions = instructions or []
+
+    # init includes name, category, instructions, tags, and video as setters
+    def __init__(self, name: str, ingredients: str = None, instructions: str = None, category: str = None, tags = None, video: str = None):
+        self.name = name # in database
+        self.category = None 
+        self.area = None
+        self.ingredients = ingredients or [] # for now, including all variables, change later
+        # ingredients in database
+        self.instructions = instructions # in database
+        self.category = category
+        self.tags = tags
+        self.video = video
 
     def __repr__(self):
         return f"<Recipe(id = {self.id}, name ='{self.name}')>"
