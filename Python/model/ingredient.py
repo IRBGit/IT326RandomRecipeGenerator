@@ -2,10 +2,15 @@
     Authors: Jon Bailey and Thaanvi Ambala
 """
 
-from sqlalchemy.orm import relationship
-from sqlalchemy import Column, Integer, String, ForeignKey
+from __future__ import annotations
+from sqlalchemy.orm import relationship, Mapped, mapped_column
+from sqlalchemy import Integer, String, Sequence
 from model.base import Base
 from model.associations import recipe_ingredients
+from typing import TYPE_CHECKING, List
+
+if TYPE_CHECKING:
+    from model import Recipe, PantryItem
 
 # This class is for the backend of ingredients
 
@@ -14,19 +19,19 @@ from model.associations import recipe_ingredients
 
 
 class Ingredient(Base):
-    __tablename__ = "ingredient"
+    __tablename__ = "ingredients"
 
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    name = Column(String(255), nullable=False, unique=True)
+    id: Mapped[int] = mapped_column(Integer, Sequence("ingredient_id_seq"), primary_key=True)
+    name: Mapped[str] = mapped_column(String(255), nullable=False, unique=True)
 
     # Recipes that use this ingredient
-    recipes = relationship(
+    recipes: Mapped[List["Recipe"]] = relationship(
         "Recipe",
         secondary=recipe_ingredients,
         back_populates="ingredients"
     )
 
-    pantry_items = relationship(
+    pantry_items: Mapped[List[PantryItem]] = relationship(
     "PantryItem",
     back_populates="ingredient"
 )
@@ -37,64 +42,6 @@ class Ingredient(Base):
     def __repr__(self):
         return f"<Ingredient(id={self.id}, name='{self.name}')>"
 
-    # PLEASE DO NOT USE DATABASE LAYER INSIDE THE DATA LAYER
-    def add_ingredient_to_pantry(self, session, user, ingredient_name, quantity=None, unit=None):
-        """
-        Saves an ingredient into the user's pantry.
-        - If the ingredient doesn't exist in the ingredients table, it creates it.
-        - Then it creates a PantryItem linking user <-> ingredient.
-        """
-        from model import User, PantryItem
-        # 1) Find or create the ingredient
-        # This should not be happening at the model level. Queries need to be performed
-        # from the Database level!
-        ingredient = session.query(Ingredient).filter_by(name=ingredient_name).first()
-        if ingredient is None:
-            ingredient = Ingredient(name=ingredient_name) 
-            session.add(ingredient)
-            session.flush()  # gives ingredient an id without committing yet
-
-        # 2) Check if it's already in the pantry (so we don't duplicate)
-        existing = (
-            session.query(PantryItem)
-            .filter_by(user_id=user.id, ingredient_id=ingredient.id)
-            .first()
-        )
-        if existing:
-            # If you want, update quantity/unit instead of duplicating
-            existing.quantity = quantity or existing.quantity
-            existing.unit = unit or existing.unit
-            session.commit()
-            return existing
-
-        # 3) Add pantry item
-        pantry_item = PantryItem(
-            user_id=user.id,
-            ingredient_id=ingredient.id,
-            quantity=quantity,
-            unit=unit
-        )
-        session.add(pantry_item)
-        session.commit()
-        return pantry_item
-
-
-    def remove_ingredient_from_pantry(self, session, user, ingredient_name):
-        """Removes an ingredient from the user's pantry (if it exists)."""
-        from model import User, PantryItem
-
-        ingredient = session.query(Ingredient).filter_by(name=ingredient_name).first()
-        if ingredient is None:
-            return False
-
-        pantry_item = (
-            session.query(PantryItem)
-            .filter_by(user_id=user.id, ingredient_id=ingredient.id)
-            .first()
-        )
-        if pantry_item is None:
-            return False
-
-        session.delete(pantry_item)
-        session.commit()
-        return True
+    def get_name(self) -> str:
+        assert isinstance(self.name, str)
+        return self.name

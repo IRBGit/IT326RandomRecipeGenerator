@@ -2,41 +2,48 @@
     Author: Jon Bailey
 """
 
+from __future__ import annotations
+
 # models.py (continuing from Recipe)
 from __future__ import annotations # delays type checking to prevent runtime errors.
-from typing import Optional, TYPE_CHECKING, Any
+from typing import Optional, TYPE_CHECKING, Any, List
 
-from sqlalchemy import Column, Integer, String, Sequence
-from sqlalchemy.orm import relationship
+from sqlalchemy import Integer, String, Sequence
+from sqlalchemy.orm import relationship, Mapped, mapped_column
 from model.base import Base
 from model.associations import user_favorites
 from model.pw_hash import PWHash
 
 if TYPE_CHECKING:
-    from model.ingredient import Ingredient
-    from model.pantry import PantryItem
+    from model import Ingredient, PantryItem, Recipe, Rating
 
 
 class User(Base):
     __tablename__ = "users"
 
-    id = Column(Integer, 
+    id: Mapped[int] = mapped_column(Integer, 
                 Sequence('user_id_seq'),
                 primary_key=True)
-    email = Column(String(255), 
+    email: Mapped[str] = mapped_column(String(255), 
                    unique=True, 
                    nullable=False)
-    password = Column(String(255), 
+    password: Mapped[str] = mapped_column(String(255), 
                       nullable=False)
 
     # Many-to-many relationship to Recipe
-    favorites = relationship(
+    favorites: Mapped[List["Recipe"]] = relationship(
         "Recipe",
         secondary=user_favorites,
         back_populates="favorited_by"
     )
 
-    pantry_items = relationship(
+    ratings: Mapped[List["Rating"]] = relationship(
+        "Rating", 
+        back_populates = "user", 
+        cascade = "all, delete-orphan"
+        )
+
+    pantry_items: Mapped[List["PantryItem"]] = relationship(
         "PantryItem",
         back_populates="user",
         cascade="all, delete-orphan"
@@ -137,10 +144,6 @@ class User(Base):
         Returns:
             items(Ingredients): A list of ingredients in the pantry.
         """
-
-        if self.pantry_items is None:
-            return None
-
         return [
             {
                 "ingredient": item.ingredient.name,
@@ -148,6 +151,7 @@ class User(Base):
                 "unit": item.unit
             }
             for item in self.pantry_items
-        ] 
-
+        ]
     
+    def get_id(self) -> int:
+        return self.id
