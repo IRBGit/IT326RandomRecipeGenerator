@@ -1,44 +1,133 @@
+"""
+    Authors: Jon Bailey and 
+"""
+
 # This class handles the data of Recipes
 
 #TODO: include methods for the different Use Cases, according to Class Diagram
 #TODO: Add setters/getters
 
-from sqlalchemy.orm import relationship
-from sqlalchemy import Column, Integer, String, Text, Table, Column, ForeignKey
+from __future__ import annotations
+from typing import TYPE_CHECKING
+from sqlalchemy.orm import relationship, Mapped, mapped_column
+from sqlalchemy import Integer, String, Sequence, Text
+from sqlalchemy.ext.hybrid import hybrid_property
 from model.base import Base
-from model.associations import user_favorites, recipe_ingredients
+from model import user_favorites, recipe_ingredients
+import json
+from typing import List
 
-recipe_ingredients = Table(
-    "recipe_ingredients", Base.metadata,
-    Column("recipe_id", Integer, ForeignKey("recipes.id"), primary_key=True),
-    Column("ingredient_id", Integer, ForeignKey("ingredients.id"), primary_key=True)
-    
-)
+if TYPE_CHECKING:
+    from model import Rating, User, Ingredient
 
 class Recipe(Base):
-    __tablename__ = "recipe" # Table name in the SQL database
+    __tablename__ = "recipes" # Table name in the SQL database
 
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    name = Column(String(255), nullable = False)
+    id: Mapped[int] = mapped_column(Integer, 
+                Sequence('recipe_id_seq'),
+                primary_key=True)
+    name: Mapped[str] = mapped_column(String(255), nullable = False)
     # area = Column() # I don't know what this is supposed to be but it can't be an empty column to write to the database.
-    instructions = Column(Text, nullable=False)
+    _instructions: Mapped[str] = mapped_column("intstructions", Text, nullable=False)
     
 
     # This relationship is automatically created via the backref in User and explicitly identified here.
-    favorited_by = relationship(
+    favorited_by: Mapped[List["User"]] = relationship(
         "User", 
         secondary = user_favorites, 
         back_populates = "favorites")
 
-    ingredients = relationship(
+    ingredients: Mapped[List["Ingredient"]] = relationship(
         "Ingredient",
         secondary=recipe_ingredients,
         back_populates="recipes"
     )
 
-    def __init__(self, name: str, instructions: str = None):
+    # init includes name, category, instructions, tags, and video as setters
+    def __init__(self, name: str, instructions: str = None, category: str = None, tags = None, video: str = None):
         self.name = name
+        self.category = None
+        self.area = None
+        self.ingredients = instructions if instructions is not None else [] # for now, including all variables, change later
         self.instructions = instructions
+        self.category = category
+        self.tags = tags
+        self.video = video
+    
+    ratings: Mapped[List["Rating"]] = relationship(
+        "Rating",
+        back_populates = "recipe",
+        cascade = "all, delete-orphan"
+    )
+
+    # def __init__(self, name: str, instructions: list[str] | None = None):
+    #     self.name = name
+    #     self.instructions = instructions or []
 
     def __repr__(self):
         return f"<Recipe(id = {self.id}, name ='{self.name}')>"
+    
+    # prints a recipe to terminal
+    def print(self):
+        print(self.name)
+        if (self.category):
+            print(self.category)
+
+        if (self.area):
+            print(self.area)
+
+        if (self.ingredients):
+            print(self.ingredients)
+
+        if (self.instructions):
+            print(self.instructions)
+
+        if (self.category):
+            print(self.category)
+            
+        if (self.tags):
+            print(self.tags)
+
+        if (self.video):
+            print(self.video)
+    @property
+    def instructions(self) -> list[str]:
+        # This is what you'll use in your Python code: recipe.instructions
+        try:
+            return json.loads(self._instructions)
+        except (json.JSONDecodeError, TypeError):
+            return []
+
+    @instructions.setter
+    def instructions(self, value: list[str]):
+        self._instructions = json.dumps(value or [])
+
+    def get_average_rating(self) -> float:
+        from model import Rating
+        if not self.ratings:
+            return 0.0
+        return sum(r.rating for r in self.ratings) / len(self.ratings)
+
+    def get_user_rating(self, user) -> int | None:
+        from model import Rating
+        for r in self.ratings:
+            if r.user == user:
+                return r.rating
+        return None
+    
+    def add_rating(self, user: User, value: int) -> Rating:
+        from model import Rating
+        if value < 0 or value > 5:
+            raise ValueError("rating must be between 0 and 5")
+        
+        for r in self.ratings:
+            if r.user == user:
+                r.rating = value
+                return r
+        
+        rating = Rating(user = user, recipe = self, rating = value)
+        self.ratings.append(rating)
+        return rating
+    
+    def get_name(self) -> str:
+        return self.name

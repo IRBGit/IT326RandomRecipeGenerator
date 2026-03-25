@@ -1,7 +1,7 @@
 # driver.py
 # This file tests if the database is connected to the file.
 
-from db_connect import DBConnect
+from db.db_connect import DBConnect
 
 def main():
     # Create DBConnect instance
@@ -10,13 +10,8 @@ def main():
     print("Attempting to connect to database...")
 
     try:
-        #print("1")
-        # Initialize engine
-        db_connect.connect()
-        #print("2")
-
         # Check connection
-        if db_connect.is_connected():
+        if db_connect.test_connection():
             print("Database connection successful!")
         else:
             print("Database connection failed.")
@@ -26,8 +21,11 @@ def main():
 
     finally:
         # Close session if one exists
-        db_connect.close_session()
+        db_connect.shutdown()
         print("Database session closed.")
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    finally:
+        DBConnect().shutdown()
