@@ -118,7 +118,6 @@ class SearchEngine(ABC):  # ABC = Abstract Base Class — acts like an <<Interfa
 
 
 # Concrete implementation 
-# This is a real, working subclass of SearchEngine.
 # It implements every @abstractmethod so Python allows us to create instances.
 
 class RecipeSearchEngine(SearchEngine):
@@ -211,4 +210,4 @@ class RecipeSearchEngine(SearchEngine):
         an association. We just call recipe_filter.apply() and move on.
         This reflects the dashed dependency arrow in the UML diagram.
         """
-        return recipe_filter.apply(recipes, pantry)  # Delegate filtering to Filter
+        return recipe_filter.apply(recipes, pantry) 
