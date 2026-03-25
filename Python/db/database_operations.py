@@ -320,6 +320,14 @@ class IngredientService:
             uow.ingredients.delete(ingredient)
             uow.commit()
             return True
+    
+    def get_ingredient_by_id(
+            self,
+            ing_id: int
+    ) -> Ingredient:
+        with UnitOfWork() as uow:
+            return uow.ingredients.get_by_id(ing_id)
+
 
 class RecipeService:
     """
@@ -534,6 +542,12 @@ class ServiceContainer:
             ingredient: Ingredient
         ) -> bool:
         return self.ingredient_service.remove_ingredient_obj(ingredient)
+    
+    def get_ingredient_by_id(
+            self,
+            ing_id: int
+    ) -> Ingredient:
+        return self.ingredient_service.get_ingredient_by_id(ing_id)
     
     #Pantry Service
     def add_to_pantry(
