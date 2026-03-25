@@ -43,19 +43,53 @@ class Recipe(Base):
         back_populates="recipes"
     )
 
+    # init includes name, category, instructions, tags, and video as setters
+    def __init__(self, name: str, instructions: str = None, category: str = None, tags = None, video: str = None):
+        self.name = name
+        self.category = None
+        self.area = None
+        self.ingredients = instructions if instructions is not None else [] # for now, including all variables, change later
+        self.instructions = instructions
+        self.category = category
+        self.tags = tags
+        self.video = video
+    
     ratings: Mapped[List["Rating"]] = relationship(
         "Rating",
         back_populates = "recipe",
         cascade = "all, delete-orphan"
     )
 
-    def __init__(self, name: str, instructions: list[str] | None = None):
-        self.name = name
-        self.instructions = instructions or []
+    # def __init__(self, name: str, instructions: list[str] | None = None):
+    #     self.name = name
+    #     self.instructions = instructions or []
 
     def __repr__(self):
         return f"<Recipe(id = {self.id}, name ='{self.name}')>"
     
+    # prints a recipe to terminal
+    def print(self):
+        print(self.name)
+        if (self.category):
+            print(self.category)
+
+        if (self.area):
+            print(self.area)
+
+        if (self.ingredients):
+            print(self.ingredients)
+
+        if (self.instructions):
+            print(self.instructions)
+
+        if (self.category):
+            print(self.category)
+            
+        if (self.tags):
+            print(self.tags)
+
+        if (self.video):
+            print(self.video)
     @property
     def instructions(self) -> list[str]:
         # This is what you'll use in your Python code: recipe.instructions
