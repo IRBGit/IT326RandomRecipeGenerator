@@ -8,7 +8,7 @@
 #TODO: Add setters/getters
 
 from __future__ import annotations
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 from sqlalchemy.orm import relationship, Mapped, mapped_column
 from sqlalchemy import Integer, String, Sequence, Text
 from sqlalchemy.ext.hybrid import hybrid_property
@@ -42,17 +42,6 @@ class Recipe(Base):
         secondary=recipe_ingredients,
         back_populates="recipes"
     )
-
-    # init includes name, category, instructions, tags, and video as setters
-    def __init__(self, name: str, instructions: str = None, category: str = None, tags = None, video: str = None):
-        self.name = name
-        self.category = None
-        self.area = None
-        self.ingredients = instructions if instructions is not None else [] # for now, including all variables, change later
-        self.instructions = instructions
-        self.category = category
-        self.tags = tags
-        self.video = video
     
     ratings: Mapped[List["Rating"]] = relationship(
         "Rating",
@@ -63,6 +52,17 @@ class Recipe(Base):
     # def __init__(self, name: str, instructions: list[str] | None = None):
     #     self.name = name
     #     self.instructions = instructions or []
+
+        # init includes name, category, instructions, tags, and video as setters
+    def __init__(self, name: str, ingredients: Optional[List["Ingredient"]], instructions: Optional[List[str]] | None = None, category: Optional[str] = None, tags = None, video: Optional[str] = None):
+        self.name = name
+        self.category = None
+        self.area = None
+        self.ingredients = ingredients or [] # for now, including all variables, change later
+        self.instructions = instructions or []
+        self.category = category
+        self.tags = tags
+        self.video = video
 
     def __repr__(self):
         return f"<Recipe(id = {self.id}, name ='{self.name}')>"
