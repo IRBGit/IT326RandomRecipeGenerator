@@ -5,7 +5,7 @@ def createfile(text, filename):
 def main():
     r=requests.get('https://www.themealdb.com/api/json/v1/1/list.php?i=list',)
     data = r.json()
-    ingredients = [meal.get("strIngredient")+"\n" for meal in data.get("meals", [])]
+    ingredients = [meal.get("idIngredient") + " " + meal.get("strIngredient")+"\n" for meal in data.get("meals", [])]
     createfile(ingredients, "ingredients")
     r=requests.get('https://www.themealdb.com/api/json/v1/1/list.php?c=list',)
     data = r.json()
