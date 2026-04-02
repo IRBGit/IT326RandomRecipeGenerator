@@ -6,11 +6,10 @@ from __future__ import annotations
 from sqlalchemy.orm import relationship, Mapped, mapped_column
 from sqlalchemy import Integer, String, Sequence
 from model.base import Base
-from model.associations import recipe_ingredients
 from typing import TYPE_CHECKING, List
 
 if TYPE_CHECKING:
-    from model import Recipe, PantryItem
+    from model import Recipe, PantryItem, RecipeIngredient
 
 # This class is for the backend of ingredients
 
@@ -25,15 +24,16 @@ class Ingredient(Base):
     name: Mapped[str] = mapped_column(String(255), nullable=False, unique=True)
 
     # Recipes that use this ingredient
-    recipes: Mapped[List["Recipe"]] = relationship(
-        "Recipe",
-        secondary=recipe_ingredients,
-        back_populates="ingredients"
+    recipe_association: Mapped[List["RecipeIngredient"]] = relationship(
+        "RecipeIngredient",
+        back_populates="ingredient",
+        cascade = "all, delete-orphan"
     )
 
-    pantry_items: Mapped[List[PantryItem]] = relationship(
+    pantry_items: Mapped[List["PantryItem"]] = relationship(
     "PantryItem",
-    back_populates="ingredient"
+    back_populates="ingredient",
+    cascade = "all, delete-orphan"
 )
 
     def __init__(self, name: str):

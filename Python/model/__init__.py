@@ -1,10 +1,12 @@
 from .base import Base
-from .associations import user_favorites, recipe_ingredients
+from .associations import user_favorites
 from .user import User
 from .recipe import Recipe
 from .ingredient import Ingredient
 from .pantry import PantryItem
 from .rating import Rating
+from .recipe_ingredient import RecipeIngredient
+from .recipe_notes import UserRecipeNote
 
 __all__ = [
     "Base", 
@@ -12,5 +14,7 @@ __all__ = [
     "Recipe", 
     "Ingredient", 
     "PantryItem", 
-    "Rating"
+    "Rating",
+    "RecipeIngredient",
+    "UserRecipeNote"
 ]
