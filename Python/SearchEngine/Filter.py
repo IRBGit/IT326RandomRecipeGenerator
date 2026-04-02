@@ -112,29 +112,3 @@ class Filter:
 
         return matching_recipes
 
-
-# ── Quick demo ──────────────────────────────────────────────────────────────
-if __name__ == "__main__":
-    # Sample recipes (each is a simple dictionary)
-    sample_recipes = [
-        {"name": "Pasta", "cook_time": 20, "calories": 400, "ingredients": ["pasta", "tomato sauce"]},
-        {"name": "Peanut Stir-fry", "cook_time": 15, "calories": 350, "ingredients": ["peanuts", "chicken", "soy sauce"]},
-        {"name": "Salad", "cook_time": 5, "calories": 150, "ingredients": ["lettuce", "tomato", "cucumber"]},
-        {"name": "Slow Roast", "cook_time": 180, "calories": 600, "ingredients": ["beef", "potato", "carrot"]},
-    ]
-
-    my_pantry = ["pasta", "tomato sauce", "lettuce", "tomato", "cucumber"]
-
-    # Set up a filter
-    my_filter = Filter()
-    my_filter.max_cook_time = 30       # Only quick meals (under 30 min)
-    my_filter.max_calories = 500       # Under 500 calories
-    my_filter.blocked_ingredients = ["peanuts"]  # Peanut allergy!
-    my_filter.use_pantry_only = True   # Only use what I have at home
-
-    # Apply the filter
-    results = my_filter.apply(sample_recipes, my_pantry)
-
-    print("Recipes that match your filter:")
-    for r in results:
-        print(f"  - {r['name']}")
