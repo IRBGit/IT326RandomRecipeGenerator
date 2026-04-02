@@ -1,7 +1,6 @@
-# search_engine.py
-# SearchEngine is marked as <<Interface>> in the UML diagram.
-# In Python, we simulate an interface using an Abstract Base Class (ABC).
-
+"""
+    Author: Thanvi Ambala
+"""
 from abc import ABC, abstractmethod  # Built-in Python module for abstract classes
 from Filter import Filter            # We import Filter because it's used as a parameter type
 

@@ -1,8 +1,6 @@
-# filter.py
-# This file contains the Filter class, which is used to filter a list of recipes
-# based on user preferences like cook time, calories, and dietary restrictions.
-
-
+"""
+    Author: Thanvi Ambala
+"""
 class Filter:
     """
     The Filter class stores a set of preferences/rules that can be applied
