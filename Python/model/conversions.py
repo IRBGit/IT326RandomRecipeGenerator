@@ -13,14 +13,18 @@ UNIT_TO_METRIC = {
     "ounces": ("g", 28.3495),
     "lb": ("kg", 0.453592),
     "pound": ("kg", 0.453592),
-    "pounds": ("kg", 0.453592)
+    "pounds": ("kg", 0.453592),
+    "quart": ("L", 0.946353),
+    "quarts": ("L", 0.946353)
 }
 
 UNIT_TO_IMPERIAL = {
     "ml": ("cup", 1 / 236.588),
     "mL": ("cup", 1 / 236.588),
     "g": ("oz", 1 / 28.3495),
-    "kg": ("lb", 1 / 0.453592)
+    "kg": ("lb", 1 / 0.453592),
+    "l": ("quart", 1 / 0.946353),
+    "L": ("quart", 1 / 0.946353)
 }
 
 
@@ -90,13 +94,66 @@ def convert_ingredient(amount, unit, name, system):
     return converted + " " + name
 
 
-#Update:  Started backend code for measurement conversion. 
-#To DO: work while viewing a recipe, so the missing part is still:
+def split_quantity_text(quantity_text):
+    # break text into parts
+    parts = quantity_text.split()
 
-# connecting this to actual recipe data
+    # no text given
+    if len(parts) == 0:
+        return None, None
+
+    # try to read first part as number
+    try:
+        amount = float(parts[0])
+    except ValueError:
+        return None, None
+
+    # only a number, no unit
+    if len(parts) == 1:
+        return amount, ""
+
+    # save the unit part
+    unit = " ".join(parts[1:])
+
+    return amount, unit
+
+
+def convert_quantity_text(quantity_text, system):
+    # split amount and unit
+    amount, unit = split_quantity_text(quantity_text)
+
+    # bad quantity text
+    if amount is None:
+        return quantity_text
+
+    # no unit to convert
+    if unit == "":
+        return quantity_text
+
+    # convert the quantity
+    converted = format_converted_amount(amount, unit, system)
+
+    # keep old value if bad unit
+    if converted == "Unit not supported":
+        return quantity_text
+
+    # keep old value if bad system
+    if converted == "System not supported":
+        return quantity_text
+
+    return converted
+
+
+def convert_recipe_ingredient(name, quantity_text, system):
+    # convert full ingredient line
+    converted_quantity = convert_quantity_text(quantity_text, system)
+
+    return converted_quantity + " " + name
 
 
 # test examples
-# print(format_converted_amount(1, "cup", "metric"))
-# print(format_converted_amount(2, "tbsp", "metric"))
-# print(format_converted_amount(1, "kg", "imperial"))
+# print(convert_quantity_text("1 quart", "metric"))
+# print(convert_quantity_text("1.5 cups", "metric"))
+# print(convert_quantity_text("0.5 teaspoon", "metric"))
+# print(convert_quantity_text("2", "metric"))
+# print(convert_recipe_ingredient("Milk", "1.5 cups", "metric"))
