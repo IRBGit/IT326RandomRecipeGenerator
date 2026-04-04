@@ -91,20 +91,10 @@ def convert_ingredient(amount, unit, name, system):
 
 
 #Update:  Started backend code for measurement conversion. 
-# * Added unit support and helper functions to convert ingredient amounts into metric values.
-# backend conversion file made
-# metric conversions
-# imperial conversions
-# formatting helper
-# ingredient helper
-# more unit support
-
 #To DO: work while viewing a recipe, so the missing part is still:
 
 # connecting this to actual recipe data
-# using real ingredient amount/unit values
-# hooking it into recipe display
-# testing it in the actual app flow
+
 
 # test examples
 # print(format_converted_amount(1, "cup", "metric"))
