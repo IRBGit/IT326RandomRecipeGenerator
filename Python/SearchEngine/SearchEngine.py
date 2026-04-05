@@ -210,4 +210,19 @@ class RecipeSearchEngine(SearchEngine):
         an association. We just call recipe_filter.apply() and move on.
         This reflects the dashed dependency arrow in the UML diagram.
         """
-        return recipe_filter.apply(recipes, pantry) 
+        return recipe_filter.apply(recipes, pantry)
+    
+# if __name__ == "__main__":
+#     #Tolu: quick pantry filter test
+#     engine = RecipeSearchEngine()
+
+#     pantry = ["chicken", "broccoli", "soy sauce", "garlic"]
+
+#     recipe_filter = Filter()
+#     recipe_filter.use_pantry_only = True
+
+#     results = engine.search_with_filter(engine._recipes, pantry, recipe_filter)
+
+#     print("Recipes you can make with current ingredients:")
+#     for recipe in results:
+#         print(recipe["name"])
