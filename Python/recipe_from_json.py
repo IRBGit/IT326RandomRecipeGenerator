@@ -13,20 +13,28 @@ def import_recipes_from_json(file_path):
         with open(file_path, 'r', encoding='utf-8') as f:
             data = json.load(f)
             
-        recipes_to_import = data.get("Recipe", [])
+        recipes_to_import = data.get("meals", [])
         print(f"--- Found {len(recipes_to_import)} recipes to import ---")
 
         for entry in recipes_to_import:
-            name = entry.get("recipeName")
+            name = entry.get("strMeal")
             
             # 1. Process Instructions: Split by \n and clean up whitespace
-            raw_steps = entry.get("steps", "")
+            raw_steps = entry.get("strInstructions", "")
             instructions_list = [step.strip() for step in raw_steps.split('\n') if step.strip()]
             
-            # 2. Process Ingredients: Extract names and ignore quantities
-            ingredient_data = entry.get("ingredients", [])
-            ingredient_names = [ing.get("ingredientName") for ing in ingredient_data if ing.get("ingredientName")]
-            
+            # empties the ingredient names from previous entries
+            ingredient_names = []
+
+            # adds all the ingredients to Recipe database
+            # TODO: add all ingredient quantites when recipe ing quanity added to database. 
+            for i in range(1,21):
+                item = entry.get("strIngredient"+str(i))
+                if item == "":
+                    ingredient_names.append(item)
+
+            time_stamp = entry.get("dateModified")
+
             try:
                 # 3. Use ServiceContainer to add the recipe
                 # Note: add_recipe takes a list of instruction strings and a list of ingredient names
