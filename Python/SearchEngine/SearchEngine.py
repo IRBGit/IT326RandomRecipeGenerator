@@ -247,7 +247,7 @@ class RecipeSearchEngine(SearchEngine):
         """
         return recipe_filter.apply(recipes, pantry)
     
-if __name__ == "__main__":
+# if __name__ == "__main__":
     # #Tolu: quick pantry filter test
     # engine = RecipeSearchEngine()
 
