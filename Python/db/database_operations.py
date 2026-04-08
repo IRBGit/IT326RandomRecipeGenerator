@@ -8,6 +8,7 @@ from model import Ingredient, User, PantryItem, Recipe, recipe_ingredients, user
 import re
 from typing import Optional, List
 from sqlalchemy.orm import Session
+from datetime import datetime
 
 class PantryService:
     """
@@ -351,7 +352,8 @@ class RecipeService:
             self,
             name:str,
             instructions: list[str],
-            ingredients: list[str]
+            ingredients: list[str],
+            pub_time: list[datetime]
             ) -> Recipe | None:
         """
         Add a recipe to the database.

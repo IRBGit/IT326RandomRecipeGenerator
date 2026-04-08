@@ -10,7 +10,7 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING, Optional
 from sqlalchemy.orm import relationship, Mapped, mapped_column
-from sqlalchemy import Integer, String, Sequence, Text
+from sqlalchemy import Integer, String, Sequence, Text, DateTime
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm.collections import attribute_mapped_collection
 from sqlalchemy.ext.associationproxy import association_proxy, AssociationProxy
@@ -18,6 +18,7 @@ from model.base import Base
 from model import user_favorites
 import json
 from typing import List
+from datetime import datetime
 
 if TYPE_CHECKING:
     from model import Rating, User, Ingredient, RecipeIngredient, UserRecipeNote
@@ -28,12 +29,13 @@ class Recipe(Base):
     id: Mapped[int] = mapped_column(Integer, 
                 Sequence('recipe_id_seq'),
                 primary_key=True)
-    name: Mapped[str] = mapped_column(String(255), nullable = False)
+    name: Mapped[str] = mapped_column(String(255), nullable = False, unique=True)
     # area = Column() # I don't know what this is supposed to be but it can't be an empty column to write to the database.
     _instructions: Mapped[str] = mapped_column("intstructions", Text, nullable=False)
     # Alysa Solomon: published time should be added here, IDK how to add it
     # It should be able to store a big number, from reaserch DATETIME will probably be most helpful
     # additonally need to add quanity, still don't know how to add columns via code
+    published_time: Mapped[datetime] = mapped_column("published_time", DateTime, nullable=True)
 
     # This relationship is automatically created via the backref in User and explicitly identified here.
     favorited_by: Mapped[List["User"]] = relationship(
@@ -79,7 +81,7 @@ class Recipe(Base):
     #     self.instructions = instructions or []
 
         # init includes name, category, instructions, tags, and video as setters
-    def __init__(self, name: str, ingredients: Optional[List["Ingredient"]], instructions: Optional[List[str]] | None = None, category: Optional[str] = None, tags = None, video: Optional[str] = None):
+    def __init__(self, name: str, ingredients: Optional[List["Ingredient"]], instructions: Optional[List[str]] | None = None, pub_time: Optional[List[datetime]] | None = None,category: Optional[str] = None, tags = None, video: Optional[str] = None):
         self.name = name
         self.category = None
         self.area = None
@@ -88,6 +90,7 @@ class Recipe(Base):
         self.category = category
         self.tags = tags
         self.video = video
+        self.published_time = pub_time
 
     def __repr__(self):
         return f"<Recipe(id = {self.id}, name ='{self.name}')>"

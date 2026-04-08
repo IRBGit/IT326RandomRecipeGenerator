@@ -1,6 +1,7 @@
 import json
 import os
 from db.database_operations import ServiceContainer
+import datetime
 
 def import_recipes_from_json(file_path):
     container = ServiceContainer()
@@ -15,7 +16,6 @@ def import_recipes_from_json(file_path):
             
         recipes_to_import = data.get("meals", [])
         print(f"--- Found {len(recipes_to_import)} recipes to import ---")
-
         for entry in recipes_to_import:
             name = entry.get("strMeal")
             
@@ -33,7 +33,10 @@ def import_recipes_from_json(file_path):
                 if item == "":
                     ingredient_names.append(item)
 
-            time_stamp = entry.get("dateModified")
+            time_stamp_str = entry.get("dateModified")
+            # 2025-11-16 01:49:18
+            if (time_stamp_str != None):
+                time_stamp = datetime.datetime.strptime(time_stamp_str,"%Y-%m-%d %H:%M:%S")
 
             try:
                 # 3. Use ServiceContainer to add the recipe
@@ -42,6 +45,7 @@ def import_recipes_from_json(file_path):
                     name=name,
                     instructions=instructions_list,
                     ingredients=ingredient_names
+                    # pub_time=time_stamp
                 )
                 if recipe:
                     print(f" [SUCCESS] Imported: {name} with {len(ingredient_names)} ingredients.")
@@ -54,7 +58,8 @@ def import_recipes_from_json(file_path):
         print(f"An unexpected error occurred: {e}")
     finally:
         container.close()
+        pass
 
 if __name__ == "__main__":
     # Ensure this matches your JSON filename
-    import_recipes_from_json('Sample_Recipe.json')
+    import_recipes_from_json('Python\\theMealDB_A.json')
