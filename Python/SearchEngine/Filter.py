@@ -54,8 +54,7 @@ class Filter:
 
         return True  # All checks passed!
     
-    # Tolu: added to clean one ingredient name
-    # -------------------------------------
+    # Tolu: clean one ingredient name
     def _clean_name(self, value):
         return str(value).strip().lower()
 

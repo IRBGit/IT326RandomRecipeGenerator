@@ -197,7 +197,6 @@ class RecipeSearchEngine(SearchEngine):
     def search_recipes_by_category(self, category: str) -> list:
         return [r for r in self._recipes if r["category"].lower() == category.lower()]
     
-    # ---------------------------------------------------------------------
 
     # Tolu: search recipes using a simple criteria
     def search_recipes_by_criteria(self, include_ingredients: list, exclude_ingredients: list, category: str) -> list:
@@ -229,7 +228,6 @@ class RecipeSearchEngine(SearchEngine):
                 results.append(recipe)
 
         return results
-    # ---------------------------------------------------------------------
     
 
     def get_random_recipes(self, count: int) -> list:
@@ -247,29 +245,3 @@ class RecipeSearchEngine(SearchEngine):
         """
         return recipe_filter.apply(recipes, pantry)
     
-# if __name__ == "__main__":
-    # #Tolu: quick pantry filter test
-    # engine = RecipeSearchEngine()
-
-    # pantry = ["chicken", "broccoli", "soy sauce", "garlic"]
-
-    # recipe_filter = Filter()
-    # recipe_filter.use_pantry_only = True
-
-    # results = engine.search_with_filter(engine._recipes, pantry, recipe_filter)
-
-    # print("Recipes you can make with current ingredients:")
-    # for recipe in results:
-    #     print(recipe["name"])
-    # Tolu: quick criteria search test
-    # engine = RecipeSearchEngine()
-
-    # include_ingredients = ["chicken"]
-    # exclude_ingredients = ["g"]
-    # category = "asian"
-
-    # results = engine.search_recipes_by_criteria(include_ingredients, exclude_ingredients, category)
-
-    # print("Recipes that match the criteria:")
-    # for recipe in results:
-    #     print(recipe["name"])
