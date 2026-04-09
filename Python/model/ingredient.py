@@ -45,3 +45,13 @@ class Ingredient(Base):
     def get_name(self) -> str:
         assert isinstance(self.name, str)
         return self.name
+    
+    def __eq__(self, other: Ingredient) -> bool:
+        if not isinstance(other, Ingredient):
+            return False
+        if self.id == other.id:
+            return True
+        elif self.name == other.name:
+            return True
+        else:
+            return False

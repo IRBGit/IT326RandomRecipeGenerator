@@ -13,15 +13,48 @@ class RecipeIngredient(Base):
     recipe_id: Mapped[int] = mapped_column(Integer, ForeignKey("recipes.id"), primary_key=True)
     ingredient_id: Mapped[int] = mapped_column(Integer, ForeignKey("ingredients.id"), primary_key=True)
 
-    quantity: Mapped[float] = mapped_column(Float, nullable=True)
-    unit: Mapped[str] = mapped_column(String(50), nullable=True)
+    quantity: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    unit: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
 
     # Relationships
-    recipe: Mapped["Recipe"] = relationship("Recipe", back_populates="_ingredients")
-    ingredient: Mapped["Ingredient"] = relationship("Ingredient", back_populates="recipe_associations")
+    recipe: Mapped["Recipe"] = relationship(
+        "Recipe", 
+        back_populates = "_ingredients")
+    ingredient: Mapped["Ingredient"] = relationship(
+        "Ingredient", 
+        back_populates = "recipe_association")
 
-    def __init__(self, quantity: float = 0.0, unit: str = "", ingredient: Optional[Ingredient] = None):
+    def __init__(
+            self, 
+            ingredient: "Ingredient",
+            quantity: Optional[float] = None, 
+            unit: Optional[str] = None
+        ):
+        if ingredient is None:
+            raise ValueError("ingredient cannot be None")
+        
+        # Rule 1: quantity must be > 0 if provided.
+        if quantity is not None and quantity <= 0:
+            raise ValueError("quantity must be greater than 0")
+        
+        # Rule 2: unit requires quantity
+        if unit is not None and quantity is None:
+            raise ValueError("unit cannot be set without a quantity")
+
         self.quantity = quantity
         self.unit = unit
-        if ingredient:
-            self.ingredient = ingredient
+        self.ingredient = ingredient
+
+    def __eq__(self, other: RecipeIngredient) -> bool:
+        if not isinstance(other, RecipeIngredient):
+            return False
+        if self.ingredient_id == other.ingredient_id and self.recipe_id == other.recipe_id:
+            return True
+        elif self.ingredient.id == other.ingredient.id and self.recipe_id == other.recipe_id:
+            return True
+        elif self.ingredient_id == other.ingredient_id and self.recipe.id == other.recipe.id:
+            return True
+        elif self.ingredient.id == other.ingredient.id and self.recipe.id == other.recipe.id:
+            return True
+        else:
+            return False

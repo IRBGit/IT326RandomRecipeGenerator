@@ -20,8 +20,8 @@ class Rating(Base):
     )
 
     #Relationships
-    user: Mapped[List["User"]] = relationship("User", back_populates="_ratings")
-    recipe: Mapped[List["Recipe"]] = relationship("Recipe", back_populates="_ratings")
+    user: Mapped["User"] = relationship("User", back_populates="_ratings")
+    recipe: Mapped["Recipe"] = relationship("Recipe", back_populates="_ratings")
 
     def __init__(self, user: Optional[User] = None, recipe: Optional[Recipe] = None, rating: int = 0):
         self.user = user
@@ -30,3 +30,18 @@ class Rating(Base):
 
     def __repr__(self):
         return f"Rating(user_id = {self.user_id}, recipe_id = {self.recipe_id}, rating = {self.rating})>"
+    
+    def __eq__(self, other: Rating) -> bool:
+        if not isinstance(other, Rating):
+            return False
+        from model import User, Recipe
+        if self.user_id == other.user_id and self.recipe_id == other.recipe_id:
+            return True
+        elif self.user.id == other.user.id and self.recipe_id == other.recipe_id:
+            return True
+        elif self.user_id == other.user_id and self.recipe.id == other.recipe.id:
+            return True
+        elif self.user.id == other.user.id and self.recipe.id == other.recipe.id:
+            return True
+        else:
+            return False

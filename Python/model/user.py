@@ -48,19 +48,26 @@ class User(Base):
     
     """This cannot be set from the User side. Must be set by methods in the Recipe class."""
     recipe_rating: AssociationProxy[dict["Recipe", int]] = association_proxy(
-        "_rating",
+        "_ratings",
         "rating"
     )
 
-    pantry: AssociationProxy[dict["Ingredient", "PantryItem"]] = association_proxy(
+    pantry: AssociationProxy[
+        dict[
+            "Ingredient", 
+            "PantryItem"
+            ]
+        ] = association_proxy(
         "_pantry",
         "self",
         creator = lambda i, p: p # 'i' is the ingredient key, and 'p' is the PantryItem value
     )
 
-    _pantry: Mapped[List["PantryItem"]] = relationship(
+    _pantry: Mapped[dict[int, "PantryItem"]] = relationship(
         "PantryItem",
-        collection_class = attribute_mapped_collection("ingredient"),
+        collection_class = attribute_mapped_collection(
+            "ingredient_id"
+            ),
         back_populates="user",
         cascade="all, delete-orphan"
     )
@@ -96,10 +103,10 @@ class User(Base):
     # annotations from __future__ allows type checking at run time.
     def add_ingredient_to_pantry(
             self, 
-            ingredient: Ingredient, 
+            ingredient: "Ingredient", 
             quantity: Optional[float] = None, 
             unit: Optional[str] = None
-            )-> PantryItem:
+            )-> "PantryItem":
         """
         Add a new ingredient to the pantry or update the existing item.
 
@@ -111,21 +118,37 @@ class User(Base):
         Returns:
             item(PantryItem): The PantryItem is returned to the user.
         """
-        from model import PantryItem, Ingredient
+        from model import PantryItem
 
-        # 1. Check if it already exists in our Map
-        if ingredient in self.pantry:
-            item = self.pantry[ingredient]
+        if ingredient.id is None:
+            raise ValueError("Ingredient must be persisted (have an id)")
+        
+        key = ingredient.id
+
+        if key in self._pantry:
+            item = self._pantry[key]
+
             if quantity is not None:
                 item.quantity = quantity
             if unit is not None:
                 item.unit = unit
+
             return item
         
         # 2. If it doesn't exist, use the Map to add it
         # The 'user' is handled automatically because we are adding to self.pantry
-        new_item = PantryItem(quantity=quantity or 0.0, unit=unit or "")
-        self.pantry[ingredient] = new_item
+        if quantity is not None and quantity <= 0:
+            raise ValueError("Qauntity must be greater than 0.")
+        if unit is not None and quantity is None:
+            raise ValueError("You cannot have a unit without a quantity")
+        
+        if quantity is None and unit is None:
+            new_item = PantryItem(ingredient = ingredient)
+        elif unit is None:
+            new_item = PantryItem(ingredient = ingredient, quantity = quantity)
+        else: 
+            new_item = PantryItem(quantity=quantity, unit=unit, ingredient = ingredient)
+        self._pantry[key] = new_item
         return new_item
     
     # annotations from __future__ allows type checking at run time.
@@ -138,21 +161,35 @@ class User(Base):
         """
         from model import PantryItem
 
-        return self.pantry.pop(ingredient, None)
+        if ingredient.id is None:
+            raise ValueError("Ingredient must have an id")
+        
+        key = ingredient.id
+
+        return self._pantry.pop(key, None)
     
     def update_pantry_item(
             self, 
-            ingredient: Ingredient, 
+            ingredient: "Ingredient", 
             quantity: Optional[float] = None, 
             unit: Optional[str] = None
-            ) -> PantryItem | None:
+            ) -> "PantryItem | None":
         """
         Update the quantity or unit for an ingredient in the user's pantry.
         """
         from model import PantryItem
 
-        item = self.pantry.get(ingredient)
+        if ingredient.id is None:
+            raise ValueError("Ingredient must have an id")
+        
+        key = ingredient.id
+        item = self._pantry.get(key)
         if item:
+            if quantity is not None and quantity <= 0:
+                raise ValueError("Quantity may not be less than or equal to 0.")
+            if unit is not None and quantity is None:
+                raise ValueError("Unit may not exist without a quantity.")
+            
             item.quantity = quantity
             item.unit = unit
         return item
@@ -166,12 +203,23 @@ class User(Base):
         """
         return [
             {
-                "ingredient": ing.name,
+                "ingredient_id": item.ingredient.id,
+                "ingredient": item.ingredient.name,
                 "quantity": item.quantity,
                 "unit": item.unit
             }
-            for ing, item in self.pantry_items
+            for ing, item in self._pantry_items
             ]
     
     def get_id(self) -> int:
         return self.id
+    
+    def __eq__(self, other: User) -> bool:
+        if not isinstance(other, User):
+            return False
+        if self.id == other.id:
+            return True
+        elif self.email == other.id:
+            return True
+        else:
+            return False

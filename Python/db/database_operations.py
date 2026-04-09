@@ -4,7 +4,7 @@
 
 from db.db_connect import DBConnect
 from db.unit_of_work import UnitOfWork
-from model import Ingredient, User, PantryItem, Recipe, recipe_ingredients, user_favorites
+from model import Ingredient, User, PantryItem, Recipe, user_favorites, RecipeIngredient, UserRecipeNote, Rating
 import re
 from typing import Optional, List
 from sqlalchemy.orm import Session
@@ -18,9 +18,9 @@ class PantryService:
     
     def add_ingredient_to_pantry(
             self, 
-            user_id: int, 
-            ingredient_name: str, 
-            quantity: Optional[int] = None, 
+            user: "User", 
+            ingredient: "Ingredient", 
+            quantity: Optional[float] = None, 
             unit: Optional[str] = None
             ) -> PantryItem:
         """
@@ -37,59 +37,42 @@ class PantryService:
             Optional(PantryItem): Will return the PantryItem object if it succeeds.
         """
         with UnitOfWork() as uow:
-            user: User = uow.users.get_by_id(user_id)
-            if not user:
-                raise ValueError("User not found")
-            
-            ingredient: Ingredient = uow.ingredients.get_by_name(ingredient_name)
-            if not ingredient:
-                ingredient = Ingredient(name = ingredient_name)
-                uow.ingredients.add(ingredient)
-            
-            pantry_item = user.add_ingredient_to_pantry(
-                ingredient,
-                quantity,
-                unit
+            item = user.add_ingredient_to_pantry(
+                ingredient=ingredient,
+                quantity=quantity,
+                unit=unit
             )
             uow.commit()
-            return pantry_item
+        return item
+            
     
     def remove_ingredient_from_pantry(
             self, 
-            user_id: int, 
-            ingredient_name: str
+            user: User, 
+            ingredient: Ingredient
             ) -> Optional[PantryItem]:
         """
         Remove an ingredient from the user's pantry.
 
         Args:
             user(User): The ORM user object
-            ingredient_name(str): The name of the ingredient
+            ingredient: The ORM ingredient object
         
         Returns:
             Optional(PantryItem): The pantry item that was removed or None if it is not found.
         """
         with UnitOfWork() as uow:
-            user = uow.users.get_by_id(user_id)
-            if not user:
-                raise ValueError("User not found")
-            
-            ingredient = uow.ingredients.get_by_name(ingredient_name)
-            if not ingredient:
-                return None
-            
-            item = user.remove_ingredient_from_pantry(ingredient)
-
+            item = user.remove_ingredient_from_pantry(ingredient=ingredient)
             if item:
                 uow.commit()
-
-            return item
+        return item
+            
     
     def update_pantry_item(
             self, 
-            user_id: int, 
-            ingredient_name: str, 
-            quantity: Optional[int]= None, 
+            user: User, 
+            ingredient: Ingredient, 
+            quantity: Optional[int] = None, 
             unit: Optional[str] = None
             ) -> Optional[PantryItem]:
         """
@@ -105,20 +88,15 @@ class PantryService:
             Optional(PantryItem): The PantryItem or None
         """
         with UnitOfWork() as uow:
-            user = uow.users.get_by_id(user_id)
-            if not user:
-                raise ValueError("User not found")
-            
-            ingredient = uow.ingredients.get_by_name(ingredient_name)
-            if not ingredient:
-                return None
-            
-            item = user.update_pantry_item(ingredient, quantity, unit)
-
+            item = user.update_pantry_item(
+                ingredient=ingredient,
+                quantity=quantity,
+                unit=unit
+            )
             if item:
                 uow.commit()
 
-            return item
+        return item
 
 class UserService:
     """
@@ -348,39 +326,43 @@ class RecipeService:
                 
 
     def add_recipe(
-            self,
-            name:str,
-            instructions: list[str],
-            ingredients: list[str]
-            ) -> Recipe | None:
+        self,
+        name: str,
+        instructions: Optional[List[str]] = None,
+        ingredients: Optional[List[dict]] = None
+    ) -> Recipe:
         """
-        Add a recipe to the database.
-
-        Args:
-            name(str): Name of the recipe.
-            instructions(str): Recipe instructions.
-            ingredients(list(Ingredient)): List of ORM Ingredient objects.
-
-        Returns:
-            Recipe object if creation succeeded, else None
+        ingredients format:
+        [
+            {"name": "Flour", "quantity": 2, "unit": "cups"},
+            {"name": "Milk", "quantity": 1, "unit": "cup"}
+        ]
         """
+
         with UnitOfWork() as uow:
             recipe = uow.recipes.get_by_name(name)
             if recipe:
                 return recipe
-            
-            
+
+            recipe = Recipe(
+                name=name, 
+                instructions=instructions or []
+                )
             uow.recipes.add(recipe)
 
-            items: List[Ingredient] = []
-            for ingredient in ingredients or []:
-                ing = uow.ingredients.get_by_name(ingredient)
-                if not ing:
-                    ing = Ingredient(name = ingredient)
-                    uow.ingredients.add(ing)
-                items.append(ing)
-            
-            recipe = Recipe(name = name, ingredients = items, instructions = instructions or [])
+            for item in ingredients or []:
+                ingredient = uow.ingredients.get_by_name(item["name"])
+                if not ingredient:
+                    ingredient = Ingredient(name=item["name"])
+                    uow.ingredients.add(ingredient)
+                    if uow.session is not None:
+                        uow.session.flush()
+
+                recipe.add_ingredient(
+                    ingredient,
+                    item.get("quantity"),
+                    item.get("unit")
+                )
 
             uow.commit()
             return recipe
@@ -571,13 +553,13 @@ class ServiceContainer:
     def add_to_pantry(
             self,
             user: User,
-            ingredients: Ingredient,
+            ingredient: Ingredient,
             quantity: Optional[int] = None,
             unit: Optional[str] = None
-    ) -> PantryItem | None:
+    ) -> Optional[PantryItem]:
         return self.pantry_service.add_ingredient_to_pantry(
-            user.get_id(), 
-            ingredients.get_name(), 
+            user, 
+            ingredient, 
             quantity, 
             unit
         )
@@ -588,8 +570,8 @@ class ServiceContainer:
             ingredient: Ingredient
     ) -> Optional[PantryItem]:
         return self.pantry_service.remove_ingredient_from_pantry(
-            user.get_id(), 
-            ingredient.get_name()
+            user, 
+            ingredient
         )
     
     def update_pantry(
@@ -600,8 +582,8 @@ class ServiceContainer:
             unit: Optional[str] = None
     ) -> PantryItem | None:
         return self.pantry_service.update_pantry_item(
-            user.get_id(), 
-            ingredient.get_name(), 
+            user, 
+            ingredient, 
             quantity, 
             unit
         )
