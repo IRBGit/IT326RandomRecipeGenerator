@@ -196,6 +196,39 @@ class RecipeSearchEngine(SearchEngine):
 
     def search_recipes_by_category(self, category: str) -> list:
         return [r for r in self._recipes if r["category"].lower() == category.lower()]
+    
+
+    # Tolu: search recipes using a simple criteria
+    def search_recipes_by_criteria(self, include_ingredients: list, exclude_ingredients: list, category: str) -> list:
+        results = []
+
+        for recipe in self._recipes:
+            recipe_ingredients = []
+            for ingredient in recipe["ingredients"]:
+                recipe_ingredients.append(ingredient.lower())
+
+            matches = True
+
+            # Tolu: check ingredients the user wants included
+            for ingredient in include_ingredients:
+                if ingredient.lower() not in recipe_ingredients:
+                    matches = False
+
+            # Tolu: check ingredients the user does not want
+            for ingredient in exclude_ingredients:
+                if ingredient.lower() in recipe_ingredients:
+                    matches = False
+
+            # Tolu: check category if one was given
+            if category != "":
+                if recipe["category"].lower() != category.lower():
+                    matches = False
+
+            if matches:
+                results.append(recipe)
+
+        return results
+    
 
     def get_random_recipes(self, count: int) -> list:
         import random
@@ -210,4 +243,5 @@ class RecipeSearchEngine(SearchEngine):
         an association. We just call recipe_filter.apply() and move on.
         This reflects the dashed dependency arrow in the UML diagram.
         """
-        return recipe_filter.apply(recipes, pantry) 
+        return recipe_filter.apply(recipes, pantry)
+    
