@@ -81,7 +81,7 @@ class Recipe(Base):
     #     self.instructions = instructions or []
 
         # init includes name, category, instructions, tags, and video as setters
-    def __init__(self, name: str, ingredients: Optional[List["Ingredient"]], instructions: Optional[List[str]] | None = None, pub_time: Optional[List[datetime]] | None = None,category: Optional[str] = None, tags = None, video: Optional[str] = None):
+    def __init__(self, name: str, ingredients: Optional[List["Ingredient"]], instructions: Optional[List[str]] | None = None, pub_time: Optional[datetime] | None = None,category: Optional[str] = None, tags = None, video: Optional[str] = None):
         self.name = name
         self.category = None
         self.area = None

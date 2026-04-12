@@ -25,13 +25,19 @@ def import_recipes_from_json(file_path):
             
             # empties the ingredient names from previous entries
             ingredient_names = []
+            quantity_list = []
 
             # adds all the ingredients to Recipe database
             # TODO: add all ingredient quantites when recipe ing quanity added to database. 
             for i in range(1,21):
-                item = entry.get("strIngredient"+str(i))
-                if item == "":
-                    ingredient_names.append(item)
+                # ingredients
+                ing_item = entry.get("strIngredient"+str(i))
+                # quantity
+                qua_item = entry.get("strMeasure"+str(i))
+                if ing_item != "":
+                    ingredient_names.append(ing_item)
+                    quantity_list.append(qua_item)
+                    
 
             time_stamp_str = entry.get("dateModified")
             # 2025-11-16 01:49:18
@@ -44,8 +50,8 @@ def import_recipes_from_json(file_path):
                 recipe = container.recipe_service.add_recipe(
                     name=name,
                     instructions=instructions_list,
-                    ingredients=ingredient_names
-                    # pub_time=time_stamp
+                    ingredients=ingredient_names,
+                    pub_time=time_stamp
                 )
                 if recipe:
                     print(f" [SUCCESS] Imported: {name} with {len(ingredient_names)} ingredients.")
