@@ -235,6 +235,13 @@ class RecipeSearchEngine(SearchEngine):
         shuffled = self._recipes.copy()
         random.shuffle(shuffled)
         return shuffled[:count]
+    
+    # Alysa Solomon
+    def get_random_recipe_with_filter(self, count: int, pantry: list, recipe_filter: Filter) -> list:
+        import random
+        shuffled = self.search_with_filter(self._recipes.copy(), pantry, recipe_filter)
+        random.shuffle(shuffled)
+        return shuffled[:count]
 
     def search_with_filter(self, recipes: list, pantry: list, recipe_filter: Filter) -> list:
         """
