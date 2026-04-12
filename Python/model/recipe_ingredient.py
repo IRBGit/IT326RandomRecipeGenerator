@@ -45,16 +45,16 @@ class RecipeIngredient(Base):
         self.unit = unit
         self.ingredient = ingredient
 
-    def __eq__(self, other: RecipeIngredient) -> bool:
+    def __eq__(
+            self, 
+            other: object
+            ) -> bool:
         if not isinstance(other, RecipeIngredient):
             return False
-        if self.ingredient_id == other.ingredient_id and self.recipe_id == other.recipe_id:
-            return True
-        elif self.ingredient.id == other.ingredient.id and self.recipe_id == other.recipe_id:
-            return True
-        elif self.ingredient_id == other.ingredient_id and self.recipe.id == other.recipe.id:
-            return True
-        elif self.ingredient.id == other.ingredient.id and self.recipe.id == other.recipe.id:
-            return True
-        else:
-            return False
+        from model import Ingredient, Recipe
+        return self.ingredient == other.ingredient and self.recipe == other.recipe
+    
+    def __hash__(
+            self
+            ) -> int:
+        return hash((type(self), self.id))

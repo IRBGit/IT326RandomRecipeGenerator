@@ -7,6 +7,7 @@ from .pantry import PantryItem
 from .rating import Rating
 from .recipe_ingredient import RecipeIngredient
 from .recipe_notes import UserRecipeNote
+from .user_search import UserSearch
 
 __all__ = [
     "Base", 
@@ -16,5 +17,6 @@ __all__ = [
     "PantryItem", 
     "Rating",
     "RecipeIngredient",
-    "UserRecipeNote"
+    "UserRecipeNote",
+    "UserSearch"
 ]

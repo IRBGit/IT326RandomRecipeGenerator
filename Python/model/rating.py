@@ -31,17 +31,16 @@ class Rating(Base):
     def __repr__(self):
         return f"Rating(user_id = {self.user_id}, recipe_id = {self.recipe_id}, rating = {self.rating})>"
     
-    def __eq__(self, other: Rating) -> bool:
+    def __eq__(
+            self, 
+            other: object
+            ) -> bool:
         if not isinstance(other, Rating):
             return False
         from model import User, Recipe
-        if self.user_id == other.user_id and self.recipe_id == other.recipe_id:
-            return True
-        elif self.user.id == other.user.id and self.recipe_id == other.recipe_id:
-            return True
-        elif self.user_id == other.user_id and self.recipe.id == other.recipe.id:
-            return True
-        elif self.user.id == other.user.id and self.recipe.id == other.recipe.id:
-            return True
-        else:
-            return False
+        return self.user == other.user and self.recipe == other.recipe
+    
+    def __hash__(
+            self
+            ) -> int:
+        return hash((type(self), self.id))

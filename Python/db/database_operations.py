@@ -4,10 +4,11 @@
 
 from db.db_connect import DBConnect
 from db.unit_of_work import UnitOfWork
-from model import Ingredient, User, PantryItem, Recipe, user_favorites, RecipeIngredient, UserRecipeNote, Rating
+from model import Ingredient, User, PantryItem, Recipe, user_favorites, RecipeIngredient, UserRecipeNote, Rating, UserSearch
 import re
 from typing import Optional, List
 from sqlalchemy.orm import Session
+from sqlalchemy import Row
 
 class PantryService:
     """
@@ -446,7 +447,43 @@ class RecipeService:
         with UnitOfWork() as uow:
             recipes = uow.recipes.get_all()
             return recipes
-        
+    
+class SearchService:
+    """
+    A class to contain services related to searches.
+    """
+
+    def record_search(
+            self, 
+            user: User, 
+            query: str):
+        query = query.strip().lower()
+        with UnitOfWork() as uow:
+
+            search = UserSearch(
+                user_id = user.id if user else None,
+                query = query
+            )
+            
+            uow.searches.add(search)
+            uow.commit()
+    
+    def get_popular_searches(
+            self, 
+            limit: int = 10
+            ) -> list[Row[tuple[str, int]]]:
+        with UnitOfWork() as uow:
+            result = uow.searches.get_popular(limit = limit)
+            return result
+    
+    def get_recent_searches(
+            self,
+            limit: int = 50
+    ) -> list[UserSearch]:
+        with UnitOfWork() as uow:
+            result = uow.searches.get_recent(limit = limit)
+            return result
+
 class ServiceContainer:
     def __init__(self):
         self.db_connect = DBConnect()
@@ -455,6 +492,7 @@ class ServiceContainer:
         self._ingredient_service = IngredientService()
         self._pantry_service = PantryService()
         self._recipe_service = RecipeService()
+        self._search_service = SearchService()
 
     @property
     def user_service(self):
@@ -471,6 +509,10 @@ class ServiceContainer:
     @property
     def recipe_service(self):
         return self._recipe_service
+    
+    @property
+    def search_service(self):
+        return self._search_service
 
     #User Service
     def create_user(
@@ -641,6 +683,31 @@ class ServiceContainer:
         Retrieve all recipes from the database.
         """
         return self.recipe_service.get_all_recipes()
+    
+    # ==================== Searches ====================== #
+
+    def record_search(
+            self,
+            user: User, 
+            query: str
+    ):
+        self.search_service.record_search(user, query)
+
+    def get_popular_searches(
+            self,
+            limit: int
+    ) -> list[Row[tuple[str, int]]]:
+        """
+        Get the most popular searches.
+
+        Parameters:
+            limit(int): The number of items you want to return.
+        
+        Returns:
+            list(Row(tuple(str, int))): A list of rows that contain a tuple with the name and the count of the search terms.
+        """
+        return self.search_service.get_popular_searches(limit = limit)
+        
 
     # ==================== DB CONTROL ==================== #
 
@@ -660,3 +727,5 @@ class ServiceContainer:
         """
         from sqlalchemy.orm import Session
         self.db_connect.shutdown()
+
+    

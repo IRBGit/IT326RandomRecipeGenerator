@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from model import User, Recipe, Ingredient
+from model import User, Recipe, Ingredient, UserSearch
 
 class BaseRepository:
     def __init__(self, session: Session):
@@ -36,3 +36,29 @@ class IngredientRepository(BaseRepository):
     
     def get_by_name(self, name: str) -> Ingredient | None:
         return self.session.query(Ingredient).filter_by(name=name).first()
+    
+class SearchRepository(BaseRepository):
+    def get_by_id(self, search_id: int):
+        return self.session.get(UserSearch, search_id)
+    
+    def get_recent(self, limit: int = 50):
+        return(
+            self.session.query(UserSearch)
+            .order_by(UserSearch.timestamp.desc())
+            .limit(limit)
+            .all()
+        )
+    
+    def get_popular(self, limit: int = 10):
+        from sqlalchemy import func
+
+        return(
+            self.session.query(
+                UserSearch.query,
+                func.count(UserSearch.query).label("count")
+            )
+            .group_by(UserSearch.query)
+            .order_by(func.count(UserSearch.query).desc())
+            .limit(limit)
+            .all()
+        )

@@ -1,3 +1,4 @@
+from __future__ import annotations
 import json
 from sqlalchemy import Text, ForeignKey, Integer
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -49,6 +50,12 @@ class UserRecipeNote(Base):
     def notes(
         self
         ) -> list[str]:
+        """
+        Getter method for notes.
+
+        Returns:
+            A list of strings.
+        """
         if not self._notes_raw:
             return []
         return self._notes_raw.split("\n")
@@ -58,9 +65,30 @@ class UserRecipeNote(Base):
         self, 
         value: list[str]
         ):
+        """
+        Setter method for notes, converts a list of strings into a single string for storage into a single text block. 
+        Each string in the note will be seperated by '\\n' before storage
+        
+
+        """
+
         self._notes_raw = "\n".join(value) if value else ""
 
     def __repr__(
             self
             ):
         return f"<UserRecipeNote(user_id={self.user_id}, recipe_id={self.recipe_id})>"
+    
+    def __eq__(
+            self,
+            other: object
+    ) -> bool:
+        if not isinstance(other, UserRecipeNote):
+            return False
+        from model import User, Recipe
+        return self.recipe == other.recipe and self.user == other.user
+    
+    def __hash__(
+            self
+            ) -> int:
+        return hash((type(self), self.id))

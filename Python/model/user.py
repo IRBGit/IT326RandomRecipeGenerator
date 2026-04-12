@@ -23,21 +23,27 @@ if TYPE_CHECKING:
 class User(Base):
     __tablename__ = "users"
 
-    id: Mapped[int] = mapped_column(Integer, 
-                Sequence('user_id_seq'),
-                primary_key=True)
-    email: Mapped[str] = mapped_column(String(255), 
-                   unique=True, 
-                   nullable=False)
-    password: Mapped[str] = mapped_column(String(255), 
-                      nullable=False)
+    id: Mapped[int] = mapped_column(
+        Integer, 
+        Sequence('user_id_seq'),
+        primary_key=True
+        )
+    email: Mapped[str] = mapped_column(
+        String(255), 
+        unique=True, 
+        nullable=False
+        )
+    password: Mapped[str] = mapped_column(
+        String(255), 
+        nullable=False
+        )
 
     # Many-to-many relationship to Recipe
     favorites: Mapped[List["Recipe"]] = relationship(
         "Recipe",
         secondary=user_favorites,
         back_populates="favorited_by"
-    )
+        )
 
     _ratings: Mapped[dict["Recipe", "Rating"]] = relationship(
         "Rating", 
@@ -50,7 +56,7 @@ class User(Base):
     recipe_rating: AssociationProxy[dict["Recipe", int]] = association_proxy(
         "_ratings",
         "rating"
-    )
+        )
 
     pantry: AssociationProxy[
         dict[
@@ -214,12 +220,15 @@ class User(Base):
     def get_id(self) -> int:
         return self.id
     
-    def __eq__(self, other: User) -> bool:
+    def __eq__(
+            self, 
+            other: object
+            ) -> bool:
         if not isinstance(other, User):
             return False
-        if self.id == other.id:
-            return True
-        elif self.email == other.id:
-            return True
-        else:
-            return False
+        return self.id is not None and other.id is not None and self.id == other.id
+    
+    def __hash__(
+            self
+            ) -> int:
+        return hash((type(self), self.id))

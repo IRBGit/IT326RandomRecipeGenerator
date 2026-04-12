@@ -55,17 +55,16 @@ class PantryItem(Base):
     def __repr__(self):
         return f"<PantryItem(user_id={self.user_id}, ingredient_id={self.ingredient_id}, quantity={self.quantity}, unit='{self.unit}')>"
     
-    def __eq__(self, other: PantryItem) -> bool:
+    def __eq__(
+            self, 
+            other: object
+            ) -> bool:
         if not isinstance(other, PantryItem):
             return False
         from model import User, Ingredient
-        if self.ingredient_id == other.ingredient_id and self.user_id == other.user_id:
-            return True
-        elif self.user.id == other.user.id and self.ingredient_id == other.ingredient_id:
-            return True
-        elif self.ingredient.id == other.ingredient.id and self.user_id == other.user_id:
-            return True
-        elif self.ingredient.id == other.ingredient.id and self.user.id == other.user.id:
-            return True
-        else:
-            return False
+        return self.user == other.user and self.ingredient == other.ingredient
+    
+    def __hash__(
+            self
+            ) -> int:
+        return hash((type(self), self.id))

@@ -209,3 +209,16 @@ class Recipe(Base):
 
         return self._ingredients.pop(key)
     
+
+    def __eq__(
+            self, 
+            other: object
+            ) -> bool:
+        if not isinstance(other, Recipe):
+            return False
+        return self.id is not None and other.id is not None and self.id == other.id
+    
+    def __hash__(
+            self
+            ) -> int:
+        return hash((type(self), self.id))
