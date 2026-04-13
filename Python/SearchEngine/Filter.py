@@ -1,6 +1,11 @@
-"""
-    Authors: Thanvii Ambala and 
-"""
+# filter.py
+# This file contains the Filter class, which is used to filter a list of recipes
+# based on user preferences like cook time, calories, and dietary restrictions.
+# Tolu:
+# Clean ingredient names before comparing
+# Check blocked ingredients
+# Only keep recipes the pantry can make
+
 class Filter:
     """
     The Filter class stores a set of preferences/rules that can be applied
@@ -48,6 +53,17 @@ class Filter:
             return False
 
         return True  # All checks passed!
+    
+    # Tolu: clean one ingredient name
+    def _clean_name(self, value):
+        return str(value).strip().lower()
+
+    # Tolu: added to clean a whole ingredient list
+    def _clean_list(self, values):
+        cleaned = []
+        for value in values:
+            cleaned.append(self._clean_name(value))
+        return cleaned
 
     def matches(self, recipe: dict, pantry: list) -> bool:
         """
@@ -72,16 +88,20 @@ class Filter:
             return False
 
         # Check that none of the recipe's ingredients are blocked
-        recipe_ingredients = recipe.get("ingredients", [])
+        recipe_ingredients = self._clean_list(recipe.get("ingredients", []))
+        pantry_ingredients = self._clean_list(pantry)
+        blocked_ingredients = self._clean_list(self.blocked_ingredients)
+
+        
         for ingredient in recipe_ingredients:
-            if ingredient in self.blocked_ingredients:
-                return False  # This recipe contains a blocked ingredient
+            if ingredient in blocked_ingredients:
+                return False
 
         # If use_pantry_only is True, every ingredient must be in the pantry
         if self.use_pantry_only:
             for ingredient in recipe_ingredients:
-                if ingredient not in pantry:
-                    return False  # Missing an ingredient from the pantry
+                if ingredient not in pantry_ingredients:
+                    return False # Missing an ingredient from the pantry
 
         return True  # Recipe passed all checks!
 

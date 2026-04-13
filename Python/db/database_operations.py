@@ -4,10 +4,11 @@
 
 from db.db_connect import DBConnect
 from db.unit_of_work import UnitOfWork
-from model import Ingredient, User, PantryItem, Recipe, recipe_ingredients, user_favorites
+from model import Ingredient, User, PantryItem, Recipe
 import re
-from typing import Optional
+from typing import Optional, List
 from sqlalchemy.orm import Session
+from datetime import datetime
 
 class PantryService:
     """
@@ -351,7 +352,8 @@ class RecipeService:
             self,
             name:str,
             instructions: list[str],
-            ingredients: list[str]
+            ingredients: list[str],
+            pub_time: datetime
             ) -> Recipe | None:
         """
         Add a recipe to the database.
@@ -360,6 +362,7 @@ class RecipeService:
             name(str): Name of the recipe.
             instructions(str): Recipe instructions.
             ingredients(list(Ingredient)): List of ORM Ingredient objects.
+            pub_time(list(datetime)): List of time stamps.
 
         Returns:
             Recipe object if creation succeeded, else None
@@ -369,16 +372,18 @@ class RecipeService:
             if recipe:
                 return recipe
             
-            recipe = Recipe(name = name, instructions = instructions or [])
+            
             uow.recipes.add(recipe)
 
+            items: List[Ingredient] = []
             for ingredient in ingredients or []:
                 ing = uow.ingredients.get_by_name(ingredient)
                 if not ing:
                     ing = Ingredient(name = ingredient)
                     uow.ingredients.add(ing)
-                if ing not in recipe.ingredients:
-                    recipe.ingredients.append(ing)
+                items.append(ing)
+            
+            recipe = Recipe(name = name, ingredients = items, instructions = instructions or [], pub_time = pub_time)
 
             uow.commit()
             return recipe
@@ -467,10 +472,26 @@ class ServiceContainer:
     def __init__(self):
         self.db_connect = DBConnect()
 
-        self.user_service = UserService()
-        self.ingredient_service = IngredientService()
-        self.pantry_service = PantryService()
-        self.recipe_service = RecipeService()
+        self._user_service = UserService()
+        self._ingredient_service = IngredientService()
+        self._pantry_service = PantryService()
+        self._recipe_service = RecipeService()
+
+    @property
+    def user_service(self):
+        return self._user_service
+    
+    @property
+    def ingredient_service(self):
+        return self._ingredient_service
+    
+    @property
+    def pantry_service(self):
+        return self._pantry_service
+    
+    @property
+    def recipe_service(self):
+        return self._recipe_service
 
     #User Service
     def create_user(

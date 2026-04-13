@@ -137,6 +137,7 @@ class RecipeSearchEngine(SearchEngine):
                 "name": "Spaghetti Bolognese",
                 "category": "pasta",
                 "ingredients": ["spaghetti", "ground beef", "tomato sauce", "onion"],
+                "dietary_tags": [],
                 "cook_time": 40,
                 "calories": 550,
             },
@@ -145,6 +146,7 @@ class RecipeSearchEngine(SearchEngine):
                 "name": "Caesar Salad",
                 "category": "salad",
                 "ingredients": ["romaine lettuce", "croutons", "parmesan", "caesar dressing"],
+                "dietary_tags": ["vegetarian"],
                 "cook_time": 10,
                 "calories": 300,
             },
@@ -153,6 +155,7 @@ class RecipeSearchEngine(SearchEngine):
                 "name": "Chicken Stir-fry",
                 "category": "asian",
                 "ingredients": ["chicken", "broccoli", "soy sauce", "garlic"],
+                "dietary_tags": ["halal"],
                 "cook_time": 20,
                 "calories": 400,
             },
@@ -161,6 +164,7 @@ class RecipeSearchEngine(SearchEngine):
                 "name": "Veggie Pasta",
                 "category": "pasta",
                 "ingredients": ["penne", "zucchini", "bell pepper", "olive oil"],
+                "dietary_tags": ["vegetarian", "vegan"],
                 "cook_time": 25,
                 "calories": 380,
             },
@@ -169,6 +173,7 @@ class RecipeSearchEngine(SearchEngine):
                 "name": "Greek Salad",
                 "category": "salad",
                 "ingredients": ["cucumber", "tomato", "feta", "olives", "red onion"],
+                "dietary_tags": ["vegetarian", "gluten-free"],
                 "cook_time": 5,
                 "calories": 220,
             },
@@ -196,10 +201,58 @@ class RecipeSearchEngine(SearchEngine):
 
     def search_recipes_by_category(self, category: str) -> list:
         return [r for r in self._recipes if r["category"].lower() == category.lower()]
+    
+    #----------------------------------
+        # Tolu: search recipes using simple criteria
+    def search_recipes_by_criteria(self, include_ingredients: list, exclude_ingredients: list, category: str, dietary_tags: list) -> list:
+        results = []
+
+        for recipe in self._recipes:
+            recipe_ingredients = []
+            for ingredient in recipe["ingredients"]:
+                recipe_ingredients.append(ingredient.lower())
+
+            recipe_tags = []
+            for tag in recipe.get("dietary_tags", []):
+                recipe_tags.append(tag.lower())
+
+            matches = True
+
+            # Tolu: check ingredients the user wants included
+            for ingredient in include_ingredients:
+                if ingredient.lower() not in recipe_ingredients:
+                    matches = False
+
+            # Tolu: check ingredients the user does not want
+            for ingredient in exclude_ingredients:
+                if ingredient.lower() in recipe_ingredients:
+                    matches = False
+
+            # Tolu: check category if one was given
+            if category != "":
+                if recipe["category"].lower() != category.lower():
+                    matches = False
+
+            # Tolu: check dietary tags
+            for tag in dietary_tags:
+                if tag.lower() not in recipe_tags:
+                    matches = False
+
+            if matches:
+                results.append(recipe)
+
+        return results    
 
     def get_random_recipes(self, count: int) -> list:
         import random
         shuffled = self._recipes.copy()
+        random.shuffle(shuffled)
+        return shuffled[:count]
+    
+    # Alysa Solomon
+    def get_random_recipe_with_filter(self, count: int, pantry: list, recipe_filter: Filter) -> list:
+        import random
+        shuffled = self.search_with_filter(self._recipes.copy(), pantry, recipe_filter)
         random.shuffle(shuffled)
         return shuffled[:count]
 
@@ -211,28 +264,3 @@ class RecipeSearchEngine(SearchEngine):
         This reflects the dashed dependency arrow in the UML diagram.
         """
         return recipe_filter.apply(recipes, pantry) 
-
-    def offer_recipes_with_pantry(self, pantry: list) -> list:
-        """
-        Return recipes that can be made using ONLY the ingredients
-        available in the user's pantry.
-
-        Args:
-          pantry: list of ingredient names the user currently has
-
-        Returns:
-          List of recipes the user can make
-        """
-        matched_recipes = []
-
-        # Convert pantry to lowercase for comparison
-        pantry_items = [item.lower() for item in pantry]
-
-        for recipe in self._recipes:
-            recipe_ingredients = [ing.lower() for ing in recipe["ingredients"]]
-
-            # Check if ALL recipe ingredients exist in pantry
-            if all(ingredient in pantry_items for ingredient in recipe_ingredients):
-                matched_recipes.append(recipe)
-
-        return matched_recipes
