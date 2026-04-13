@@ -3,7 +3,7 @@
 """
 
 from abc import ABC, abstractmethod  # Built-in Python module for abstract classes
-from Filter import Filter            # We import Filter because it's used as a parameter type
+from .Filter import Filter           # We import Filter because it's used as a parameter type
 
 
 class SearchEngine(ABC):  # ABC = Abstract Base Class — acts like an <<Interface>>
@@ -264,3 +264,21 @@ class RecipeSearchEngine(SearchEngine):
         This reflects the dashed dependency arrow in the UML diagram.
         """
         return recipe_filter.apply(recipes, pantry) 
+    
+    def offer_recipes_with_pantry(self, pantry: list) -> list:
+        """
+        Return recipes that can be made using ONLY the ingredients
+        available in the user's pantry.
+        """
+        matched_recipes = []
+
+        pantry_items = [item["ingredient"].lower() for item in pantry]
+
+        for recipe in self._recipes:
+            recipe_ingredients = [ing.lower() for ing in recipe["ingredients"]]
+
+            if all(ingredient in pantry_items for ingredient in recipe_ingredients):
+                matched_recipes.append(recipe)
+
+        return matched_recipes
+ 
