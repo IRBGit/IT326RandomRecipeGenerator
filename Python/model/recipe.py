@@ -35,7 +35,9 @@ class Recipe(Base):
     # Alysa Solomon: published time should be added here, IDK how to add it
     # It should be able to store a big number, from reaserch DATETIME will probably be most helpful
     # additonally need to add quanity, still don't know how to add columns via code
-    published_time: Mapped[datetime] = mapped_column("published_time", DateTime, nullable=True)
+
+    # Tolu: removed for now, not in db table yet
+    # published_time: Mapped[datetime] = mapped_column("published_time", DateTime, nullable=True)
 
     # This relationship is automatically created via the backref in User and explicitly identified here.
     favorited_by: Mapped[List["User"]] = relationship(
@@ -44,10 +46,10 @@ class Recipe(Base):
         back_populates = "favorites")
 
     _ingredients: Mapped[dict["Ingredient", "RecipeIngredient"]] = relationship(
-        "Ingredient",
+        "RecipeIngredient",
         collection_class = attribute_mapped_collection("ingredient"),
         back_populates="recipe",
-        cascade = "all, delete-orphan"
+        cascade="all, delete-orphan"
     )
 
     recipe_ingredients: AssociationProxy[dict["Ingredient", "RecipeIngredient"]] = association_proxy(
@@ -90,7 +92,8 @@ class Recipe(Base):
         self.category = category
         self.tags = tags
         self.video = video
-        self.published_time = pub_time
+        # Tolu: removed for now, not in db table yet
+        # self.published_time = pub_time
 
     def __repr__(self):
         return f"<Recipe(id = {self.id}, name ='{self.name}')>"
@@ -160,4 +163,7 @@ class Recipe(Base):
     def get_name(self) -> str:
         return self.name
     
+    def get_id(self) -> int:
+        # Tolu: gets recipe id
+        return self.id
     

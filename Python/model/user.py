@@ -172,6 +172,27 @@ class User(Base):
             }
             for ing, item in self.pantry_items
             ]
+    #---------------------------- :lu favorites methods
+    def add_favorite_recipe(self, recipe: Recipe) -> bool:
+        # Tolu: adds recipe to favorites
+        if recipe in self.favorites:
+            return False
+        
+        self.favorites.append(recipe)
+        return True
     
+    def remove_favorite_recipe(self, recipe: Recipe) -> bool:
+        # Tolu: removes recipe from favorites
+        if recipe not in self.favorites:
+            return False
+        
+        self.favorites.remove(recipe)
+        return True
+    
+    def get_favorite_recipes(self) -> List["Recipe"]:
+        # Tolu: gets user's favorites
+        return self.favorites
+    #-------------------------------
+
     def get_id(self) -> int:
         return self.id

@@ -4,7 +4,7 @@
 
 from db.db_connect import DBConnect
 from db.unit_of_work import UnitOfWork
-from model import Ingredient, User, PantryItem, Recipe, recipe_ingredients, user_favorites
+from model import Ingredient, User, PantryItem, Recipe
 import re
 from typing import Optional, List
 from sqlalchemy.orm import Session
@@ -350,11 +350,12 @@ class RecipeService:
 
     def add_recipe(
             self,
-            name:str,
+            name: str,
             instructions: list[str],
             ingredients: list[str],
-            pub_time: list[datetime]
+            pub_time: Optional[datetime] = None
             ) -> Recipe | None:
+
         """
         Add a recipe to the database.
 
@@ -371,8 +372,6 @@ class RecipeService:
             if recipe:
                 return recipe
             
-            
-            uow.recipes.add(recipe)
 
             items: List[Ingredient] = []
             for ingredient in ingredients or []:
@@ -382,8 +381,9 @@ class RecipeService:
                     uow.ingredients.add(ing)
                 items.append(ing)
             
-            recipe = Recipe(name = name, ingredients = items, instructions = instructions or [])
+            recipe = Recipe(name=name, ingredients=items, instructions=instructions or [], pub_time=pub_time)
 
+            uow.recipes.add(recipe)
             uow.commit()
             return recipe
         
@@ -466,6 +466,70 @@ class RecipeService:
         with UnitOfWork() as uow:
             recipes = uow.recipes.get_all()
             return recipes
+    #----------------------- lu-Task: save to favorites/favorites methods
+
+    def add_recipe_to_favorites(
+            self,
+            user_id: int,
+            recipe_id: int
+            ) -> bool:
+        """
+        Add a recipe to a user's favorites.
+        """
+        with UnitOfWork() as uow:
+            user = uow.users.get_by_id(user_id)
+            if not user:
+                raise ValueError("User not found")
+            
+            recipe = uow.recipes.get_by_id(recipe_id)
+            if not recipe:
+                raise ValueError("Recipe not found")
+            
+            added = user.add_favorite_recipe(recipe)
+
+            if added:
+                uow.commit()
+
+            return added
+    
+    def remove_recipe_from_favorites(
+            self,
+            user_id: int,
+            recipe_id: int
+            ) -> bool:
+        """
+        Remove a recipe from a user's favorites.
+        """
+        with UnitOfWork() as uow:
+            user = uow.users.get_by_id(user_id)
+            if not user:
+                raise ValueError("User not found")
+            
+            recipe = uow.recipes.get_by_id(recipe_id)
+            if not recipe:
+                raise ValueError("Recipe not found")
+            
+            removed = user.remove_favorite_recipe(recipe)
+
+            if removed:
+                uow.commit()
+
+            return removed
+    
+    def get_user_favorites(
+            self,
+            user_id: int
+            ) -> list[Recipe]:
+        """
+        Get all favorite recipes for a user.
+        """
+        with UnitOfWork() as uow:
+            user = uow.users.get_by_id(user_id)
+            if not user:
+                raise ValueError("User not found")
+            
+            return user.get_favorite_recipes()
+    #-------------------
         
 class ServiceContainer:
     def __init__(self):
@@ -661,6 +725,29 @@ class ServiceContainer:
         Retrieve all recipes from the database.
         """
         return self.recipe_service.get_all_recipes()
+
+    #---------------- lu: STF Block | favorites container methods
+    def add_recipe_to_favorites(
+            self,
+            user_id: int,
+            recipe_id: int
+            ) -> bool:
+        return self.recipe_service.add_recipe_to_favorites(user_id, recipe_id)
+    
+    def remove_recipe_from_favorites(
+            self,
+            user_id: int,
+            recipe_id: int
+            ) -> bool:
+        return self.recipe_service.remove_recipe_from_favorites(user_id, recipe_id)
+    
+    def get_user_favorites(
+            self,
+            user_id: int
+            ) -> list[Recipe]:
+        return self.recipe_service.get_user_favorites(user_id)
+    #----------
+
 
     # ==================== DB CONTROL ==================== #
 
