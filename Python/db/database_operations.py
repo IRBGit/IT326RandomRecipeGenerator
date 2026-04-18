@@ -363,6 +363,7 @@ class RecipeService:
             name(str): Name of the recipe.
             instructions(str): Recipe instructions.
             ingredients(list(Ingredient)): List of ORM Ingredient objects.
+            pub_time(list(datetime)): List of time stamps.
 
         Returns:
             Recipe object if creation succeeded, else None
