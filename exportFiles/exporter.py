@@ -1,7 +1,7 @@
 from json2pdf_converter import generate
 import json2pdf_converter
 import json
-import os
+
 from pathlib import Path
 import shutil
 
@@ -38,20 +38,33 @@ def search_recipe(recipe_name: str) -> dict | None:
 def ensure_wkhtmltopdf_available() -> None:
     package_dir = Path(json2pdf_converter.__file__).resolve().parent
     expected_bin_dir = package_dir / 'wkhtmltopdf' / 'bin'
-    expected_exe = expected_bin_dir / 'wkhtmltopdf.exe'
+    executable_name = 'wkhtmltopdf.exe' if os.name == 'nt' else 'wkhtmltopdf'
+    image_executable_name = 'wkhtmltoimage.exe' if os.name == 'nt' else 'wkhtmltoimage'
+    expected_exe = expected_bin_dir / executable_name
 
     if expected_exe.exists():
         return
 
-    installed_bin_dir = Path('C:/Program Files/wkhtmltopdf/bin')
-    installed_exe = installed_bin_dir / 'wkhtmltopdf.exe'
-    if not installed_exe.exists():
+    installed_exe_path = (
+        os.environ.get('WKHTMLTOPDF_BIN')
+        or os.environ.get('WKHTMLTOPDF_PATH')
+        or shutil.which(executable_name)
+        or shutil.which('wkhtmltopdf')
+    )
+    if not installed_exe_path:
         raise FileNotFoundError(
-            'wkhtmltopdf.exe is not installed. Install wkhtmltopdf and rerun exporter.'
+            f'{executable_name} is not installed or not available on PATH. '
+            'Install wkhtmltopdf, or set WKHTMLTOPDF_BIN/WKHTMLTOPDF_PATH, and rerun exporter.'
         )
 
+    installed_bin_dir = Path(installed_exe_path).resolve().parent
+
     expected_bin_dir.mkdir(parents=True, exist_ok=True)
-    for binary_name in ('wkhtmltopdf.exe', 'wkhtmltoimage.exe', 'wkhtmltox.dll'):
+    binary_names = [executable_name, image_executable_name]
+    if os.name == 'nt':
+        binary_names.append('wkhtmltox.dll')
+
+    for binary_name in binary_names:
         src = installed_bin_dir / binary_name
         if src.exists():
             shutil.copy2(src, expected_bin_dir / binary_name)
@@ -91,20 +104,26 @@ options = {
 }
 
 data_variables = {
-    "data": data
-}
-template_directory = project_root / 'exportFiles'
-template_name = "recipeExportTemplate.html"
+# Create a temporary JSON file so json_file_path always points to a real file.
+temp_json_path = Path(output_dir) / '_generate_input.json'
 
-# Create a safe filename from the recipe name
-safe_recipe_name = "".join(c for c in recipe.get('strMeal', 'recipe') if c.isalnum() or c in (' ', '_', '-')).rstrip()
+with open(temp_json_path, 'w', encoding='utf-8') as temp_json_file:
+    json.dump(data, temp_json_file, ensure_ascii=False)
 
-# Directories for output (library expects directories, not full paths)
-output_dir = str(project_root / 'exportFiles')
-
-print(f"Generating PDF: {safe_recipe_name}.pdf")
-
-# Note: json_file_path is passed to generate() but we're using data_variables instead
+try:
+    generate(
+        json_file_path=str(temp_json_path),
+        template_directory_path=str(template_directory),
+        output_html_path=output_dir,
+        output_pdf_path=output_dir,
+        options=options,
+        template_name=template_name,
+        data_variables=data_variables,
+        custom_filter_functions=[]
+    )
+finally:
+    if temp_json_path.exists():
+        temp_json_path.unlink()
 dummy_json_path = project_root / 'JSON_Recipes' / 'a_recipes.json'
 
 generate(
@@ -112,17 +131,22 @@ generate(
     template_directory_path=str(template_directory),
     output_html_path=output_dir,
     output_pdf_path=output_dir,
-    options=options,
-    template_name=template_name,
-    data_variables=data_variables,
-    custom_filter_functions=[]
-)
+# Move HTML file, replacing any existing file with the same recipe name
+if output_html_file.exists():
+    output_html_file.replace(final_html_file)
+    print(f"HTML created: {final_html_file}")
+else:
+    print(f"Warning: HTML file not found at {output_html_file}")
 
-# Rename the generated files to use the recipe name
-# HTML file is created in the root output directory, move it to html/
-output_html_file = Path(output_dir) / 'output.html'
-html_dir = Path(output_dir) / 'html'
-html_dir.mkdir(exist_ok=True)
+# Rename PDF file
+if output_pdf_file.exists():
+    output_pdf_file.replace(final_pdf_file)
+if output_pdf_file.exists():
+    if final_pdf_file.exists():
+        final_pdf_file.unlink()
+    shutil.move(str(output_pdf_file), str(final_pdf_file))
+if final_pdf_file.exists():
+    print(f"\nPDF successfully created at: {final_pdf_file}")
 final_html_file = html_dir / f'{safe_recipe_name}.html'
 
 # PDF file is created in the pdf subdirectory
