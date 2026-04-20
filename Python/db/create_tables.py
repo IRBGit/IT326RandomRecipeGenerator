@@ -1,4 +1,4 @@
-from model import User, Ingredient, PantryItem, Recipe, user_favorites, RecipeIngredient, UserRecipeNote, Rating
+from model import User, Ingredient, PantryItem, Recipe, user_favorites, RecipeIngredient, UserRecipeNote, Rating, UserSearch, UserRecipeNote
 from db.db_connect import DBConnect
 
 # THIS WILL ONLY CREATE NEW TABLES!!! IT WILL NOT UPDATE EXISTING TABLES!
