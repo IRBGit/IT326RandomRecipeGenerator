@@ -1,7 +1,7 @@
 from json2pdf_converter import generate
 import json2pdf_converter
 import json
-
+import os
 from pathlib import Path
 import shutil
 
@@ -104,26 +104,20 @@ options = {
 }
 
 data_variables = {
-# Create a temporary JSON file so json_file_path always points to a real file.
-temp_json_path = Path(output_dir) / '_generate_input.json'
+    "data": data
+}
+template_directory = project_root / 'exportFiles'
+template_name = "recipeExportTemplate.html"
 
-with open(temp_json_path, 'w', encoding='utf-8') as temp_json_file:
-    json.dump(data, temp_json_file, ensure_ascii=False)
+# Create a safe filename from the recipe name
+safe_recipe_name = "".join(c for c in recipe.get('strMeal', 'recipe') if c.isalnum() or c in (' ', '_', '-')).rstrip()
 
-try:
-    generate(
-        json_file_path=str(temp_json_path),
-        template_directory_path=str(template_directory),
-        output_html_path=output_dir,
-        output_pdf_path=output_dir,
-        options=options,
-        template_name=template_name,
-        data_variables=data_variables,
-        custom_filter_functions=[]
-    )
-finally:
-    if temp_json_path.exists():
-        temp_json_path.unlink()
+# Directories for output (library expects directories, not full paths)
+output_dir = str(project_root / 'exportFiles')
+
+print(f"Generating PDF: {safe_recipe_name}.pdf")
+
+# Note: json_file_path is passed to generate() but we're using data_variables instead
 dummy_json_path = project_root / 'JSON_Recipes' / 'a_recipes.json'
 
 generate(
@@ -131,22 +125,17 @@ generate(
     template_directory_path=str(template_directory),
     output_html_path=output_dir,
     output_pdf_path=output_dir,
-# Move HTML file, replacing any existing file with the same recipe name
-if output_html_file.exists():
-    output_html_file.replace(final_html_file)
-    print(f"HTML created: {final_html_file}")
-else:
-    print(f"Warning: HTML file not found at {output_html_file}")
+    options=options,
+    template_name=template_name,
+    data_variables=data_variables,
+    custom_filter_functions=[]
+)
 
-# Rename PDF file
-if output_pdf_file.exists():
-    output_pdf_file.replace(final_pdf_file)
-if output_pdf_file.exists():
-    if final_pdf_file.exists():
-        final_pdf_file.unlink()
-    shutil.move(str(output_pdf_file), str(final_pdf_file))
-if final_pdf_file.exists():
-    print(f"\nPDF successfully created at: {final_pdf_file}")
+# Rename the generated files to use the recipe name
+# HTML file is created in the root output directory, move it to html/
+output_html_file = Path(output_dir) / 'output.html'
+html_dir = Path(output_dir) / 'html'
+html_dir.mkdir(exist_ok=True)
 final_html_file = html_dir / f'{safe_recipe_name}.html'
 
 # PDF file is created in the pdf subdirectory
@@ -155,16 +144,20 @@ pdf_dir = Path(output_dir) / 'pdf'
 pdf_dir.mkdir(exist_ok=True)
 final_pdf_file = pdf_dir / f'{safe_recipe_name}.pdf'
 
-# Rename HTML file
+# Move HTML file
 if output_html_file.exists():
-    output_html_file.rename(final_html_file)
+    if final_html_file.exists():
+        final_html_file.unlink()
+    output_html_file.replace(final_html_file)
     print(f"HTML created: {final_html_file}")
 else:
     print(f"Warning: HTML file not found at {output_html_file}")
 
-# Rename PDF file
+# Move PDF file
 if output_pdf_file.exists():
-    output_pdf_file.rename(final_pdf_file)
+    if final_pdf_file.exists():
+        final_pdf_file.unlink()
+    output_pdf_file.replace(final_pdf_file)
     print(f"PDF created: {final_pdf_file}")
 else:
     print(f"Warning: PDF file not found at {output_pdf_file}")
