@@ -1,5 +1,5 @@
 """
-    Author: Jon Bailey
+    Author: Jon Bailey and Thanvi Ambala
 """
 
 from __future__ import annotations
@@ -84,7 +84,7 @@ class User(Base):
         
 
     def check_password(self, toCheck: str) -> bool:
-        return PWHash().verify(hash = self.password, password = toCheck)
+        return PWHash().verify(self.password, toCheck)
 
     def __repr__(self):
         return f"<User(id={self.id}, email='{self.email}')>"
@@ -175,3 +175,9 @@ class User(Base):
     
     def get_id(self) -> int:
         return self.id
+    
+    def delete_account(self):
+        print("Deleting user account...")
+
+    def reset_password(self, new_password: str):
+        self.password = PWHash().hashPassword(new_password)

@@ -4,10 +4,11 @@
 
 from db.db_connect import DBConnect
 from db.unit_of_work import UnitOfWork
-from model import Ingredient, User, PantryItem, Recipe, recipe_ingredients, user_favorites
+from model import Ingredient, User, PantryItem, Recipe
 import re
 from typing import Optional, List
 from sqlalchemy.orm import Session
+from datetime import datetime
 
 class PantryService:
     """
@@ -351,7 +352,8 @@ class RecipeService:
             self,
             name:str,
             instructions: list[str],
-            ingredients: list[str]
+            ingredients: list[str],
+            pub_time: datetime
             ) -> Recipe | None:
         """
         Add a recipe to the database.
@@ -360,6 +362,7 @@ class RecipeService:
             name(str): Name of the recipe.
             instructions(str): Recipe instructions.
             ingredients(list(Ingredient)): List of ORM Ingredient objects.
+            pub_time(list(datetime)): List of time stamps.
 
         Returns:
             Recipe object if creation succeeded, else None
@@ -380,7 +383,7 @@ class RecipeService:
                     uow.ingredients.add(ing)
                 items.append(ing)
             
-            recipe = Recipe(name = name, ingredients = items, instructions = instructions or [])
+            recipe = Recipe(name = name, ingredients = items, instructions = instructions or [], pub_time = pub_time)
 
             uow.commit()
             return recipe
