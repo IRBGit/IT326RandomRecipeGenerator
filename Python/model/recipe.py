@@ -35,7 +35,7 @@ class Recipe(Base):
     # Alysa Solomon: published time should be added here, IDK how to add it
     # It should be able to store a big number, from reaserch DATETIME will probably be most helpful
     # additonally need to add quanity, still don't know how to add columns via code
-    published_time: Mapped[datetime] = mapped_column("published_time", DateTime, nullable=True)
+    published_time: Mapped[Optional[datetime]] = mapped_column("published_time", DateTime, nullable=True)
 
     # This relationship is automatically created via the backref in User and explicitly identified here.
     favorited_by: Mapped[List["User"]] = relationship(

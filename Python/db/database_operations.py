@@ -170,12 +170,12 @@ class UserService:
             password: str
             ) -> Optional[User]:
         with UnitOfWork() as uow:
+            if not self.validate_password(password):
+                raise ValueError("User password is not strong enough")
+            
             if uow.users.get_by_email(email):
                 raise ValueError("User already exists.")
             
-            if not self.validate_password(password):
-                raise ValueError("User password is not strong enough")
-
             user = User(email = email, password = password)
 
             uow.users.add(user)
@@ -347,7 +347,8 @@ class RecipeService:
 
             recipe = Recipe(
                 name=name, 
-                instructions=instructions or []
+                instructions=instructions or [],
+                ingredients = []
                 )
             uow.recipes.add(recipe)
 
