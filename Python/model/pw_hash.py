@@ -1,8 +1,9 @@
 """
-    Author: Jon Bailey
+    Author: Jon Bailey and Thanvi Ambala
 """
 
 from argon2 import PasswordHasher
+from argon2.exceptions import VerifyMismatchError
 
 class PWHash:
     """
@@ -17,15 +18,11 @@ class PWHash:
     
     def hashPassword(self, password) -> str:
         """
-        A method to hash a password into a hashstring to be stored in the database.
-
-        Args:
-            password(str): A password that you want to turn into a hash string.
+        Hash a password to store in the database.
         """
-        hash = self.ph.hash(password)
-        return hash
+        return self.ph.hash(password)
     
-    def verify(self, hash, password) -> bool:
+    def verify(self, hashed_password: str, password: str) -> bool:
         """
         A method that returns true or false based on it matching the stored hash from the database.
 
@@ -37,10 +34,11 @@ class PWHash:
             verified(bool): Returns True if the password matches the hash. Returns False if the password does not match the hash.
         """
         try:
-            self.ph.verify(hash, password)
-            return True
-        except:
+            return self.ph.verify(hashed_password, password)
+
+        except VerifyMismatchError:
             return False
+        
     
 
             

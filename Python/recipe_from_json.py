@@ -38,11 +38,12 @@ def import_recipes_from_json(file_path):
                     ingredient_names.append(ing_item)
                     quantity_list.append(qua_item)
                     
-
             time_stamp_str = entry.get("dateModified")
             # 2025-11-16 01:49:18
             if (time_stamp_str != None):
                 time_stamp = datetime.datetime.strptime(time_stamp_str,"%Y-%m-%d %H:%M:%S")
+
+            print("Variables Created")
 
             try:
                 # 3. Use ServiceContainer to add the recipe

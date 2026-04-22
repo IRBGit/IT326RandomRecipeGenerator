@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recipe</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f5f5f5;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 40px;
+        }
+
+        .recipe-header {
+            text-align: center;
+            margin-bottom: 40px;
+            border-bottom: 3px solid #e74c3c;
+            padding-bottom: 30px;
+        }
+
+        .recipe-title {
+            font-size: 42px;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+
+        .recipe-meta {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            flex-wrap: wrap;
+            font-size: 14px;
+            color: #666;
+            margin-top: 10px;
+        }
+
+        .meta-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .meta-label {
+            font-weight: bold;
+            color: #e74c3c;
+            font-size: 12px;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+        }
+
+        .recipe-image {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .recipe-image img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            max-height: 400px;
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+
+        .section {
+            break-inside: avoid;
+        }
+
+        .section-title {
+            font-size: 24px;
+            font-weight: bold;
+            color: #2c3e50;
+            border-bottom: 2px solid #e74c3c;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        .ingredients-list {
+            list-style: none;
+        }
+
+        .ingredients-list li {
+            padding: 8px 0;
+            border-bottom: 1px solid #ecf0f1;
+            font-size: 14px;
+        }
+
+        .ingredients-list li:last-child {
+            border-bottom: none;
+        }
+
+        .ingredient-name {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .ingredient-measure {
+            color: #7f8c8d;
+            font-size: 13px;
+            margin-left: 10px;
+        }
+
+        .instructions {
+            line-height: 1.8;
+            font-size: 14px;
+            color: #444;
+            text-align: justify;
+        }
+
+        .instructions p {
+            margin-bottom: 15px;
+        }
+
+        .source-section {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #ecf0f1;
+            font-size: 12px;
+            color: #7f8c8d;
+        }
+
+        .source-label {
+            font-weight: bold;
+            color: #e74c3c;
+            text-transform: uppercase;
+            font-size: 11px;
+            margin-bottom: 5px;
+        }
+
+        .source-url {
+            word-break: break-all;
+            color: #3498db;
+        }
+
+        .youtube-section {
+            margin-top: 20px;
+        }
+
+        .youtube-label {
+            font-weight: bold;
+            color: #e74c3c;
+            text-transform: uppercase;
+            font-size: 11px;
+            margin-bottom: 5px;
+        }
+
+        .youtube-url {
+            word-break: break-all;
+            color: #e74c3c;
+        }
+
+        .tags {
+            margin-top: 20px;
+        }
+
+        .tags-label {
+            font-weight: bold;
+            color: #e74c3c;
+            text-transform: uppercase;
+            font-size: 11px;
+            margin-bottom: 8px;
+        }
+
+        .tag {
+            display: inline-block;
+            background-color: #ecf0f1;
+            color: #2c3e50;
+            padding: 4px 10px;
+            border-radius: 12px;
+            margin-right: 8px;
+            margin-bottom: 8px;
+            font-size: 12px;
+        }
+
+        @media (max-width: 768px) {
+            .content-grid {
+                grid-template-columns: 1fr;
+                gap: 30px;
+            }
+
+            .recipe-title {
+                font-size: 28px;
+            }
+
+            .recipe-meta {
+                gap: 15px;
+            }
+        }
+
+        @media print {
+            body {
+                background-color: white;
+            }
+
+            .container {
+                padding: 20px;
+                box-shadow: none;
+            }
+
+            .recipe-image img {
+                max-height: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        
+        <div class="recipe-header">
+            <h1 class="recipe-title">Adana kebab</h1>
+            <div class="recipe-meta">
+                
+                <div class="meta-item">
+                    <span class="meta-label">Category</span>
+                    <span>Lamb</span>
+                </div>
+                
+                
+                <div class="meta-item">
+                    <span class="meta-label">Cuisine</span>
+                    <span>Turkish</span>
+                </div>
+                
+            </div>
+        </div>
+
+        
+        <div class="recipe-image">
+            <img src="https://www.themealdb.com/images/media/meals/04axct1763793018.jpg" alt="Adana kebab">
+        </div>
+        
+
+        <div class="content-grid">
+            <!-- Ingredients Section -->
+            <div class="section">
+                <h2 class="section-title">Ingredients</h2>
+                <ul class="ingredients-list">
+                    
+                        
+                        <li>
+                            <span class="ingredient-name">Romano Pepper</span>
+                            <span class="ingredient-measure">2 large</span>
+                        </li>
+                        
+                    
+                        
+                        <li>
+                            <span class="ingredient-name">Lamb Mince</span>
+                            <span class="ingredient-measure">800g</span>
+                        </li>
+                        
+                    
+                        
+                        <li>
+                            <span class="ingredient-name">Red Pepper Paste</span>
+                            <span class="ingredient-measure">3  tablespoons</span>
+                        </li>
+                        
+                    
+                        
+                        <li>
+                            <span class="ingredient-name">Pul Biber</span>
+                            <span class="ingredient-measure">1 tablespoon</span>
+                        </li>
+                        
+                    
+                        
+                        <li>
+                            <span class="ingredient-name">Sunflower Oil</span>
+                            <span class="ingredient-measure">3  tablespoons</span>
+                        </li>
+                        
+                    
+                        
+                    
+                        
+                    
+                        
+                    
+                        
+                    
+                        
+                    
+                        
+                    
+                        
+                    
+                        
+                    
+                        
+                    
+                        
+                    
+                        
+                    
+                        
+                    
+                        
+                    
+                        
+                    
+                        
+                    
+                </ul>
+            </div>
+
+            <!-- Instructions Section -->
+            <div class="section">
+                <h2 class="section-title">Instructions</h2>
+                <div class="instructions">
+                    
+                    <p>step 1</p><p>Finely chop the peppers in a food processor, then tip them in a sieve and press into the sieve so that the peppers release all of their juices. Tip into a bowl along with the mince, red pepper paste, pul biber, 1½ tsp flaky sea salt, and 2 tbsp of the oil. Mix together, kneading well for at least 2-3 mins. If you need to, wet your hands with cold water to prevent the mixture from sticking. The mixture should be sticky when ready. Cover and chill for at least 2 hrs, or up to 12 hrs.</p><p></p><p>step 2</p><p>When ready to cook, heat the grill to high or an oven to 220C/200C fan/gas 6. Divide the mixture into 12 equal portions, around 85g each. If you’d like to skewer them, divide into 8 equal portions and roll into balls. Using wet hands, thread the balls onto the end of the skewers, massaging the mixture down the skewers in between the palms of your hands, until evenly distributed. Ensure that the mixture is fully wrapped tightly around the skewers without any exposed metal. Alternatively, lay them on a large baking tray lined with parchment paper if cooking in the oven, or foil if cooking under the grill. Shape into 20cm-long köfte. Wet your fingers with a little cold water and make indents all along the köfte for the traditional shape.</p><p></p><p>step 3</p><p>Gently brush each köfte with the remaining 1 tbsp oil and cook under the grill, on the top shelf for 10-12 mins, turning regularly, or cook in the oven for 16-18 mins, until crispy on the outside and juicy in the middle</p>
+                    
+                </div>
+            </div>
+        </div>
+
+        <!-- Additional Information Footer -->
+        <div class="source-section">
+            
+
+            
+            <div style="margin-top: 15px;">
+                <div class="source-label">Recipe Source</div>
+                <div class="source-url">https://www.bbcgoodfood.com/recipes/adana-kebab</div>
+            </div>
+            
+
+            
+            <div class="youtube-section">
+                <div class="youtube-label">Video Tutorial</div>
+                <div class="youtube-url">https://www.youtube.com/watch?v=Wj7sXu9B_ME</div>
+            </div>
+            
+        </div>
+        
+    </div>
+</body>
+</html>
