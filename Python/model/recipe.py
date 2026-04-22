@@ -35,7 +35,7 @@ class Recipe(Base):
     # Alysa Solomon: published time should be added here, IDK how to add it
     # It should be able to store a big number, from reaserch DATETIME will probably be most helpful
     # additonally need to add quanity, still don't know how to add columns via code
-    published_time: Mapped[datetime] = mapped_column("published_time", DateTime, nullable=True)
+    published_time: Mapped[Optional[datetime]] = mapped_column("published_time", DateTime, nullable=True)
 
     # This relationship is automatically created via the backref in User and explicitly identified here.
     favorited_by: Mapped[List["User"]] = relationship(
@@ -43,9 +43,11 @@ class Recipe(Base):
         secondary = user_favorites, 
         back_populates = "favorites")
 
-    _ingredients: Mapped[dict["Ingredient", "RecipeIngredient"]] = relationship(
-        "Ingredient",
-        collection_class = attribute_mapped_collection("ingredient"),
+    _ingredients: Mapped[dict[int, "RecipeIngredient"]] = relationship(
+        "RecipeIngredient",
+        collection_class = attribute_mapped_collection(
+            "ingredient_id"
+            ),
         back_populates="recipe",
         cascade = "all, delete-orphan"
     )
@@ -85,7 +87,7 @@ class Recipe(Base):
         self.name = name
         self.category = None
         self.area = None
-        self.ingredients = ingredients or [] # for now, including all variables, change later
+        # self.ingredients = ingredients or [] # for now, including all variables, change later
         self.instructions = instructions or []
         self.category = category
         self.tags = tags
@@ -160,4 +162,68 @@ class Recipe(Base):
     def get_name(self) -> str:
         return self.name
     
+    def add_ingredient(
+            self, 
+            ingredient: Ingredient, 
+            quantity: Optional[float] = None, 
+            unit: Optional[str] = None
+    ) -> "RecipeIngredient" :
+        from model import RecipeIngredient
+
+        if ingredient.id is None:
+            raise ValueError("Ingredient must be presisted (have an id from the database)")
+        
+        key = ingredient.id
+
+        if key in self._ingredients:
+            assoc = self._ingredients[key]
+            if quantity is not None and quantity <= 0:
+                raise ValueError("Quantity must be greater than 0")
+            if unit is not None and quantity is None:
+                raise ValueError("Unit cannot be set without a quantity")
+            
+            assoc.unit = unit
+            assoc.quantity = quantity
+            return assoc
+        
+        assoc = RecipeIngredient(
+            ingredient = ingredient,
+            quantity = quantity,
+            unit = unit
+        )
+        self._ingredients[ingredient] = assoc
+        return assoc
     
+    def remove_ingredient(
+            self,
+            ingredient: "Ingredient"
+    ) -> "RecipeIngredient | None":
+        """
+        Remove an ingredient from the recipe.
+
+        Returns:
+            The removed RecipeIngredient or None if it wasn't present.
+        """
+        if ingredient.id is None:
+            raise ValueError("Ingredient must have an id")
+        
+        key = ingredient.id
+
+        if key not in self._ingredients:
+            raise KeyError(f"{ingredient} not in recipe.")
+
+        return self._ingredients.pop(key)
+    
+
+    def __eq__(
+            self, 
+            other: object
+            ) -> bool:
+        if not isinstance(other, Recipe):
+            return False
+        return self.id is not None and other.id is not None and self.id == other.id
+    
+    def __hash__(
+            self
+            ) -> int:
+        return hash((type(self), self.id))
