@@ -9,6 +9,7 @@ import re
 from typing import Optional, List
 from sqlalchemy.orm import Session
 from sqlalchemy import Row
+from datetime import datetime
 
 class PantryService:
     """
@@ -382,7 +383,8 @@ class RecipeService:
         self,
         name: str,
         instructions: Optional[List[str]] = None,
-        ingredients: Optional[List[dict]] = None
+        ingredients: Optional[list[str]] = None,
+        pub_time: Optional[datetime] = None
     ) -> Recipe:
         """
         ingredients format:
@@ -400,23 +402,26 @@ class RecipeService:
             recipe = Recipe(
                 name=name, 
                 instructions=instructions or [],
-                ingredients = []
+                ingredients = [],
+                pub_time = pub_time
                 )
             uow.recipes.add(recipe)
 
-            for item in ingredients or []:
-                ingredient = uow.ingredients.get_by_name(item["name"])
+            if ingredients is None:
+                uow.commit()
+                return recipe
+            
+
+            for ing_name in ingredients:
+                ingredient = uow.ingredients.get_by_name(ing_name)
+
                 if not ingredient:
-                    ingredient = Ingredient(name=item["name"])
+                    ingredient = Ingredient(name=ing_name)
                     uow.ingredients.add(ingredient)
                     if uow.session is not None:
                         uow.session.flush()
 
-                recipe.add_ingredient(
-                    ingredient,
-                    item.get("quantity"),
-                    item.get("unit")
-                )
+                recipe.add_ingredient(ingredient)
 
             uow.commit()
             return recipe
@@ -704,17 +709,15 @@ class ServiceContainer:
             self,
             name: str,
             instructions: list[str],
-            ingredients: Optional[list[Ingredient]] = None
+            ingredients: Optional[list[str]] = None,
+            pub_time: Optional[datetime] = None
     ) -> Recipe | None:
-        ingredient_list = []
-        if ingredients:
-            for ingredient in ingredients:
-                ingredient_list.append(ingredient.get_name())
 
         recipe = self.recipe_service.add_recipe(
             name, 
             instructions,
-            ingredient_list
+            ingredients = ingredients,
+            pub_time = pub_time
         )
         if recipe is None:
             raise RuntimeError("Failed to create Recipe")

@@ -16,11 +16,6 @@ class UserSearch(Base):
         primary_key=True
     )
 
-    user_id: Mapped[int] = mapped_column(
-        ForeignKey("users.id"),
-        nullable = True
-    )
-
     query: Mapped[str] = mapped_column(
         String(255), 
         nullable = False
@@ -31,5 +26,3 @@ class UserSearch(Base):
         server_default = func.now(),
         nullable = False
     )
-
-    user = relationship("User", back_populates = "searches")
