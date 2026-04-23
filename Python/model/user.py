@@ -232,6 +232,44 @@ class User(Base):
             self
             ) -> int:
         return hash((type(self), self.id))
+    
+    def add_note(
+            self, 
+            recipe: "Recipe", 
+            note: str
+        ) -> list[str]:
+        if recipe in self.notes:
+            notes = self.notes[recipe]
+            notes.append(note)
+            self.notes[recipe] = notes
+        else:
+            self.notes[recipe] = [note]
+
+        return self.notes[recipe]
+    
+    def remove_note(
+            self, recipe: "Recipe",
+            note: str
+    ) -> list[str]:
+        """
+        Remove a specific note for a given recipe.
+
+        Returns:
+            Updated list of notes.
+        """
+        if recipe not in self.notes:
+            raise KeyError("No notes found for this recipe")
+        
+        notes_list = self.notes[recipe]
+
+        if note not in notes_list:
+            raise ValueError("Note not found")
+        
+        notes_list.remove(note)
+
+        self.notes[recipe] = notes_list
+
+        return notes_list
     def delete_account(self):
         print("Deleting user account...")
 
