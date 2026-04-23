@@ -10,6 +10,7 @@ def import_recipes_from_json(file_path):
         print(f"Error: {file_path} not found.")
         return
 
+
     try:
         with open(file_path, 'r', encoding='utf-8') as f:
             data = json.load(f)
@@ -69,4 +70,6 @@ def import_recipes_from_json(file_path):
 
 if __name__ == "__main__":
     # Ensure this matches your JSON filename
+
     import_recipes_from_json('Python\\theMealDB_A.json')
+    # recipe_list = ["a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","Z","0","1","2","3","4","5","6","7","8","9"]
