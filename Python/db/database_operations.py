@@ -216,6 +216,58 @@ class UserService:
             
             return user
 
+    def add_personal_note(
+            self,
+            user: User,
+            recipe: Recipe,
+            note: str
+    ) -> list[str]:
+        with UnitOfWork() as uow:
+            db_user = uow.users.get_by_id(user.id)
+            db_recipe = uow.recipes.get_by_id(recipe.id)
+
+            if db_user is None:
+                raise ValueError("Could not find User")
+            
+            if db_recipe is None:
+                raise ValueError("Could not find Recipe")
+
+            item = db_user.add_note(db_recipe, note)
+            
+            uow.commit()
+
+            return item
+        
+    def delete_personal_note(
+            self,
+            user: User,
+            recipe: Recipe,
+            note: str
+        ) -> list[str]:
+        """
+        Remove a specific note for a given recipe.
+
+        Returns:
+            Updated list of notes.
+        """
+        with UnitOfWork() as uow:
+            db_user = uow.users.get_by_id(user.id)
+            db_recipe = uow.recipes.get_by_id(recipe.id)
+
+            if db_user is None:
+                raise ValueError("User not found")
+            if db_recipe is None:
+                raise ValueError("Recipe not found")
+            
+            updated_notes = db_user.remove_note(db_recipe, note)
+
+            uow.commit()
+
+            return updated_notes
+
+
+
+
 class IngredientService:
     """
     Ingredient services:
@@ -560,6 +612,22 @@ class ServiceContainer:
         Find a user from their user id.
         """
         return self.user_service.get_user_by_id(user_id)
+    
+    def add_personal_note(
+            self,
+            user: User,
+            recipe: Recipe,
+            note: str
+    ) -> list[str]:
+        return self.user_service.add_personal_note(user = user, recipe = recipe, note = note)
+    
+    def delete_personal_note(
+            self,
+            user: User,
+            recipe: Recipe,
+            note: str
+    ) -> list[str]:
+        return self.user_service.delete_personal_note(user = user, recipe = recipe, note = note)
     
     #Ingredient Service
     def add_ingredient(
