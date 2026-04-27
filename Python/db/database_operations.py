@@ -267,8 +267,6 @@ class UserService:
             return updated_notes
 
 
-
-
 class IngredientService:
     """
     Ingredient services:
@@ -434,7 +432,7 @@ class RecipeService:
         Delete a recipe from the database.
 
         Args:
-            recipe(Recipe): The ORM object to delete from the database.
+            recipe_id(int): The recipe id to delete.
 
         Returns:
             True if deleted successfully, False otherwise.
