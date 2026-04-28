@@ -97,6 +97,26 @@ class Recipe(Base):
     def __repr__(self):
         return f"<Recipe(id = {self.id}, name ='{self.name}')>"
     
+    def _is_valid_operand(self, other):
+        return (hasattr((other, "published_time")))
+
+    def __lt__(self, other):
+        # if not self._is_valid_operand(self, other):
+        #     return NotImplemented
+        return (self.published_time < other.published_time)
+    def __le__(self, other):
+        if not self._is_valid_operand(self,other):
+            return NotImplemented
+        return (self.published_time <= other.published_time)
+    def __gt__(self, other):
+        if not self._is_valid_operand(self,other):
+            return NotImplemented
+        return (self.published_time > other.published_time)
+    def __ge__(self, other):
+        if not self._is_valid_operand(self,other):
+            return NotImplemented
+        return (self.published_time >= other.published_time)
+    
     # prints a recipe to terminal
     def print(self):
         print(self.name)
