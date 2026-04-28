@@ -201,7 +201,7 @@ class RecipeSearchEngine(SearchEngine):
 
     def get_random_recipes(self, count: int) -> list:
         shuffled = self._recipes.copy()
-        random.shuffle(shuffled)
+        shuffled = random.shuffle(shuffled)
         return shuffled[:count]
     
     # Alysa Solomon
