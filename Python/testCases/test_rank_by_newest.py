@@ -18,7 +18,7 @@ class TestRankNewest(unittest.TestCase):
         self.assertEqual(r.rank_by_newest([reci]),[reci])
         pass
 
-        #I Don't Understand
+        #it works now
     def test_is_sorted(self):
         r : Rank.Rank= Rank.Rank()
         
