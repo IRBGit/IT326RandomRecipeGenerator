@@ -1,0 +1,9 @@
+Register Account
+Log IN
+Log Out
+Reset Password
+Update Account Information
+Delete AccountRetrieve Recipe
+Search for recipe by name
+Search for Recipe by Criteria
+Search for recipe by Required Ingredients
