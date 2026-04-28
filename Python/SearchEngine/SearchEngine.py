@@ -4,6 +4,8 @@
 
 from abc import ABC, abstractmethod  # Built-in Python module for abstract classes
 from .Filter import Filter           # We import Filter because it's used as a parameter type
+import random
+
 
 
 class SearchEngine(ABC):  # ABC = Abstract Base Class — acts like an <<Interface>>
@@ -131,53 +133,7 @@ class RecipeSearchEngine(SearchEngine):
         super().__init__()  # Run the parent __init__ to set up service attributes
 
         # Demo recipe data — replace with real DB/API calls in production
-        self._recipes = [
-            {
-                "id": 1,
-                "name": "Spaghetti Bolognese",
-                "category": "pasta",
-                "ingredients": ["spaghetti", "ground beef", "tomato sauce", "onion"],
-                "dietary_tags": [],
-                "cook_time": 40,
-                "calories": 550,
-            },
-            {
-                "id": 2,
-                "name": "Caesar Salad",
-                "category": "salad",
-                "ingredients": ["romaine lettuce", "croutons", "parmesan", "caesar dressing"],
-                "dietary_tags": ["vegetarian"],
-                "cook_time": 10,
-                "calories": 300,
-            },
-            {
-                "id": 3,
-                "name": "Chicken Stir-fry",
-                "category": "asian",
-                "ingredients": ["chicken", "broccoli", "soy sauce", "garlic"],
-                "dietary_tags": ["halal"],
-                "cook_time": 20,
-                "calories": 400,
-            },
-            {
-                "id": 4,
-                "name": "Veggie Pasta",
-                "category": "pasta",
-                "ingredients": ["penne", "zucchini", "bell pepper", "olive oil"],
-                "dietary_tags": ["vegetarian", "vegan"],
-                "cook_time": 25,
-                "calories": 380,
-            },
-            {
-                "id": 5,
-                "name": "Greek Salad",
-                "category": "salad",
-                "ingredients": ["cucumber", "tomato", "feta", "olives", "red onion"],
-                "dietary_tags": ["vegetarian", "gluten-free"],
-                "cook_time": 5,
-                "calories": 220,
-            },
-        ]
+        self._recipes = []
 
     def get_recipe_by_id(self, recipe_id: int) -> dict | None:
         for recipe in self._recipes:
@@ -244,16 +200,14 @@ class RecipeSearchEngine(SearchEngine):
         return results    
 
     def get_random_recipes(self, count: int) -> list:
-        import random
         shuffled = self._recipes.copy()
-        random.shuffle(shuffled)
+        shuffled = random.shuffle(shuffled)
         return shuffled[:count]
     
     # Alysa Solomon
     def get_random_recipe_with_filter(self, count: int, pantry: list, recipe_filter: Filter) -> list:
-        import random
         shuffled = self.search_with_filter(self._recipes.copy(), pantry, recipe_filter)
-        random.shuffle(shuffled)
+        shuffled = random.shuffle(shuffled)
         return shuffled[:count]
 
     def search_with_filter(self, recipes: list, pantry: list, recipe_filter: Filter) -> list:
