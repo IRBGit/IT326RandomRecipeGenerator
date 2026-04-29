@@ -32,7 +32,7 @@ def main():
     stuff = os.getenv("WHATEVER")
     print("ENV VALUE:", stuff)
 
-    # 🔐 login part
+    # login part
     username = input("Enter username: ")
     password = input("Enter password: ")
 
