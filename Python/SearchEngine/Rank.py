@@ -8,5 +8,8 @@ class Rank:
     def rank_by_newest(self, recipe_list: List[Recipe]):
         if len(recipe_list) <= 1:
             return recipe_list
-        sorted = recipe_list.sort(Recipe.published_time)
-        return sorted
+        # recipe_list.sort()
+        recipe_list.sort()
+        return recipe_list
+
+

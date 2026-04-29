@@ -10,6 +10,7 @@ def import_recipes_from_json(file_path):
         print(f"Error: {file_path} not found.")
         return
 
+
     try:
         with open(file_path, 'r', encoding='utf-8') as f:
             data = json.load(f)
@@ -38,11 +39,12 @@ def import_recipes_from_json(file_path):
                     ingredient_names.append(ing_item)
                     quantity_list.append(qua_item)
                     
-
             time_stamp_str = entry.get("dateModified")
             # 2025-11-16 01:49:18
             if (time_stamp_str != None):
                 time_stamp = datetime.datetime.strptime(time_stamp_str,"%Y-%m-%d %H:%M:%S")
+
+            print("Variables Created")
 
             try:
                 # 3. Use ServiceContainer to add the recipe
@@ -68,4 +70,8 @@ def import_recipes_from_json(file_path):
 
 if __name__ == "__main__":
     # Ensure this matches your JSON filename
-    import_recipes_from_json('Python\\theMealDB_A.json')
+
+    # import_recipes_from_json('Python\\theMealDB_A.json')
+    recipe_list = ["a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","Z","0","1","2","3","4","5","6","7","8","9"]
+    for letter in recipe_list:
+        import_recipes_from_json(f"JSON_Recipes\\{letter}_recipes.json")

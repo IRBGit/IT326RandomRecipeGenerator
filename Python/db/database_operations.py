@@ -4,10 +4,11 @@
 
 from db.db_connect import DBConnect
 from db.unit_of_work import UnitOfWork
-from model import Ingredient, User, PantryItem, Recipe
+from model import Ingredient, User, PantryItem, Recipe, user_favorites, RecipeIngredient, UserRecipeNote, Rating, UserSearch
 import re
 from typing import Optional, List
 from sqlalchemy.orm import Session
+from sqlalchemy import Row
 from datetime import datetime
 
 class PantryService:
@@ -19,9 +20,9 @@ class PantryService:
     
     def add_ingredient_to_pantry(
             self, 
-            user_id: int, 
-            ingredient_name: str, 
-            quantity: Optional[int] = None, 
+            user: "User", 
+            ingredient: "Ingredient", 
+            quantity: Optional[float] = None, 
             unit: Optional[str] = None
             ) -> PantryItem:
         """
@@ -38,59 +39,42 @@ class PantryService:
             Optional(PantryItem): Will return the PantryItem object if it succeeds.
         """
         with UnitOfWork() as uow:
-            user: User = uow.users.get_by_id(user_id)
-            if not user:
-                raise ValueError("User not found")
-            
-            ingredient: Ingredient = uow.ingredients.get_by_name(ingredient_name)
-            if not ingredient:
-                ingredient = Ingredient(name = ingredient_name)
-                uow.ingredients.add(ingredient)
-            
-            pantry_item = user.add_ingredient_to_pantry(
-                ingredient,
-                quantity,
-                unit
+            item = user.add_ingredient_to_pantry(
+                ingredient=ingredient,
+                quantity=quantity,
+                unit=unit
             )
             uow.commit()
-            return pantry_item
+        return item
+            
     
     def remove_ingredient_from_pantry(
             self, 
-            user_id: int, 
-            ingredient_name: str
+            user: User, 
+            ingredient: Ingredient
             ) -> Optional[PantryItem]:
         """
         Remove an ingredient from the user's pantry.
 
         Args:
             user(User): The ORM user object
-            ingredient_name(str): The name of the ingredient
+            ingredient: The ORM ingredient object
         
         Returns:
             Optional(PantryItem): The pantry item that was removed or None if it is not found.
         """
         with UnitOfWork() as uow:
-            user = uow.users.get_by_id(user_id)
-            if not user:
-                raise ValueError("User not found")
-            
-            ingredient = uow.ingredients.get_by_name(ingredient_name)
-            if not ingredient:
-                return None
-            
-            item = user.remove_ingredient_from_pantry(ingredient)
-
+            item = user.remove_ingredient_from_pantry(ingredient=ingredient)
             if item:
                 uow.commit()
-
-            return item
+        return item
+            
     
     def update_pantry_item(
             self, 
-            user_id: int, 
-            ingredient_name: str, 
-            quantity: Optional[int]= None, 
+            user: User, 
+            ingredient: Ingredient, 
+            quantity: Optional[int] = None, 
             unit: Optional[str] = None
             ) -> Optional[PantryItem]:
         """
@@ -106,20 +90,15 @@ class PantryService:
             Optional(PantryItem): The PantryItem or None
         """
         with UnitOfWork() as uow:
-            user = uow.users.get_by_id(user_id)
-            if not user:
-                raise ValueError("User not found")
-            
-            ingredient = uow.ingredients.get_by_name(ingredient_name)
-            if not ingredient:
-                return None
-            
-            item = user.update_pantry_item(ingredient, quantity, unit)
-
+            item = user.update_pantry_item(
+                ingredient=ingredient,
+                quantity=quantity,
+                unit=unit
+            )
             if item:
                 uow.commit()
 
-            return item
+        return item
 
 class UserService:
     """
@@ -192,12 +171,12 @@ class UserService:
             password: str
             ) -> Optional[User]:
         with UnitOfWork() as uow:
+            if not self.validate_password(password):
+                raise ValueError("User password is not strong enough")
+            
             if uow.users.get_by_email(email):
                 raise ValueError("User already exists.")
             
-            if not self.validate_password(password):
-                raise ValueError("User password is not strong enough")
-
             user = User(email = email, password = password)
 
             uow.users.add(user)
@@ -237,6 +216,56 @@ class UserService:
                 return None
             
             return user
+
+    def add_personal_note(
+            self,
+            user: User,
+            recipe: Recipe,
+            note: str
+    ) -> list[str]:
+        with UnitOfWork() as uow:
+            db_user = uow.users.get_by_id(user.id)
+            db_recipe = uow.recipes.get_by_id(recipe.id)
+
+            if db_user is None:
+                raise ValueError("Could not find User")
+            
+            if db_recipe is None:
+                raise ValueError("Could not find Recipe")
+
+            item = db_user.add_note(db_recipe, note)
+            
+            uow.commit()
+
+            return item
+        
+    def delete_personal_note(
+            self,
+            user: User,
+            recipe: Recipe,
+            note: str
+        ) -> list[str]:
+        """
+        Remove a specific note for a given recipe.
+
+        Returns:
+            Updated list of notes.
+        """
+        with UnitOfWork() as uow:
+            db_user = uow.users.get_by_id(user.id)
+            db_recipe = uow.recipes.get_by_id(recipe.id)
+
+            if db_user is None:
+                raise ValueError("User not found")
+            if db_recipe is None:
+                raise ValueError("Recipe not found")
+            
+            updated_notes = db_user.remove_note(db_recipe, note)
+
+            uow.commit()
+
+            return updated_notes
+
 
 class IngredientService:
     """
@@ -347,42 +376,59 @@ class RecipeService:
         with UnitOfWork() as uow:
             return uow.recipes.get_by_name(name)
                 
-
     def add_recipe(
-            self,
-            name: str,
-            instructions: list[str],
-            ingredients: list[str],
-            pub_time: Optional[datetime] = None
-            ) -> Recipe | None:
+        self,
+        name: str,
+        instructions: Optional[List[str]] = None,
+        ingredients: Optional[list[str]] = None,
+        pub_time: Optional[datetime] = None
+        ) -> Recipe | None:
+        
+   def add_recipe(
+        self,
+        name: str,
+        instructions: Optional[List[str]] = None,
+        ingredients: Optional[list[str]] = None,
+        pub_time: Optional[datetime] = None
+        ) -> Recipe | None:
 
         """
-        Add a recipe to the database.
-
-        Args:
-            name(str): Name of the recipe.
-            instructions(str): Recipe instructions.
-            ingredients(list(Ingredient)): List of ORM Ingredient objects.
-            pub_time(list(datetime)): List of time stamps.
-
-        Returns:
-            Recipe object if creation succeeded, else None
+        ingredients format:
+        [
+            {"name": "Flour", "quantity": 2, "unit": "cups"},
+            {"name": "Milk", "quantity": 1, "unit": "cup"}
+        ]
         """
+
         with UnitOfWork() as uow:
             recipe = uow.recipes.get_by_name(name)
             if recipe:
                 return recipe
-            
+                
+            recipe = Recipe(
+                name=name,
+                instructions=instructions or [],
+                ingredients=[],
+                pub_time=pub_time
+            )
+            uow.recipes.add(recipe)
 
-            items: List[Ingredient] = []
-            for ingredient in ingredients or []:
-                ing = uow.ingredients.get_by_name(ingredient)
-                if not ing:
-                    ing = Ingredient(name = ingredient)
-                    uow.ingredients.add(ing)
-                items.append(ing)
+            if ingredients is None:
+                uow.commit()
+                return recipe
             
             recipe = Recipe(name=name, ingredients=items, instructions=instructions or [], pub_time=pub_time)
+
+            for ing_name in ingredients:
+                ingredient = uow.ingredients.get_by_name(ing_name)
+
+                if not ingredient:
+                    ingredient = Ingredient(name=ing_name)
+                    uow.ingredients.add(ingredient)
+                    if uow.session is not None:
+                        uow.session.flush()
+
+                recipe.add_ingredient(ingredient)
 
             uow.recipes.add(recipe)
             uow.commit()
@@ -396,7 +442,7 @@ class RecipeService:
         Delete a recipe from the database.
 
         Args:
-            recipe(Recipe): The ORM object to delete from the database.
+            recipe_id(int): The recipe id to delete.
 
         Returns:
             True if deleted successfully, False otherwise.
@@ -467,7 +513,8 @@ class RecipeService:
         with UnitOfWork() as uow:
             recipes = uow.recipes.get_all()
             return recipes
-    #----------------------- lu-Task: save to favorites/favorites methods
+
+    #-save to favorites/favorites methods
 
     def add_recipe_to_favorites(
             self,
@@ -532,6 +579,43 @@ class RecipeService:
             return user.get_favorite_recipes()
     #-------------------
         
+    
+class SearchService:
+    """
+    A class to contain services related to searches.
+    """
+
+    def record_search(
+            self, 
+            user: User, 
+            query: str):
+        query = query.strip().lower()
+        with UnitOfWork() as uow:
+
+            search = UserSearch(
+                user_id = user.id if user else None,
+                query = query
+            )
+            
+            uow.searches.add(search)
+            uow.commit()
+    
+    def get_popular_searches(
+            self, 
+            limit: int = 10
+            ) -> list[Row[tuple[str, int]]]:
+        with UnitOfWork() as uow:
+            result = uow.searches.get_popular(limit = limit)
+            return result
+    
+    def get_recent_searches(
+            self,
+            limit: int = 50
+    ) -> list[UserSearch]:
+        with UnitOfWork() as uow:
+            result = uow.searches.get_recent(limit = limit)
+            return result
+
 class ServiceContainer:
     def __init__(self):
         self.db_connect = DBConnect()
@@ -540,6 +624,7 @@ class ServiceContainer:
         self._ingredient_service = IngredientService()
         self._pantry_service = PantryService()
         self._recipe_service = RecipeService()
+        self._search_service = SearchService()
 
     @property
     def user_service(self):
@@ -556,6 +641,10 @@ class ServiceContainer:
     @property
     def recipe_service(self):
         return self._recipe_service
+    
+    @property
+    def search_service(self):
+        return self._search_service
 
     #User Service
     def create_user(
@@ -603,6 +692,22 @@ class ServiceContainer:
         """
         return self.user_service.get_user_by_id(user_id)
     
+    def add_personal_note(
+            self,
+            user: User,
+            recipe: Recipe,
+            note: str
+    ) -> list[str]:
+        return self.user_service.add_personal_note(user = user, recipe = recipe, note = note)
+    
+    def delete_personal_note(
+            self,
+            user: User,
+            recipe: Recipe,
+            note: str
+    ) -> list[str]:
+        return self.user_service.delete_personal_note(user = user, recipe = recipe, note = note)
+    
     #Ingredient Service
     def add_ingredient(
             self, 
@@ -638,13 +743,13 @@ class ServiceContainer:
     def add_to_pantry(
             self,
             user: User,
-            ingredients: Ingredient,
+            ingredient: Ingredient,
             quantity: Optional[int] = None,
             unit: Optional[str] = None
-    ) -> PantryItem | None:
+    ) -> Optional[PantryItem]:
         return self.pantry_service.add_ingredient_to_pantry(
-            user.get_id(), 
-            ingredients.get_name(), 
+            user, 
+            ingredient, 
             quantity, 
             unit
         )
@@ -655,8 +760,8 @@ class ServiceContainer:
             ingredient: Ingredient
     ) -> Optional[PantryItem]:
         return self.pantry_service.remove_ingredient_from_pantry(
-            user.get_id(), 
-            ingredient.get_name()
+            user, 
+            ingredient
         )
     
     def update_pantry(
@@ -667,8 +772,8 @@ class ServiceContainer:
             unit: Optional[str] = None
     ) -> PantryItem | None:
         return self.pantry_service.update_pantry_item(
-            user.get_id(), 
-            ingredient.get_name(), 
+            user, 
+            ingredient, 
             quantity, 
             unit
         )
@@ -678,17 +783,15 @@ class ServiceContainer:
             self,
             name: str,
             instructions: list[str],
-            ingredients: Optional[list[Ingredient]] = None
+            ingredients: Optional[list[str]] = None,
+            pub_time: Optional[datetime] = None
     ) -> Recipe | None:
-        ingredient_list = []
-        if ingredients:
-            for ingredient in ingredients:
-                ingredient_list.append(ingredient.get_name())
 
         recipe = self.recipe_service.add_recipe(
             name, 
             instructions,
-            ingredient_list
+            ingredients = ingredients,
+            pub_time = pub_time
         )
         if recipe is None:
             raise RuntimeError("Failed to create Recipe")
@@ -726,6 +829,31 @@ class ServiceContainer:
         Retrieve all recipes from the database.
         """
         return self.recipe_service.get_all_recipes()
+    
+    # ==================== Searches ====================== #
+
+    def record_search(
+            self,
+            user: User, 
+            query: str
+    ):
+        self.search_service.record_search(user, query)
+
+    def get_popular_searches(
+            self,
+            limit: int
+    ) -> list[Row[tuple[str, int]]]:
+        """
+        Get the most popular searches.
+
+        Parameters:
+            limit(int): The number of items you want to return.
+        
+        Returns:
+            list(Row(tuple(str, int))): A list of rows that contain a tuple with the name and the count of the search terms.
+        """
+        return self.search_service.get_popular_searches(limit = limit)
+        
 
     #---------------- lu: STF Block | favorites container methods
     def add_recipe_to_favorites(
@@ -768,3 +896,5 @@ class ServiceContainer:
         """
         from sqlalchemy.orm import Session
         self.db_connect.shutdown()
+
+    
