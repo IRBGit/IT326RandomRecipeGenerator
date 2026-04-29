@@ -201,13 +201,13 @@ class RecipeSearchEngine(SearchEngine):
 
     def get_random_recipes(self, count: int) -> list:
         shuffled = self._recipes.copy()
-        shuffled = random.shuffle(shuffled)
+        random.shuffle(shuffled)
         return shuffled[:count]
     
     # Alysa Solomon
     def get_random_recipe_with_filter(self, count: int, pantry: list, recipe_filter: Filter) -> list:
         shuffled = self.search_with_filter(self._recipes.copy(), pantry, recipe_filter)
-        shuffled = random.shuffle(shuffled)
+        random.shuffle(shuffled)
         return shuffled[:count]
 
     def search_with_filter(self, recipes: list, pantry: list, recipe_filter: Filter) -> list:
