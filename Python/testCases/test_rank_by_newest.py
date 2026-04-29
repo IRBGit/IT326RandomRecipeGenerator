@@ -18,7 +18,7 @@ class TestRankNewest(unittest.TestCase):
         self.assertEqual(r.rank_by_newest([reci]),[reci])
         pass
 
-        #I Don't Understand
+        #it works now
     def test_is_sorted(self):
         r : Rank.Rank= Rank.Rank()
         
@@ -29,6 +29,14 @@ class TestRankNewest(unittest.TestCase):
             shuffle(recipe_list)
             self.assertEqual(r.rank_by_newest(recipe_list), sorted)
         pass
+
+    def test_with_no_time(self):
+        r = Rank.Rank()
+        item_list = ["Apples","Cucumbers","Kiwi","Fruit","Bannana"]
+        recipe_list = [recipe(item_list[i],[item_list[i]],["Cut them up","Eat"]) for i in range(len(item_list))]
+        sorted = recipe_list.copy()
+        shuffle(recipe_list)
+        self.assertCountEqual(r.rank_by_newest(recipe_list), sorted)
 
 if __name__ == '__main__':
     unittest.main()
