@@ -1,10 +1,12 @@
 import os
 from dotenv import load_dotenv
-import pathlib
+
+from model.auth import login, logout  
 
 load_dotenv()
 
 def main():
+<<<<<<< Updated upstream
     logged_in = False
     will_continue = True
     while(will_continue):
@@ -25,6 +27,21 @@ def main():
                 print("Please input a valid input.")
                 continue
         will_continue = False
+=======
+    # existing code (keep it)
+    stuff = os.getenv("WHATEVER")
+    print("ENV VALUE:", stuff)
+
+    # 🔐 login part
+    username = input("Enter username: ")
+    password = input("Enter password: ")
+
+    success, message = login(username, password)
+    print(message)
+
+    if success:
+        print(logout())
+>>>>>>> Stashed changes
 
 if __name__ == "__main__":
     main()
