@@ -12,9 +12,11 @@ def loginHelper():
 
     success, message = login(username, password)
     print(message)
+    return True
 
-    if success:
-        print(logout())
+def logoutHelper():
+    print(logout())
+    return False
 
 def main():
     logged_in = False
