@@ -1,13 +1,16 @@
 {
     "java.compile.nullAnalysis.mode": "automatic",
     "python.REPL.enableREPLSmartSend": false,
+
+    "python.testing.unittestEnabled": true,
+    "python.testing.pytestEnabled": false,
+
     "python.testing.unittestArgs": [
         "-v",
+        "-b",
         "-s",
-        ".",
+        "Python/testCases",
         "-p",
         "test_*.py"
-    ],
-    "python.testing.pytestEnabled": false,
-    "python.testing.unittestEnabled": true
+    ]
 }
