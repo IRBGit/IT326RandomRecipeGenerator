@@ -32,7 +32,7 @@ class Ingredient(Base):
         )
 
     # Recipes that use this ingredient
-    recipe_association: Mapped[List["RecipeIngredient"]] = relationship(
+    recipe_associations: Mapped[List["RecipeIngredient"]] = relationship(
         "RecipeIngredient",
         back_populates="ingredient",
         cascade = "all, delete-orphan"

@@ -35,7 +35,9 @@ class Recipe(Base):
     # Alysa Solomon: published time should be added here, IDK how to add it
     # It should be able to store a big number, from reaserch DATETIME will probably be most helpful
     # additonally need to add quanity, still don't know how to add columns via code
-    published_time: Mapped[Optional[datetime]] = mapped_column("published_time", DateTime, nullable=True)
+
+    # Tolu: removed for now, not in db table yet
+    # published_time: Mapped[datetime] = mapped_column("published_time", DateTime, nullable=True)
 
     # This relationship is automatically created via the backref in User and explicitly identified here.
     favorited_by: Mapped[List["User"]] = relationship(
@@ -47,10 +49,11 @@ class Recipe(Base):
         "RecipeIngredient",
         collection_class = attribute_mapped_collection(
             "ingredient_id"
-            ),
+        ),
         back_populates="recipe",
-        cascade = "all, delete-orphan"
+        cascade="all, delete-orphan"
     )
+
 
     recipe_ingredients: AssociationProxy[dict["Ingredient", "RecipeIngredient"]] = association_proxy(
         "_ingredients",
@@ -92,10 +95,31 @@ class Recipe(Base):
         self.category = category
         self.tags = tags
         self.video = video
-        self.published_time = pub_time
+        # Tolu: removed for now, not in db table yet
+        # self.published_time = pub_time
 
     def __repr__(self):
         return f"<Recipe(id = {self.id}, name ='{self.name}')>"
+    
+    def _is_valid_operand(self, other):
+        return (hasattr((other, "published_time")))
+
+    def __lt__(self, other):
+        # if not self._is_valid_operand(self, other):
+        #     return NotImplemented
+        return (self.published_time < other.published_time)
+    def __le__(self, other):
+        if not self._is_valid_operand(self,other):
+            return NotImplemented
+        return (self.published_time <= other.published_time)
+    def __gt__(self, other):
+        if not self._is_valid_operand(self,other):
+            return NotImplemented
+        return (self.published_time > other.published_time)
+    def __ge__(self, other):
+        if not self._is_valid_operand(self,other):
+            return NotImplemented
+        return (self.published_time >= other.published_time)
     
     # prints a recipe to terminal
     def print(self):
@@ -162,17 +186,21 @@ class Recipe(Base):
     def get_name(self) -> str:
         return self.name
     
+    def get_id(self) -> int:
+        # Tolu: gets recipe id
+        return self.id
+
     def add_ingredient(
-            self, 
-            ingredient: Ingredient, 
-            quantity: Optional[float] = None, 
+            self,
+            ingredient: Ingredient,
+            quantity: Optional[float] = None,
             unit: Optional[str] = None
-    ) -> "RecipeIngredient" :
+            ) -> "RecipeIngredient":
         from model import RecipeIngredient
 
         if ingredient.id is None:
-            raise ValueError("Ingredient must be presisted (have an id from the database)")
-        
+            raise ValueError("Ingredient must be persisted (have an id from the database)")
+
         key = ingredient.id
 
         if key in self._ingredients:
@@ -181,19 +209,19 @@ class Recipe(Base):
                 raise ValueError("Quantity must be greater than 0")
             if unit is not None and quantity is None:
                 raise ValueError("Unit cannot be set without a quantity")
-            
+
             assoc.unit = unit
             assoc.quantity = quantity
             return assoc
-        
+
         assoc = RecipeIngredient(
-            ingredient = ingredient,
-            quantity = quantity,
-            unit = unit
+            ingredient=ingredient,
+            quantity=quantity,
+            unit=unit
         )
-        self._ingredients[ingredient] = assoc
+        self._ingredients[key] = assoc
         return assoc
-    
+
     def remove_ingredient(
             self,
             ingredient: "Ingredient"
