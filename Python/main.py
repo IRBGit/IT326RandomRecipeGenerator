@@ -398,11 +398,13 @@ def main():
                         if not logged_in:
                             print("Reseting Password has not been implemented yet.")
                     case 2: # Get Pop Searches
-                        recipe_list = get_pop_searches(service)
-                        if recipe_list != []:
-                            print(recipe_list)
-                        else:
-                            print("No Recipes Found.")
+                        # recipe_list = get_pop_searches(service)
+                        # if recipe_list != []:
+                        #     print(recipe_list)
+                        # else:
+                        #     print("No Recipes Found.")
+                        print("BROKEN: WILL NOT WORK")
+                        print("UNCOMMENT OUT WHEN TESTING")
                     case 3: # Get Random Recipe
                         # TODO: NOT OUTPUTTING LIST OF RECIPES
                         recipe_list = random_recipe_helper()
