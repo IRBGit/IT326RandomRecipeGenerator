@@ -7,11 +7,7 @@ from model.auth import login, logout
 
 load_dotenv()
 
-def add_note_to_recipe(
-        service: ServiceContainer, 
-        user: User, 
-        recipe: Recipe
-    ):
+def add_note_to_recipe(service: ServiceContainer, user: User, recipe: Recipe):
     try:
         note = input(f"Please enter the note you want to add to {recipe.name}: ").strip()
 
@@ -27,10 +23,7 @@ def add_note_to_recipe(
     except Exception as e:
         print(f"Error adding note: {e}")
 
-def delete_note_from_recipe(
-        service: ServiceContainer,
-        user: User
-):
+def delete_note_from_recipe(service: ServiceContainer,user: User):
     try:
         indexed_notes = service.get_all_user_notes(user)
 
@@ -118,7 +111,9 @@ def logoutHelper():
     print(logout())
     return False
 
+#By Alysa Solomon
 def main():
+    service = ServiceContainer()
     logged_in = False
     will_continue = True
     while(will_continue):
@@ -173,7 +168,7 @@ def main():
         else:
             print("\nCurrent options are listed below. \nInput the number on the left to select your choice.")
             print("1: Log In")
-            print("2: Get Popular Searches")  #Not Implemented
+            print("2: Get Popular Searches") #Not Implemented
             print("3: Get Random Recipe") #Not Implemented
             print("4: Create New Account") #Not Implemented
             print("5: Search for Recipe") #Not Implemented
@@ -203,6 +198,10 @@ def main():
                     
             except ValueError:
                 print("Please input a valid input.")
+                pass
+            pass
+        pass
+    service.close()
 
 
 
