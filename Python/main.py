@@ -3,6 +3,7 @@ from dotenv import load_dotenv
 import pathlib
 from db.database_operations import ServiceContainer
 from model import Recipe, User
+from model.auth import login, logout
 
 load_dotenv()
 
@@ -99,11 +100,6 @@ def update_note(service, user):
     except Exception as e:
         print(f"Error updating note: {e}")
 
-
-from model.auth import login, logout
-
-load_dotenv()
-
 def loginHelper():
     # login part
     username = input("Enter username: ")
@@ -127,7 +123,16 @@ def main():
     will_continue = True
     while(will_continue):
         if logged_in:
-            print("List all possible options in a list here")
+            print("1: Get Popular Searches")
+            print("2: Get Random Recipe")
+            print("3: Search for Recipe")
+            print("4: Add Your Own Recipe")
+            print("5: Add Ingredients to Pantry")
+            print("6: Update User Information")
+            print("7: Search for Recipe")
+            print("8: Log Out")
+            print("9: Delete Account")
+            print("10: Exit")
             try:
                 chosen_option = input("Select your choice:")
                 chosen_option = int(chosen_option)
@@ -141,18 +146,36 @@ def main():
             print("4: Create New Account")
             print("5: Search for Recipe")
             print("6: Exit")
+            logoutHelper()
             try:
                 chosen_option = input("Select your choice:")
                 chosen_option = int(chosen_option)
                 if(1 <= chosen_option and chosen_option <= 6):
-                    # switch statement to to pick relevent helper method.
+                    match chosen_option:
+                        case 1: # Log In
+                            is_logged_in = loginHelper()
+                            if not is_logged_in:
+                                print("Reseting Password has not been implemented yet.")
+                        case 2: # Get Pop Searches
+                            print("This feature hasn't been implemented yet.")
+                        case 3: # Get Random Recipe
+                            print("This feature hasn't been implemented yet.")
+                        case 4: # Register Account
+                            print("This feature hasn't been implemented yet.")
+                        case 5: # Searching For a recipe
+                            print("This feature hasn't been implemented yet.")
+                        case 6: # Exit
+                            will_continue = False
+                            print("Thank you for using our Program!")
                     pass
                 else:
                     print("Invalid Option. Please Try Again.")
             except ValueError:
                 print("Please input a valid input.")
-                continue
+
+        # Delete once Exit is implemented in both sides.
         will_continue = False
+
 
 if __name__ == "__main__":
     main()
