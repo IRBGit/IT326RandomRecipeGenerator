@@ -194,6 +194,26 @@ def get_dietary():
 
 def get_category():
     #TODO: FINISH THIS
+    category_list = ["Algerian","American","Argentinian","Australian","British","Canadian","Chinese","Croatian","Dutch","Egyptian","Filipino","French","Greek","Indian","Irish","Italian","Jamaican","Japanese","Kenyan","Malaysian","Mexican","Moroccan","Norwegian","Polish","Portuguese","Russian","Saudi Arabian","Slovakian","Spanish","Syrian","Thai","Tunisian","Turkish","Ukrainian","Uruguayan","Venezulan","Vietnamese"]
+    while True:
+        print("Valid Categories:")
+        for i in range(len(category_list)):
+            print(f"{i}: "+category_list[i])
+        try:
+            print(str(len(category_list)+1)+": No Desired Category")
+            chosed_option = input()
+            chosed_option = int(chosed_option)
+            if chosed_option == (len(category_list)+1):
+                return ""
+            if chosed_option > (len(category_list)+1):
+                input("Invalid Option. Press Enter to Continue")
+            else:
+                return category_list[chosed_option]
+        except:
+            print("Please input a valid input.")
+            pass
+        
+    
     pass 
 
 def search_not_logged_in():
