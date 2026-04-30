@@ -124,7 +124,7 @@ def get_ingredients():
             count = input()
             count = int(count)
             gettingCount = False
-        except:
+        except ValueError:
             print("Please input a valid input.")
             pass
 
@@ -135,62 +135,32 @@ def get_ingredients():
     return ing_list
 
 def get_category():
+    category_list = ["Beef","Breakfast","Chicken","Dessert", "Goat","Lamb", "Miscellaneous",
+                     "Pasta"
+                     "Pork",
+                     "Seafood"
+                     "Side",
+                     "Starter",
+                     "Vegan",
+                     "Vegetarian"]
     while True:
         print("The valid categories are:")
-        print("1: Beef")
-        print("2: Breakfast")
-        print("3: Chicken")
-        print("4: Dessert")
-        print("5: Goat")
-        print("6: Lamb")
-        print("7: Miscellaneous")
-        print("8: Pasta")
-        print("9: Pork")
-        print("10: Seafood")
-        print("11: Side")
-        print("12: Starter")
-        print("13: Vegan")
-        print("14: Vegetarian")
-        print("15: No Dietary Restrictions")
+        for i in range(len(category_list)):
+            print(f"{i}: "+category_list[i])
         try:
+            print(str(len(category_list)+1)+": No Desired Category")
             chosed_option = input()
             chosed_option = int(chosed_option)
-            match chosed_option:
-                case 1:
-                    return "beef"
-                case 2:
-                    return "breakfast"
-                case 3:
-                    return "chicken"
-                case 4:
-                    return "dessert"
-                case 5:
-                    return "goat"
-                case 6:
-                    return "lamb"
-                case 7:
-                    return "Miscellaneous"
-                case 8:
-                    return "pasta"
-                case 9:
-                    return "pork"
-                case 10:
-                    return "seafood"
-                case 11:
-                    return "side"
-                case 12:
-                    return "starter"
-                case 13:
-                    return "vegan"
-                case 14: 
-                    return "vegetarian"
-                case 15:
-                    return ""
-                case _:
-                    print("Invalid Option. Please Try Again.")
-        except:
+            if chosed_option == (len(category_list)+1):
+                return ""
+            if chosed_option > (len(category_list)+1):
+                input("Invalid Option. Press Enter to Continue")
+            else:
+                return category_list[chosed_option]
+        except ValueError:
             print("Please input a valid input.")
             pass
+
 
 def get_dietary():
     #TODO: I don't know if this is correct
@@ -209,9 +179,26 @@ def get_dietary():
                 input("Invalid Option. Press Enter to Continue")
             else:
                 return category_list[chosed_option]
-        except:
+        except ValueError:
             print("Please input a valid input.")
             pass
+
+def random_recipe_helper():
+    print("In Arabic Numerals, How many ingredients do you want to include in the recipe?\n")
+    req_ing = get_ingredients()
+    get_value = True
+    while get_value:
+        print("In Arabic Numerals, How many recipes do you want?\n")
+        try:
+            choose = int(input())
+            get_value = False
+        except ValueError:
+            print("Please input a valid input")
+    search_func = SearchEngine.RecipeSearchEngine()
+    if req_ing == []:
+        return search_func.get_random_recipes(choose)
+    f = filter()
+    return search_func.get_random_recipe_with_filter(choose,req_ing,f)
 
 def search_not_logged_in():
     is_searching = True
@@ -323,7 +310,7 @@ def main():
             print("2: Get Popular Searches") #Not Implemented
             print("3: Get Random Recipe") #Not Implemented
             print("4: Create New Account") #Not Implemented
-            print("5: Search for Recipe") #Not Implemented
+            print("5: Search for Recipe") # Somewhat Implemented
             print("6: Exit")
             try:
                 chosen_option = input("Select your choice:")
@@ -337,7 +324,7 @@ def main():
                     case 2: # Get Pop Searches
                         print("This feature hasn't been implemented yet.")
                     case 3: # Get Random Recipe
-                        print("This feature hasn't been implemented yet.")
+                        recipe_list = random_recipe_helper()
                     case 4: # Register Account
                         print("This feature hasn't been implemented yet.")
                     case 5: # Searching For a recipe
