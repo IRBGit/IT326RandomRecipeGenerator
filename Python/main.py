@@ -230,9 +230,11 @@ def search_by_criteria(search_func: SearchEngine.RecipeSearchEngine):
     category = get_category()
     dietary_list = get_dietary()
     recipe_list = search_func.search_recipes_by_criteria(req_ing,ew_ing,category,dietary_list)
-    pass
-def search_by_ing():
-    pass
+    return recipe_list
+def search_by_ing(search_func: SearchEngine.RecipeSearchEngine):
+    req_ing = get_ingredients("In Arabic Numerals, How many ingredients do you want to include in the recipe?\n")
+    recipe_list = search_func.search_recipes_by_ingredients(req_ing)
+    return recipe_list
 
 
 # By Alysa Solomon
@@ -251,19 +253,15 @@ def search_not_logged_in():
             chosen_option = int(chosen_option)
             match chosen_option:
                 case 1: # search by name
-                    print(search_by_name)
+                    recipe_list = search_by_name(search_func)
+                    print(recipe_list)
                 case 2: # Search by Criteria
-                    print("This Feature has not been implemeted yet.")
-                    req_ing = get_ingredients("In Arabic Numerals, How many ingredients do you want to include in the recipe?\n")
-                    ew_ing = get_ingredients("In Arabic Numerals, How many ingredients do you want to exclude from the recipe?\n")
-                    category = get_category()
-                    dietary_list = get_dietary()
-                    recipe_list = search_func.search_recipes_by_criteria(req_ing,ew_ing,category,dietary_list)
+                    recipe_list = search_by_criteria(search_func)
+                    print(recipe_list)
                     pass
                 case 3: # Search by Neccessary Ing
-                    print("This Feature has not been implemeted yet.")
-                    req_ing = get_ingredients("In Arabic Numerals, How many ingredients do you want to include in the recipe?\n")
-                    recipe_list = search_func.search_recipes_by_ingredients(req_ing)
+                    recipe_list = search_by_ing(search_func)
+                    print(recipe_list)
                     pass
                 case 4: #Help Menu
                     print("1: You input a name of a recipe, and our database finds all recipes that have that name in it's title")
