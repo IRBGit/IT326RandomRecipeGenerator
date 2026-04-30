@@ -113,9 +113,12 @@ def logoutHelper():
     print(logout())
     return False
 
+# By Alysa Solomon
+#TODO: NOT DONE
 def retrieve_recipe(recipes: List[Recipe]):
     getting_recipe = True
 
+# By Alysa Solomon
 def get_ingredients():
     count = 0
     gettingCount = True
@@ -134,6 +137,7 @@ def get_ingredients():
         ing_list.append(input())
     return ing_list
 
+# By Alysa Solomon
 def get_category():
     category_list = ["Beef",
                      "Breakfast",
@@ -167,6 +171,7 @@ def get_category():
             pass
 
 
+# By Alysa Solomon
 def get_dietary():
     #TODO: I don't know if this is correct
     category_list = ["Algerian","American","Argentinian","Australian","British","Canadian","Chinese","Croatian","Dutch","Egyptian","Filipino","French","Greek","Indian","Irish","Italian","Jamaican","Japanese","Kenyan","Malaysian","Mexican","Moroccan","Norwegian","Polish","Portuguese","Russian","Saudi Arabian","Slovakian","Spanish","Syrian","Thai","Tunisian","Turkish","Ukrainian","Uruguayan","Venezulan","Vietnamese"]
@@ -188,6 +193,7 @@ def get_dietary():
             print("Please input a valid input.")
             pass
 
+# By Alysa Solomon
 def random_recipe_helper():
     print("In Arabic Numerals, How many ingredients do you want to include in the recipe?\n")
     req_ing = get_ingredients()
@@ -205,6 +211,7 @@ def random_recipe_helper():
     f = filter()
     return search_func.get_random_recipe_with_filter(choose,req_ing,f)
 
+# By Alysa Solomon
 def search_not_logged_in():
     is_searching = True
     search_func = SearchEngine.RecipeSearchEngine()
@@ -255,13 +262,49 @@ def search_not_logged_in():
         except ValueError:
             print("Please input a valid input.")
 
+# By Alysa Solomon
+def register_user(service: ServiceContainer):
+    will_continue = True
+    while will_continue:
+        email = input("Please input your email: ")
+        password = input("Please input a new password: ")
+        password_check = input("Please type password again: ")
+        if password_check == password:
+            try:
+                user = service.create_user(email,password)
+                will_continue = False
+                print("Account Succesfully Created.")
+                return user
+            except ValueError:
+                print("Either your Password or your Email was not valid.\nPlease try again.")
+                option = input("Continue? Type 'N' or 'No' to stop.")
+                match option.lower():
+                    case "n":
+                        return None
+                    case "no":
+                        return None
+                    case _:
+                        pass
+        else:
+            option = input("Continue? Type 'N' or 'No' to stop.")
+            match option.lower():
+                case "n":
+                    return None
+                case "no":
+                    return None
+                case _:
+                    pass
+
+
+
 #By Alysa Solomon
 def main():
     service = ServiceContainer()
+    user = None
     logged_in = False
     will_continue = True
     while(will_continue):
-        if logged_in:
+        if user != None:
             print("\nCurrent options are listed below. \nInput the number on the left to select your choice.")
             print("1: Get Popular Searches") #Not Implemented
             print("2: Get Random Recipe")  #Not Implemented
@@ -296,7 +339,7 @@ def main():
                     case 7: # Log Out
                         # TODO: Fix When Login Helper returns User ID
                         logoutHelper()
-                        logged_in = False
+                        user = None
                         pass
                     case 8: # Delete Account
                         print("This feature hasn't been implemented yet.")
@@ -333,7 +376,7 @@ def main():
                         recipe_list = random_recipe_helper()
                         print(recipe_list)
                     case 4: # Register Account
-                        print("This feature hasn't been implemented yet.")
+                        user = register_user()
                     case 5: # Searching For a recipe
                         search_not_logged_in()
                     case 6: # Exit
