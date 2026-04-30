@@ -123,58 +123,87 @@ def main():
     will_continue = True
     while(will_continue):
         if logged_in:
-            print("1: Get Popular Searches")
-            print("2: Get Random Recipe")
-            print("3: Search for Recipe")
-            print("4: Add Your Own Recipe")
-            print("5: Add Ingredients to Pantry")
-            print("6: Update User Information")
-            print("7: Search for Recipe")
-            print("8: Log Out")
-            print("9: Delete Account")
-            print("10: Exit")
+            print("\nCurrent options are listed below. \nInput the number on the left to select your choice.")
+            print("1: Get Popular Searches") #Not Implemented
+            print("2: Get Random Recipe")  #Not Implemented
+            print("3: Search for Recipe") #Not Implemented
+            print("4: Add Your Own Recipe") #Not Implemented
+            print("5: Add Ingredients to Pantry") #Not Implemented
+            print("6: Update User Information") #Not Implemented
+            print("7: Log Out")
+            print("8: Delete Account") #Not Implemented
+            print("9: Exit")
             try:
                 chosen_option = input("Select your choice:")
                 chosen_option = int(chosen_option)
+                match chosen_option:
+                    case 1: # Get Popular Searches
+                        print("This feature hasn't been implemented yet.")
+                    case 2: # Get Random Recipe
+                        print("This feature hasn't been implemented yet.")
+                        pass
+                    case 3: # Search for Recipe
+                        print("This feature hasn't been implemented yet.")
+                        pass
+                    case 4: # Add Recipe
+                        print("This feature hasn't been implemented yet.")
+                        pass
+                    case 5: # Add Ingrediets to Pantry
+                        print("This feature hasn't been implemented yet.")
+                        pass
+                    case 6: # Update User Info
+                        print("This feature hasn't been implemented yet.")
+                        pass
+                    case 7: # Log Out
+                        # TODO: Fix When Login Helper returns User ID
+                        logoutHelper()
+                        logged_in = False
+                        pass
+                    case 8: # Delete Account
+                        print("This feature hasn't been implemented yet.")
+                        pass
+                    case 9: # Exit
+                        will_continue = False
+                        print("You will be automatically logged out.\nThank you for using our Program!")
+                        pass
+                    case _:
+                        print("Invalid Option. Please Try Again.")
             except ValueError:
                 print("Please input a valid input.")
-                continue
         else:
+            print("\nCurrent options are listed below. \nInput the number on the left to select your choice.")
             print("1: Log In")
-            print("2: Get Popular Searches")
-            print("3: Get Random Recipe")
-            print("4: Create New Account")
-            print("5: Search for Recipe")
+            print("2: Get Popular Searches")  #Not Implemented
+            print("3: Get Random Recipe") #Not Implemented
+            print("4: Create New Account") #Not Implemented
+            print("5: Search for Recipe") #Not Implemented
             print("6: Exit")
-            logoutHelper()
             try:
                 chosen_option = input("Select your choice:")
                 chosen_option = int(chosen_option)
-                if(1 <= chosen_option and chosen_option <= 6):
-                    match chosen_option:
-                        case 1: # Log In
-                            is_logged_in = loginHelper()
-                            if not is_logged_in:
-                                print("Reseting Password has not been implemented yet.")
-                        case 2: # Get Pop Searches
-                            print("This feature hasn't been implemented yet.")
-                        case 3: # Get Random Recipe
-                            print("This feature hasn't been implemented yet.")
-                        case 4: # Register Account
-                            print("This feature hasn't been implemented yet.")
-                        case 5: # Searching For a recipe
-                            print("This feature hasn't been implemented yet.")
-                        case 6: # Exit
-                            will_continue = False
-                            print("Thank you for using our Program!")
-                    pass
-                else:
-                    print("Invalid Option. Please Try Again.")
+                match chosen_option:
+                    case 1: # Log In  
+                        #TODO: fix when loginHelper returns a user ID
+                        logged_in = loginHelper()
+                        if not logged_in:
+                            print("Reseting Password has not been implemented yet.")
+                    case 2: # Get Pop Searches
+                        print("This feature hasn't been implemented yet.")
+                    case 3: # Get Random Recipe
+                        print("This feature hasn't been implemented yet.")
+                    case 4: # Register Account
+                        print("This feature hasn't been implemented yet.")
+                    case 5: # Searching For a recipe
+                        print("This feature hasn't been implemented yet.")
+                    case 6: # Exit
+                        will_continue = False
+                        print("Thank you for using our Program!")
+                    case _:
+                        print("Invalid Option. Please Try Again.")
+                    
             except ValueError:
                 print("Please input a valid input.")
 
-        # Delete once Exit is implemented in both sides.
-        will_continue = False
 
 
 if __name__ == "__main__":
