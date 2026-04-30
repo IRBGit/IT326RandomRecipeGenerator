@@ -41,7 +41,8 @@ class DBConnect:
             self.SessionLocal = sessionmaker(
                 bind = self.engine, 
                 autoflush = False, 
-                autocommit = False
+                autocommit = False,
+                expire_on_commit=False
             )
             if self.SessionLocal:
                 print("Connected successfully")

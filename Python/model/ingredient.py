@@ -1,16 +1,15 @@
 """
-    Authors: Jon Bailey and Thaanvi Ambala
+    Authors: Jon Bailey and Thanvi Ambala
 """
 
 from __future__ import annotations
 from sqlalchemy.orm import relationship, Mapped, mapped_column
 from sqlalchemy import Integer, String, Sequence
 from model.base import Base
-from model.associations import recipe_ingredients
 from typing import TYPE_CHECKING, List
 
 if TYPE_CHECKING:
-    from model import Recipe, PantryItem
+    from model import Recipe, PantryItem, RecipeIngredient
 
 # This class is for the backend of ingredients
 
@@ -21,27 +20,56 @@ if TYPE_CHECKING:
 class Ingredient(Base):
     __tablename__ = "ingredients"
 
-    id: Mapped[int] = mapped_column(Integer, Sequence("ingredient_id_seq"), primary_key=True)
-    name: Mapped[str] = mapped_column(String(255), nullable=False, unique=True)
+    id: Mapped[int] = mapped_column(
+        Integer, 
+        Sequence("ingredient_id_seq"), 
+        primary_key=True
+        )
+    name: Mapped[str] = mapped_column(
+        String(255), 
+        nullable=False, 
+        unique=True
+        )
 
     # Recipes that use this ingredient
-    recipes: Mapped[List["Recipe"]] = relationship(
-        "Recipe",
-        secondary=recipe_ingredients,
-        back_populates="ingredients"
-    )
+    recipe_associations: Mapped[List["RecipeIngredient"]] = relationship(
+        "RecipeIngredient",
+        back_populates="ingredient",
+        cascade = "all, delete-orphan"
+        )
 
-    pantry_items: Mapped[List[PantryItem]] = relationship(
+    pantry_items: Mapped[List["PantryItem"]] = relationship(
     "PantryItem",
-    back_populates="ingredient"
-)
+    back_populates="ingredient",
+    cascade = "all, delete-orphan"
+        )
 
-    def __init__(self, name: str):
+    def __init__(
+            self, 
+            name: str
+            ):
         self.name = name
 
-    def __repr__(self):
+    def __repr__(
+            self
+            ):
         return f"<Ingredient(id={self.id}, name='{self.name}')>"
 
-    def get_name(self) -> str:
+    def get_name(
+            self
+            ) -> str:
         assert isinstance(self.name, str)
         return self.name
+    
+    def __eq__(
+            self, 
+            other: object
+            ) -> bool:
+        if not isinstance(other, Ingredient):
+            return False
+        return self.id is not None and other.id is not None and self.id == other.id
+    
+    def __hash__(
+            self
+            ) -> int:
+        return hash((type(self), self.id))
