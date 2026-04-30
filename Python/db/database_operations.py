@@ -39,7 +39,12 @@ class PantryService:
             Optional(PantryItem): Will return the PantryItem object if it succeeds.
         """
         with UnitOfWork() as uow:
-            item = user.add_ingredient_to_pantry(
+            db_user = uow.users.get_by_id(user.id)
+
+            if db_user is None:
+                raise ValueError("User does not exist")
+
+            item = db_user.add_ingredient_to_pantry(
                 ingredient=ingredient,
                 quantity=quantity,
                 unit=unit
@@ -64,10 +69,17 @@ class PantryService:
             Optional(PantryItem): The pantry item that was removed or None if it is not found.
         """
         with UnitOfWork() as uow:
-            item = user.remove_ingredient_from_pantry(ingredient=ingredient)
+            db_user = uow.users.get_by_id(user.id)
+
+            if db_user is None:
+                raise ValueError("User not found")
+
+            item = db_user.remove_ingredient_from_pantry(ingredient)
+
             if item:
                 uow.commit()
-        return item
+
+            return item
             
     
     def update_pantry_item(
@@ -76,29 +88,47 @@ class PantryService:
             ingredient: Ingredient, 
             quantity: Optional[int] = None, 
             unit: Optional[str] = None
-            ) -> Optional[PantryItem]:
-        """
-        Update the quantity or unit of items in the pantry.
+        ) -> Optional[PantryItem]:
 
-        Args:
-            user(User): The user id from a user account.
-            ingredient_name(str): The ingredient item's name
-            quantity(int): The amount of the ingredient.
-            unit(str): The unit of the amount of the ingredient.
-
-        Returns:
-            Optional(PantryItem): The PantryItem or None
-        """
         with UnitOfWork() as uow:
-            item = user.update_pantry_item(
+            db_user = uow.users.get_by_id(user.id)
+
+            if db_user is None:
+                raise ValueError("User not found")
+
+            item = db_user.update_pantry_item(
                 ingredient=ingredient,
                 quantity=quantity,
                 unit=unit
             )
+
             if item:
                 uow.commit()
 
-        return item
+            return item
+    
+    def get_all_pantry_items(
+            self,
+            user: User
+    ) -> list[dict]:
+        with UnitOfWork() as uow:
+            db_user = uow.users.get_by_id(user.id)
+
+            if db_user is None:
+                raise ValueError("User does not exist")
+
+            pantry_items = list(db_user._pantry.values())
+
+            return [
+                {
+                    "index": i,
+                    "ingredient_id": item.ingredient.id,
+                    "ingredient_name": item.ingredient.name,
+                    "quantity": item.quantity,
+                    "unit": item.unit
+                }
+                for i, item in enumerate(pantry_items)
+            ]
 
 class UserService:
     """
@@ -266,6 +296,18 @@ class UserService:
 
             return updated_notes
 
+    def get_all_user_notes(self, user_id: int) -> list[tuple[Recipe, str]]:
+        with UnitOfWork() as uow:
+            user = uow.users.get_by_id(user_id)
+            if not user:
+                raise ValueError("User not found")
+    
+            result = []
+            for recipe, notes in user.notes.items():
+                for note in notes:
+                    result.append((recipe, note))
+
+            return result
 
 class IngredientService:
     """
@@ -342,19 +384,20 @@ class IngredientService:
         if ingredient is None:
             return False
         
-        assert type(ingredient) is Ingredient
-        
         with UnitOfWork() as uow:
-            assert type(uow.session) is Session
-            ingredient = uow.session.merge(ingredient)
-            uow.ingredients.delete(ingredient)
+            db_ingredient = uow.ingredients.get_by_id(ingredient.id)
+
+            if not db_ingredient:
+                return False
+            
+            uow.ingredients.delete(db_ingredient)
             uow.commit()
             return True
     
     def get_ingredient_by_id(
             self,
             ing_id: int
-    ) -> Ingredient:
+    ) -> Optional[Ingredient]:
         with UnitOfWork() as uow:
             return uow.ingredients.get_by_id(ing_id)
 
@@ -375,16 +418,8 @@ class RecipeService:
             ) -> Recipe | None:
         with UnitOfWork() as uow:
             return uow.recipes.get_by_name(name)
-                
-    def add_recipe(
-        self,
-        name: str,
-        instructions: Optional[List[str]] = None,
-        ingredients: Optional[list[str]] = None,
-        pub_time: Optional[datetime] = None
-        ) -> Recipe | None:
         
-   def add_recipe(
+    def add_recipe(
         self,
         name: str,
         instructions: Optional[List[str]] = None,
@@ -416,8 +451,6 @@ class RecipeService:
             if ingredients is None:
                 uow.commit()
                 return recipe
-            
-            recipe = Recipe(name=name, ingredients=items, instructions=instructions or [], pub_time=pub_time)
 
             for ing_name in ingredients:
                 ingredient = uow.ingredients.get_by_name(ing_name)
@@ -511,7 +544,7 @@ class RecipeService:
         the Retrieve Recipes use case.
         """
         with UnitOfWork() as uow:
-            recipes = uow.recipes.get_all()
+            recipes = list(uow.recipes.get_all())
             return recipes
 
     #-save to favorites/favorites methods
@@ -576,7 +609,9 @@ class RecipeService:
             if not user:
                 raise ValueError("User not found")
             
-            return user.get_favorite_recipes()
+            favorites = list(user.favorites)
+            
+            return favorites
     #-------------------
         
     
@@ -587,13 +622,11 @@ class SearchService:
 
     def record_search(
             self, 
-            user: User, 
             query: str):
         query = query.strip().lower()
         with UnitOfWork() as uow:
 
             search = UserSearch(
-                user_id = user.id if user else None,
                 query = query
             )
             
@@ -603,10 +636,15 @@ class SearchService:
     def get_popular_searches(
             self, 
             limit: int = 10
-            ) -> list[Row[tuple[str, int]]]:
+            ) -> list[dict[str, int]]:
         with UnitOfWork() as uow:
-            result = uow.searches.get_popular(limit = limit)
-            return result
+            return [
+                {
+                    "query": row [0],
+                    "count": row[1]
+                }
+                for row in uow.searches.get_popular(limit = limit)
+            ]
     
     def get_recent_searches(
             self,
@@ -708,6 +746,22 @@ class ServiceContainer:
     ) -> list[str]:
         return self.user_service.delete_personal_note(user = user, recipe = recipe, note = note)
     
+    def update_note(
+            self,
+            user: User,
+            recipe: Recipe,
+            old_note: str,
+            new_note: str
+    ) -> list[str]:
+        self.user_service.delete_personal_note(user, recipe, old_note)
+        return self.user_service.add_personal_note(user, recipe, new_note)
+    
+    def get_all_user_notes(
+            self, 
+            user: User
+        ) -> list[tuple[Recipe, str]]:
+            return self.user_service.get_all_user_notes(user.id)
+    
     #Ingredient Service
     def add_ingredient(
             self, 
@@ -778,6 +832,12 @@ class ServiceContainer:
             unit
         )
     
+    def get_all_pantry_items(
+            self,
+            user: User
+    ) -> list[PantryItem]:
+        return self.pantry_service.get_all_pantry_items(user)
+    
     #Recipe Service
     def add_recipe(
             self,
@@ -834,15 +894,14 @@ class ServiceContainer:
 
     def record_search(
             self,
-            user: User, 
             query: str
     ):
-        self.search_service.record_search(user, query)
+        self.search_service.record_search(query )
 
     def get_popular_searches(
             self,
             limit: int
-    ) -> list[Row[tuple[str, int]]]:
+    ) -> list[dict[str, int]]:
         """
         Get the most popular searches.
 
