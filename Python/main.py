@@ -135,7 +135,12 @@ def get_ingredients():
     return ing_list
 
 def get_category():
-    category_list = ["Beef","Breakfast","Chicken","Dessert", "Goat","Lamb", "Miscellaneous",
+    category_list = ["Beef",
+                     "Breakfast",
+                     "Chicken","Dessert", 
+                     "Goat",
+                     "Lamb", 
+                     "Miscellaneous",
                      "Pasta"
                      "Pork",
                      "Seafood"
@@ -240,7 +245,7 @@ def search_not_logged_in():
                     print("2: You give us a list of wanted ingredients, unwanted ingredients, any style of food, or dietary restrictions, and we will give you recipes that follow your requirements.")
                     print("3: You give us a recipe of ingredients you desire and we will find recipes that have those ingredients")
                     print("4: Descriptions of every menu option")
-                    print("5: Stop Searching")
+                    print("5: Stop Searching and go to previous menu")
                     input("Press enter to continue.")
                 case 5: # Exit
                     is_searching = False
@@ -307,9 +312,9 @@ def main():
         else:
             print("\nCurrent options are listed below. \nInput the number on the left to select your choice.")
             print("1: Log In")
-            print("2: Get Popular Searches") #Not Implemented
-            print("3: Get Random Recipe") #Not Implemented
-            print("4: Create New Account") #Not Implemented
+            print("2: Get Popular Searches") # Not Implemented
+            print("3: Get Random Recipe") # Not Tested
+            print("4: Create New Account") # Not Implemented
             print("5: Search for Recipe") # Somewhat Implemented
             print("6: Exit")
             try:
