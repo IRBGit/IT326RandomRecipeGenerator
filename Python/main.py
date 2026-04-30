@@ -119,17 +119,19 @@ def retrieve_recipe(recipes: List[Recipe]):
     getting_recipe = True
 
 # By Alysa Solomon
-def get_ingredients():
+def get_ingredients(outputString: str):
     count = 0
     gettingCount = True
     while gettingCount:
         try:
-            count = input()
+            count = input(outputString)
             count = int(count)
             gettingCount = False
         except ValueError:
             print("Please input a valid input.")
             pass
+        pass
+
 
     ing_list = []
     print("Please input name of ingredients, one at a time.")
@@ -195,8 +197,7 @@ def get_dietary():
 
 # By Alysa Solomon
 def random_recipe_helper():
-    print("In Arabic Numerals, How many ingredients do you want to include in the recipe?\n")
-    req_ing = get_ingredients()
+    req_ing = get_ingredients("In Arabic Numerals, How many ingredients do you want to include in the recipe?\n")
     get_value = True
     while get_value:
         print("In Arabic Numerals, How many recipes do you want?\n")
@@ -215,9 +216,20 @@ def filter_helper():
     pass
 
 
-def search_by_name():
+def search_by_name(search_func: SearchEngine.RecipeSearchEngine):
+    will_continue = True
+    while will_continue:
+        search_str = input("Please input Name of Recipe: ")
+        recipe_list = search_func.search_recipes_by_name(search_str)
+        print("Additonal Features not supported")
+        return recipe_list
     pass
-def search_by_criteria():
+def search_by_criteria(search_func: SearchEngine.RecipeSearchEngine):
+    req_ing = get_ingredients("In Arabic Numerals, How many ingredients do you want to include in the recipe?\n")
+    ew_ing = get_ingredients("In Arabic Numerals, How many ingredients do you want to exclude from the recipe?\n")
+    category = get_category()
+    dietary_list = get_dietary()
+    recipe_list = search_func.search_recipes_by_criteria(req_ing,ew_ing,category,dietary_list)
     pass
 def search_by_ing():
     pass
@@ -229,7 +241,7 @@ def search_not_logged_in():
     search_func = SearchEngine.RecipeSearchEngine()
     while is_searching:
         print("Current Options are listed below:")
-        print("1: Search by Name")  # Not Implemented
+        print("1: Search by Name")  # Somewhat Implemented
         print("2: Search by Specified Criteria") # Not Implemented
         print("3: Search by Necessary Ingredients") # Not Implemented
         print("4: Help")
@@ -239,24 +251,18 @@ def search_not_logged_in():
             chosen_option = int(chosen_option)
             match chosen_option:
                 case 1: # search by name
-                    search_str = input("Please input Name of Recipe: ")
-                    recipe_list = search_func.search_recipes_by_name(search_str)
-                    print("Additonal Features not supported")
-                    pass
+                    print(search_by_name)
                 case 2: # Search by Criteria
                     print("This Feature has not been implemeted yet.")
-                    print("In Arabic Numerals, How many ingredients do you want to include in the recipe?\n")
-                    req_ing = get_ingredients()
-                    print("In Arabic Numerals, How many ingredients do you want to exclude from the recipe?\n")
-                    ew_ing = get_ingredients()
+                    req_ing = get_ingredients("In Arabic Numerals, How many ingredients do you want to include in the recipe?\n")
+                    ew_ing = get_ingredients("In Arabic Numerals, How many ingredients do you want to exclude from the recipe?\n")
                     category = get_category()
                     dietary_list = get_dietary()
                     recipe_list = search_func.search_recipes_by_criteria(req_ing,ew_ing,category,dietary_list)
                     pass
                 case 3: # Search by Neccessary Ing
                     print("This Feature has not been implemeted yet.")
-                    print("In Arabic Numerals, How many ingredients do you want to include in the recipe?\n")
-                    req_ing = get_ingredients()
+                    req_ing = get_ingredients("In Arabic Numerals, How many ingredients do you want to include in the recipe?\n")
                     recipe_list = search_func.search_recipes_by_ingredients(req_ing)
                     pass
                 case 4: #Help Menu
