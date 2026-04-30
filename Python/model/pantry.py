@@ -62,7 +62,10 @@ class PantryItem(Base):
         if not isinstance(other, PantryItem):
             return False
         from model import User, Ingredient
-        return self.user == other.user and self.ingredient == other.ingredient
+        return (
+            self.user_id == other.user_id and
+            self.ingredient_id == other.ingredient_id
+        )
     
     def __hash__(
             self

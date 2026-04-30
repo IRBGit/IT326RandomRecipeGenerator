@@ -296,3 +296,6 @@ class User(Base):
 
     def reset_password(self, new_password: str):
         self.password = PWHash().hashPassword(new_password)
+
+    def get_pantry_items(self) -> list[PantryItem]:
+        return list(self._pantry.values())
