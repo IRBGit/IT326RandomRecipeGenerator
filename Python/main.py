@@ -119,6 +119,7 @@ def logoutHelper():
     return False
 
 def main():
+    service = ServiceContainer()
     logged_in = False
     will_continue = True
     while(will_continue):
@@ -173,7 +174,7 @@ def main():
         else:
             print("\nCurrent options are listed below. \nInput the number on the left to select your choice.")
             print("1: Log In")
-            print("2: Get Popular Searches")  #Not Implemented
+            print("2: Get Popular Searches") #Not Implemented
             print("3: Get Random Recipe") #Not Implemented
             print("4: Create New Account") #Not Implemented
             print("5: Search for Recipe") #Not Implemented
@@ -203,6 +204,10 @@ def main():
                     
             except ValueError:
                 print("Please input a valid input.")
+                pass
+            pass
+        pass
+    service.close()
 
 
 
