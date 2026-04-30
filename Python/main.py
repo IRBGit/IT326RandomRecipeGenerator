@@ -114,6 +114,9 @@ def loginHelper():
 
     if success:
         print("You are now logged in!")
+        return True
+    
+    return False
 
 def logoutHelper():
     print(logout())
