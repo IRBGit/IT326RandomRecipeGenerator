@@ -6,13 +6,15 @@ from model.auth import login, logout
 load_dotenv()
 
 def loginHelper():
-        # login part
+    # login part
     username = input("Enter username: ")
     password = input("Enter password: ")
 
     success, message = login(username, password)
     print(message)
-    return True
+
+    if success:
+        print("You are now logged in!")
 
 def logoutHelper():
     print(logout())
