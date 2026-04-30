@@ -330,6 +330,7 @@ def main():
                         print("This feature hasn't been implemented yet.")
                     case 3: # Get Random Recipe
                         recipe_list = random_recipe_helper()
+                        print(recipe_list)
                     case 4: # Register Account
                         print("This feature hasn't been implemented yet.")
                     case 5: # Searching For a recipe
