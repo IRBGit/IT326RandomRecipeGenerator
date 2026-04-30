@@ -134,7 +134,7 @@ def get_ingredients():
         ing_list.append(input())
     return ing_list
 
-def get_dietary():
+def get_category():
     while True:
         print("The valid categories are:")
         print("1: Beef")
@@ -192,7 +192,7 @@ def get_dietary():
             print("Please input a valid input.")
             pass
 
-def get_category():
+def get_dietary():
     #TODO: FINISH THIS
     category_list = ["Algerian","American","Argentinian","Australian","British","Canadian","Chinese","Croatian","Dutch","Egyptian","Filipino","French","Greek","Indian","Irish","Italian","Jamaican","Japanese","Kenyan","Malaysian","Mexican","Moroccan","Norwegian","Polish","Portuguese","Russian","Saudi Arabian","Slovakian","Spanish","Syrian","Thai","Tunisian","Turkish","Ukrainian","Uruguayan","Venezulan","Vietnamese"]
     while True:
@@ -212,9 +212,6 @@ def get_category():
         except:
             print("Please input a valid input.")
             pass
-        
-    
-    pass 
 
 def search_not_logged_in():
     is_searching = True
@@ -241,8 +238,8 @@ def search_not_logged_in():
                     req_ing = get_ingredients()
                     print("In Arabic Numerals, How many ingredients do you want to exclude from the recipe?\n")
                     ew_ing = get_ingredients()
-                    category = get_category()
-                    dietary_list = get_dietary()
+                    category = get_dietary()
+                    dietary_list = get_category()
                     pass
                 case 3: # Search by Neccessary Ing
                     print("This Feature has not been implemeted yet.")
