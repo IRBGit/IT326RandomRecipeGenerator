@@ -329,6 +329,7 @@ def main():
                     case 2: # Get Pop Searches
                         print("This feature hasn't been implemented yet.")
                     case 3: # Get Random Recipe
+                        # TODO: NOT OUTPUTTING LIST OF RECIPES
                         recipe_list = random_recipe_helper()
                         print(recipe_list)
                     case 4: # Register Account
