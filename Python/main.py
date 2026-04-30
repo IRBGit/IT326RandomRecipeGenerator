@@ -4,7 +4,7 @@ import pathlib
 from db.database_operations import ServiceContainer
 from model import Recipe, User
 from model.auth import login, logout
-from SearchEngine import SearchEngine
+from SearchEngine import SearchEngine, Filter
 from typing import List
 
 load_dotenv()
@@ -119,17 +119,19 @@ def retrieve_recipe(recipes: List[Recipe]):
     getting_recipe = True
 
 # By Alysa Solomon
-def get_ingredients():
+def get_ingredients(outputString: str):
     count = 0
     gettingCount = True
     while gettingCount:
         try:
-            count = input()
+            count = input(outputString)
             count = int(count)
             gettingCount = False
         except ValueError:
             print("Please input a valid input.")
             pass
+        pass
+
 
     ing_list = []
     print("Please input name of ingredients, one at a time.")
@@ -195,8 +197,7 @@ def get_dietary():
 
 # By Alysa Solomon
 def random_recipe_helper():
-    print("In Arabic Numerals, How many ingredients do you want to include in the recipe?\n")
-    req_ing = get_ingredients()
+    req_ing = get_ingredients("In Arabic Numerals, How many ingredients do you want to include in the recipe?\n")
     get_value = True
     while get_value:
         print("In Arabic Numerals, How many recipes do you want?\n")
@@ -208,8 +209,31 @@ def random_recipe_helper():
     search_func = SearchEngine.RecipeSearchEngine()
     if req_ing == []:
         return search_func.get_random_recipes(choose)
-    f = filter()
+    f = Filter.Filter()
     return search_func.get_random_recipe_with_filter(choose,req_ing,f)
+
+def filter_helper():
+    pass
+
+
+def search_by_name(search_func: SearchEngine.RecipeSearchEngine):
+    will_continue = True
+    while will_continue:
+        search_str = input("Please input Name of Recipe: ")
+        recipe_list = search_func.search_recipes_by_name(search_str)
+        print("Additonal Features not supported")
+        return recipe_list
+    pass
+def search_by_criteria(search_func: SearchEngine.RecipeSearchEngine):
+    req_ing = get_ingredients("In Arabic Numerals, How many ingredients do you want to include in the recipe?\n")
+    ew_ing = get_ingredients("In Arabic Numerals, How many ingredients do you want to exclude from the recipe?\n")
+    category = get_category()
+    dietary_list = get_dietary()
+    recipe_list = search_func.search_recipes_by_criteria(req_ing,ew_ing,category,dietary_list)
+    pass
+def search_by_ing():
+    pass
+
 
 # By Alysa Solomon
 def search_not_logged_in():
@@ -217,7 +241,7 @@ def search_not_logged_in():
     search_func = SearchEngine.RecipeSearchEngine()
     while is_searching:
         print("Current Options are listed below:")
-        print("1: Search by Name")  # Not Implemented
+        print("1: Search by Name")  # Somewhat Implemented
         print("2: Search by Specified Criteria") # Not Implemented
         print("3: Search by Necessary Ingredients") # Not Implemented
         print("4: Help")
@@ -227,24 +251,18 @@ def search_not_logged_in():
             chosen_option = int(chosen_option)
             match chosen_option:
                 case 1: # search by name
-                    search_str = input("Please input Name of Recipe: ")
-                    recipe_list = search_func.search_recipes_by_name(search_str)
-                    print("Additonal Features not supported")
-                    pass
+                    print(search_by_name)
                 case 2: # Search by Criteria
                     print("This Feature has not been implemeted yet.")
-                    print("In Arabic Numerals, How many ingredients do you want to include in the recipe?\n")
-                    req_ing = get_ingredients()
-                    print("In Arabic Numerals, How many ingredients do you want to exclude from the recipe?\n")
-                    ew_ing = get_ingredients()
+                    req_ing = get_ingredients("In Arabic Numerals, How many ingredients do you want to include in the recipe?\n")
+                    ew_ing = get_ingredients("In Arabic Numerals, How many ingredients do you want to exclude from the recipe?\n")
                     category = get_category()
                     dietary_list = get_dietary()
                     recipe_list = search_func.search_recipes_by_criteria(req_ing,ew_ing,category,dietary_list)
                     pass
                 case 3: # Search by Neccessary Ing
                     print("This Feature has not been implemeted yet.")
-                    print("In Arabic Numerals, How many ingredients do you want to include in the recipe?\n")
-                    req_ing = get_ingredients()
+                    req_ing = get_ingredients("In Arabic Numerals, How many ingredients do you want to include in the recipe?\n")
                     recipe_list = search_func.search_recipes_by_ingredients(req_ing)
                     pass
                 case 4: #Help Menu
@@ -253,7 +271,6 @@ def search_not_logged_in():
                     print("3: You give us a recipe of ingredients you desire and we will find recipes that have those ingredients")
                     print("4: Descriptions of every menu option")
                     print("5: Stop Searching and go to previous menu")
-                    input("Press enter to continue.")
                 case 5: # Exit
                     is_searching = False
                     pass
@@ -261,6 +278,8 @@ def search_not_logged_in():
                     print("Invalid Option. Please Try Again.")
         except ValueError:
             print("Please input a valid input.")
+            pass
+        input("Press Enter to Continue")
 
 # By Alysa Solomon
 def register_user(service: ServiceContainer):
@@ -295,6 +314,15 @@ def register_user(service: ServiceContainer):
                 case _:
                     pass
 
+#By: Alysa Solomon
+def get_pop_searches(service: ServiceContainer):
+    while True:
+        print("In Arabic Numerals, How many recipes do you want?\n")
+        try:
+            count = int(input())
+            return service.get_popular_searches(count)
+        except ValueError:
+            print("Please input a valid input")
 
 
 #By Alysa Solomon
@@ -352,12 +380,14 @@ def main():
                         print("Invalid Option. Please Try Again.")
             except ValueError:
                 print("Please input a valid input.")
+                pass
+            input("Press Enter to Continue")
         else:
             print("\nCurrent options are listed below. \nInput the number on the left to select your choice.")
             print("1: Log In")
             print("2: Get Popular Searches") # Not Implemented
-            print("3: Get Random Recipe") # Not Tested
-            print("4: Create New Account") # Not Implemented
+            print("3: Get Random Recipe") # Not Working (Not Main.Py Issue)
+            print("4: Create New Account") # Not Tested
             print("5: Search for Recipe") # Somewhat Implemented
             print("6: Exit")
             try:
@@ -370,11 +400,18 @@ def main():
                         if not logged_in:
                             print("Reseting Password has not been implemented yet.")
                     case 2: # Get Pop Searches
-                        print("This feature hasn't been implemented yet.")
+                        recipe_list = get_pop_searches(service)
+                        if recipe_list != []:
+                            print(recipe_list)
+                        else:
+                            print("No Recipes Found.")
                     case 3: # Get Random Recipe
                         # TODO: NOT OUTPUTTING LIST OF RECIPES
                         recipe_list = random_recipe_helper()
-                        print(recipe_list)
+                        if recipe_list != []:
+                            print(recipe_list)
+                        else:
+                            print("No Recipes Found.")
                     case 4: # Register Account
                         user = register_user()
                     case 5: # Searching For a recipe
@@ -388,6 +425,7 @@ def main():
             except ValueError:
                 print("Please input a valid input.")
                 pass
+            input("Press Enter to Continue")
             pass
         pass
     service.close()
