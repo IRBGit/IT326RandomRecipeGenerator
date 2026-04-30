@@ -4,6 +4,8 @@ import pathlib
 from db.database_operations import ServiceContainer
 from model import Recipe, User
 from model.auth import login, logout
+from SearchEngine import SearchEngine
+from typing import List
 
 load_dotenv()
 
@@ -111,6 +113,152 @@ def logoutHelper():
     print(logout())
     return False
 
+def retrieve_recipe(recipes: List[Recipe]):
+    getting_recipe = True
+
+def get_ingredients():
+    count = 0
+    gettingCount = True
+    while gettingCount:
+        try:
+            count = input()
+            count = int(count)
+            gettingCount = False
+        except:
+            print("Please input a valid input.")
+            pass
+
+    ing_list = []
+    print("Please input name of ingredients, one at a time.")
+    for _ in range(count):
+        ing_list.append(input())
+    return ing_list
+
+def get_category():
+    while True:
+        print("The valid categories are:")
+        print("1: Beef")
+        print("2: Breakfast")
+        print("3: Chicken")
+        print("4: Dessert")
+        print("5: Goat")
+        print("6: Lamb")
+        print("7: Miscellaneous")
+        print("8: Pasta")
+        print("9: Pork")
+        print("10: Seafood")
+        print("11: Side")
+        print("12: Starter")
+        print("13: Vegan")
+        print("14: Vegetarian")
+        print("15: No Dietary Restrictions")
+        try:
+            chosed_option = input()
+            chosed_option = int(chosed_option)
+            match chosed_option:
+                case 1:
+                    return "beef"
+                case 2:
+                    return "breakfast"
+                case 3:
+                    return "chicken"
+                case 4:
+                    return "dessert"
+                case 5:
+                    return "goat"
+                case 6:
+                    return "lamb"
+                case 7:
+                    return "Miscellaneous"
+                case 8:
+                    return "pasta"
+                case 9:
+                    return "pork"
+                case 10:
+                    return "seafood"
+                case 11:
+                    return "side"
+                case 12:
+                    return "starter"
+                case 13:
+                    return "vegan"
+                case 14: 
+                    return "vegetarian"
+                case 15:
+                    return ""
+                case _:
+                    print("Invalid Option. Please Try Again.")
+        except:
+            print("Please input a valid input.")
+            pass
+
+def get_dietary():
+    #TODO: FINISH THIS
+    category_list = ["Algerian","American","Argentinian","Australian","British","Canadian","Chinese","Croatian","Dutch","Egyptian","Filipino","French","Greek","Indian","Irish","Italian","Jamaican","Japanese","Kenyan","Malaysian","Mexican","Moroccan","Norwegian","Polish","Portuguese","Russian","Saudi Arabian","Slovakian","Spanish","Syrian","Thai","Tunisian","Turkish","Ukrainian","Uruguayan","Venezulan","Vietnamese"]
+    while True:
+        print("Valid Categories:")
+        for i in range(len(category_list)):
+            print(f"{i}: "+category_list[i])
+        try:
+            print(str(len(category_list)+1)+": No Desired Category")
+            chosed_option = input()
+            chosed_option = int(chosed_option)
+            if chosed_option == (len(category_list)+1):
+                return ""
+            if chosed_option > (len(category_list)+1):
+                input("Invalid Option. Press Enter to Continue")
+            else:
+                return category_list[chosed_option]
+        except:
+            print("Please input a valid input.")
+            pass
+
+def search_not_logged_in():
+    is_searching = True
+    search_func = SearchEngine.RecipeSearchEngine()
+    while is_searching:
+        print("Current Options are listed below:")
+        print("1: Search by Name")  # Not Implemented
+        print("2: Search by Specified Criteria") # Not Implemented
+        print("3: Search by Necessary Ingredients") # Not Implemented
+        print("4: Help")
+        print("5: Back")
+        try:
+            chosen_option = input("Select your choice:")
+            chosen_option = int(chosen_option)
+            match chosen_option:
+                case 1: # search by name
+                    search_str = input("Please input Name of Recipe: ")
+                    recipe_list = search_func.search_recipes_by_name(search_str)
+                    print("Additonal Features not supported")
+                    pass
+                case 2: # Search by Criteria
+                    print("This Feature has not been implemeted yet.")
+                    print("In Arabic Numerals, How many ingredients do you want to have in the recipe?\n")
+                    req_ing = get_ingredients()
+                    print("In Arabic Numerals, How many ingredients do you want to exclude from the recipe?\n")
+                    ew_ing = get_ingredients()
+                    category = get_dietary()
+                    dietary_list = get_category()
+                    pass
+                case 3: # Search by Neccessary Ing
+                    print("This Feature has not been implemeted yet.")
+                    pass
+                case 4: #Help Menu
+                    print("1: You input a name of a recipe, and our database finds all recipes that have that name in it's title")
+                    print("2: You give us a list of wanted ingredients, unwanted ingredients, any style of food, or dietary restrictions, and we will give you recipes that follow your requirements.")
+                    print("3: You give us a recipe of ingredients you desire and we will find recipes that have those ingredients")
+                    print("4: Descriptions of every menu option")
+                    print("5: Stop Searching")
+                    input("Press enter to continue.")
+                case 5: # Exit
+                    is_searching = False
+                    pass
+                case _:
+                    print("Invalid Option. Please Try Again.")
+        except ValueError:
+            print("Please input a valid input.")
+
 #By Alysa Solomon
 def main():
     service = ServiceContainer()
@@ -189,7 +337,7 @@ def main():
                     case 4: # Register Account
                         print("This feature hasn't been implemented yet.")
                     case 5: # Searching For a recipe
-                        print("This feature hasn't been implemented yet.")
+                        search_not_logged_in()
                     case 6: # Exit
                         will_continue = False
                         print("Thank you for using our Program!")
