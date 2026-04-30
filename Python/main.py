@@ -193,7 +193,7 @@ def get_category():
             pass
 
 def get_dietary():
-    #TODO: FINISH THIS
+    #TODO: I don't know if this is correct
     category_list = ["Algerian","American","Argentinian","Australian","British","Canadian","Chinese","Croatian","Dutch","Egyptian","Filipino","French","Greek","Indian","Irish","Italian","Jamaican","Japanese","Kenyan","Malaysian","Mexican","Moroccan","Norwegian","Polish","Portuguese","Russian","Saudi Arabian","Slovakian","Spanish","Syrian","Thai","Tunisian","Turkish","Ukrainian","Uruguayan","Venezulan","Vietnamese"]
     while True:
         print("Valid Categories:")
@@ -234,15 +234,19 @@ def search_not_logged_in():
                     pass
                 case 2: # Search by Criteria
                     print("This Feature has not been implemeted yet.")
-                    print("In Arabic Numerals, How many ingredients do you want to have in the recipe?\n")
+                    print("In Arabic Numerals, How many ingredients do you want to include in the recipe?\n")
                     req_ing = get_ingredients()
                     print("In Arabic Numerals, How many ingredients do you want to exclude from the recipe?\n")
                     ew_ing = get_ingredients()
-                    category = get_dietary()
-                    dietary_list = get_category()
+                    category = get_category()
+                    dietary_list = get_dietary()
+                    recipe_list = search_func.search_recipes_by_criteria(req_ing,ew_ing,category,dietary_list)
                     pass
                 case 3: # Search by Neccessary Ing
                     print("This Feature has not been implemeted yet.")
+                    print("In Arabic Numerals, How many ingredients do you want to include in the recipe?\n")
+                    req_ing = get_ingredients()
+                    recipe_list = search_func.search_recipes_by_ingredients(req_ing)
                     pass
                 case 4: #Help Menu
                     print("1: You input a name of a recipe, and our database finds all recipes that have that name in it's title")
