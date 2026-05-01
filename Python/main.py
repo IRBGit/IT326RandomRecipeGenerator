@@ -335,7 +335,7 @@ def register_user(service: ServiceContainer):
                 return user
             except ValueError:
                 print("Either your Password or your Email was not valid.\nPlease try again.")
-                option = input("Continue? Type 'N' or 'No' to stop.")
+                option = input("Continue? Type 'N' or 'No' to stop.\n")
                 match option.lower():
                     case "n":
                         return None
@@ -344,7 +344,7 @@ def register_user(service: ServiceContainer):
                     case _:
                         pass
         else:
-            option = input("Continue? Type 'N' or 'No' to stop.")
+            option = input("Continue? Type 'N' or 'No' to stop.\n")
             match option.lower():
                 case "n":
                     return None
@@ -455,7 +455,7 @@ def main():
                             print("No Recipes Found.")
                             pass
                     case 4: # Register Account
-                        user = register_user()
+                        user = register_user(service)
                     case 5: # Searching For a recipe
                         search_not_logged_in()
                     case 6: # Exit

@@ -3,7 +3,7 @@
 """
 
 from abc import ABC, abstractmethod  # Built-in Python module for abstract classes
-from Filter import Filter            # We import Filter because it's used as a parameter type
+from SearchEngine.Filter import Filter            # We import Filter because it's used as a parameter type
 
 
 class SearchEngine(ABC):  # ABC = Abstract Base Class — acts like an <<Interface>>
