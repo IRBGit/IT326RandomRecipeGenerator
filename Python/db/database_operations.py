@@ -560,7 +560,40 @@ class RecipeService:
             uow.commit()
             return True
     
-    #By Jon Bailey
+    def find_recipes_by_ingredients(
+            self,
+            ingredients: list[str]
+    ) -> list[Recipe]:
+        with UnitOfWork() as uow:
+            all_recipes = uow.recipes.get_all()
+            if not ingredients:
+                return all_recipes
+            names = [ing.strip().lower() for ing in ingredients]
+            search_ingredients = [uow.ingredients.get_by_name(name) for name in names]
+            matching_recipes = []
+            search_ingredients = [ing for ing in search_ingredients if ing is not None]
+            if len(search_ingredients) != len(ingredients):
+                return []  # If any ingredient is not found, return empty list
+            ingredient_ids = {ing.id for ing in search_ingredients}
+            for recipe in all_recipes:
+                recipe_ingredient_ids = set(recipe._ingredients.keys())
+                if ingredient_ids.issubset(recipe_ingredient_ids):
+                    matching_recipes.append(recipe)
+            return matching_recipes 
+
+    def find_recipes_by_category(
+            self,
+            category: str
+    ) -> list[Recipe]:
+        with UnitOfWork() as uow:
+            all_recipes = uow.recipes.get_all()
+            category_lower = category.strip().lower()
+            matching_recipes = []
+            for recipe in all_recipes:
+                if recipe.category and recipe.category.strip().lower() == category_lower:
+                    matching_recipes.append(recipe) 
+            return matching_recipes 
+            
     def add_ingredient_to_recipe(
             self,
             recipe_id: int,
@@ -964,7 +997,18 @@ class ServiceContainer:
             raise RuntimeError("Failed to create Recipe")
         return recipe
     
-    #By Jon Bailey
+    def find_recipes_by_ingredients(
+            self, 
+            ingredients: list[str]
+        ) -> list[Recipe]:
+        return self.recipe_service.find_recipes_by_ingredients(ingredients)
+    
+    def find_recipes_by_category(
+            self, 
+            category: str
+        ) -> list[Recipe]:
+        return self.recipe_service.find_recipes_by_category(category)
+
     def delete_recipe(self, recipe_id: int) -> bool:
         return self.recipe_service.delete_recipe(recipe_id)
 

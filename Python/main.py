@@ -298,8 +298,8 @@ def get_dietary():
             pass
 
 # By Alysa Solomon
-def random_recipe_helper():
-    req_ing = get_ingredients("How many ingredients do you want to include in the recipe?\n")
+def random_recipe_helper(search_func: SearchEngine.RecipeSearchEngine):
+    req_ing = get_ingredients("In Arabic Numerals, How many ingredients do you want to include in the recipe?\n")
     get_value = True
     while get_value:
         print("How many recipes do you want?\n")
@@ -308,7 +308,6 @@ def random_recipe_helper():
             get_value = False
         except ValueError:
             print("Please input a valid input")
-    search_func = SearchEngine.RecipeSearchEngine()
     if req_ing == []:
         return search_func.get_random_recipes(choose)
     f = Filter.Filter()
@@ -366,9 +365,8 @@ def rank(recipe_list: List[Recipe]):
             pass
 
 # By Alysa Solomon
-def search_not_logged_in():
+def search_not_logged_in(search_func: SearchEngine.RecipeSearchEngine):
     is_searching = True
-    search_func = SearchEngine.RecipeSearchEngine()
     while is_searching:
         print("\nCurrent Options are listed below:")
         print("1: Search by Name")  # Somewhat Implemented
@@ -453,14 +451,15 @@ def register_user(service: ServiceContainer):
                     pass
 
 #By: Alysa Solomon and Jon Bailey
-def get_pop_searches(service: ServiceContainer, search_engine: SearchEngine.RecipeSearchEngine):
+def get_pop_searches(service: ServiceContainer):
+    search_engine = SearchEngine.RecipeSearchEngine()
     while True:
         print("How many popular searches do you want? The default is 10. Press enter for default selection\n")
 
         try:
             raw = input()
 
-            if raw.strip() == "":
+            if raw == "":
                 count = 10
             else:
                 count = int(raw)
@@ -538,6 +537,7 @@ def add_recipe(service: ServiceContainer):
 #By Alysa Solomon
 def main():
     service = ServiceContainer()
+    search_func = SearchEngine.RecipeSearchEngine(service)
     user = None
     will_continue = True
     while(will_continue):
@@ -557,13 +557,13 @@ def main():
                 chosen_option = int(chosen_option)
                 match chosen_option:
                     case 1: # Get Popular Searches
-                        # recipe_list = get_pop_searches(service)
-                        # if recipe_list != []:
-                        #     print(recipe_list)
-                        # else:
-                        #     print("No Recipes Found.")
-                        print("BROKEN: WILL NOT WORK")
-                        print("UNCOMMENT OUT WHEN TESTING")
+                        recipe_list = get_pop_searches(service)
+                        if recipe_list != []:
+                            print(recipe_list)
+                        else:
+                            print("No Recipes Found.")
+                        # print("BROKEN: WILL NOT WORK")
+                        # print("UNCOMMENT OUT WHEN TESTING")
                     case 2: # Get Random Recipe
                         # TODO: NOT OUTPUTTING LIST OF RECIPES
                         recipe_list = random_recipe_helper()
@@ -624,13 +624,13 @@ def main():
                             pass
                         input("Press Enter to Continue")
                     case 2: # Get Pop Searches
-                        # recipe_list = get_pop_searches(service)
-                        # if recipe_list != []:
-                        #     print(recipe_list)
-                        # else:
-                        #     print("No Recipes Found.")
-                        print("BROKEN: WILL NOT WORK")
-                        print("UNCOMMENT OUT WHEN TESTING")
+                        recipe_list = get_pop_searches(service)
+                        if recipe_list != []:
+                            print(recipe_list)
+                        else:
+                            print("No Recipes Found.")
+                        # print("BROKEN: WILL NOT WORK")
+                        # print("UNCOMMENT OUT WHEN TESTING")
                     case 3: # Get Random Recipe
                         # TODO: NOT OUTPUTTING LIST OF RECIPES
                         recipe_list = random_recipe_helper()

@@ -1,5 +1,5 @@
 """
-    Authors: Thanvi Ambala and 
+    Authors: Thanvi Ambala 
 """
 
 from sqlalchemy import select

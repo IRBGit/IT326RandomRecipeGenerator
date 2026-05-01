@@ -1,11 +1,10 @@
 """
-    Authors: Thanvii Ambala and 
+    Author: Thanvi Ambala
 """
-
 from abc import ABC, abstractmethod  # Built-in Python module for abstract classes
-from SearchEngine.Filter import Filter           # We import Filter because it's used as a parameter type
-
-
+from Filter import Filter            # We import Filter because it's used as a parameter type
+from db.database_operations import ServiceContainer  # For real DB interactions in a full implementation
+from model.recipe import Recipe  # Assuming you have a Recipe model 
 
 class SearchEngine(ABC):  # ABC = Abstract Base Class — acts like an <<Interface>>
     """
@@ -23,11 +22,7 @@ class SearchEngine(ABC):  # ABC = Abstract Base Class — acts like an <<Interfa
         # These are the private attributes shown in the UML diagram.
         # Subclasses will connect these to real services.
         self._api_client = None          # Connects to an external recipe API
-        self._db_query = None            # Runs database queries
-        self._user_service = None        # Manages user accounts
-        self._ingredient_service = None  # Manages ingredient data
-        self._pantry_service = None      # Manages the user's pantry
-        self._recipe_service = None      # Manages recipe storage/retrieval
+        self.service = None              # Connects to the database repositories via ServiceContainer
 
     # Abstract methods 
     # Each method below MUST be implemented by any subclass.
@@ -128,81 +123,29 @@ class RecipeSearchEngine(SearchEngine):
     without any database or API setup.
     """
 
-    def __init__(self):
+    def __init__(self, service: ServiceContainer):
         super().__init__()  # Run the parent __init__ to set up service attributes
+        self.service = service  # In a real implementation, this would connect to the DB
 
-        # Demo recipe data — replace with real DB/API calls in production
-        self._recipes = [
-            {
-                "id": 1,
-                "name": "Spaghetti Bolognese",
-                "category": "pasta",
-                "ingredients": ["spaghetti", "ground beef", "tomato sauce", "onion"],
-                "cook_time": 40,
-                "calories": 550,
-            },
-            {
-                "id": 2,
-                "name": "Caesar Salad",
-                "category": "salad",
-                "ingredients": ["romaine lettuce", "croutons", "parmesan", "caesar dressing"],
-                "cook_time": 10,
-                "calories": 300,
-            },
-            {
-                "id": 3,
-                "name": "Chicken Stir-fry",
-                "category": "asian",
-                "ingredients": ["chicken", "broccoli", "soy sauce", "garlic"],
-                "cook_time": 20,
-                "calories": 400,
-            },
-            {
-                "id": 4,
-                "name": "Veggie Pasta",
-                "category": "pasta",
-                "ingredients": ["penne", "zucchini", "bell pepper", "olive oil"],
-                "cook_time": 25,
-                "calories": 380,
-            },
-            {
-                "id": 5,
-                "name": "Greek Salad",
-                "category": "salad",
-                "ingredients": ["cucumber", "tomato", "feta", "olives", "red onion"],
-                "cook_time": 5,
-                "calories": 220,
-            },
-        ]
+    def get_recipe_by_id(self, recipe_id: int) -> Recipe | None:
+        recipe = self.service.get_recipe_by_id(recipe_id)
+        return recipe
 
-    def get_recipe_by_id(self, recipe_id: int) -> dict | None:
-        for recipe in self._recipes:
-            if recipe["id"] == recipe_id:
-                return recipe
-        print(f"No recipe found with id {recipe_id}.")
-        return None
-
-    def search_recipes_by_name(self, name: str) -> list:
-        name_lower = name.lower()
-        return [r for r in self._recipes if name_lower in r["name"].lower()]
+    def search_recipes_by_name(self, name: str) -> list | None:
+        return self.service.find_recipe(name)
 
     def search_recipes_by_ingredients(self, ingredients: list) -> list:
-        search_terms = [i.lower() for i in ingredients]
-        results = []
-        for recipe in self._recipes:
-            recipe_ings = [i.lower() for i in recipe["ingredients"]]
-            if all(term in recipe_ings for term in search_terms):
-                results.append(recipe)
-        return results
+        return self.service.find_recipes_by_ingredients(ingredients)
 
     def search_recipes_by_category(self, category: str) -> list:
-        return [r for r in self._recipes if r["category"].lower() == category.lower()]
+        return self.service.find_recipes_by_category(category)
 
     def get_random_recipes(self, count: int) -> list:
+        all_recipes = self.service.get_all_recipes()
+        if count >= len(all_recipes):
+            return all_recipes  # Return everything if count exceeds available recipes
         import random
-        shuffled = self._recipes.copy()
-        random.shuffle(shuffled)
-        return shuffled[:count]
+        return random.sample(all_recipes, count)
 
     def search_with_filter(self, recipes: list, pantry: list, recipe_filter: Filter) -> list:
         """
@@ -224,16 +167,4 @@ class RecipeSearchEngine(SearchEngine):
         Returns:
           List of recipes the user can make
         """
-        matched_recipes = []
-
-        # Convert pantry to lowercase for comparison
-        pantry_items = [item.lower() for item in pantry]
-
-        for recipe in self._recipes:
-            recipe_ingredients = [ing.lower() for ing in recipe["ingredients"]]
-
-            # Check if ALL recipe ingredients exist in pantry
-            if all(ingredient in pantry_items for ingredient in recipe_ingredients):
-                matched_recipes.append(recipe)
-
-        return matched_recipes
+        
