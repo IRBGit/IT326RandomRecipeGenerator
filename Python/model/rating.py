@@ -37,8 +37,12 @@ class Rating(Base):
             ) -> bool:
         if not isinstance(other, Rating):
             return False
-        from model import User, Recipe
-        return self.user == other.user and self.recipe == other.recipe
+        return (
+            self.user_id is not None and
+            self.self.recipe_id is not None and
+            self.user_id == other.user_id and 
+            self.recipe_id == other.recipe_id
+        )
     
     def __hash__(
             self

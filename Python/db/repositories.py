@@ -32,8 +32,11 @@ class RecipeRepository(BaseRepository):
         return self.session.get(Recipe, recipe_id)
     
     # By Jon Bailey
-    def get_by_name(self, recipe_name: str) -> list[Recipe] | None:
-        return list(self.session.query(Recipe).filter_by(name=recipe_name))
+    def search_by_name(self, recipe_name: str) -> list[Recipe]:
+        return list(self.session.query(Recipe).filter(Recipe.name.ilike(f"%{recipe_name}%")))
+    
+    def get_by_name(self, recipe_name: str) -> Recipe | None:
+        return self.session.query(Recipe).filter(Recipe.name == recipe_name).first()
     
     # By Jon Bailey
     def get_all(self) -> list[Recipe]:

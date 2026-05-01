@@ -86,7 +86,12 @@ class UserRecipeNote(Base):
         if not isinstance(other, UserRecipeNote):
             return False
         from model import User, Recipe
-        return self.recipe == other.recipe and self.user == other.user
+        return (
+            self.recipe_id is not None and
+            self.user_id is not None and
+            self.recipe_id == other.recipe_id and 
+            self.user_id == other.user_id
+        )
     
     def __hash__(
             self
