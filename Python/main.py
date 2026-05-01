@@ -355,16 +355,46 @@ def register_user(service: ServiceContainer):
                 case _:
                     pass
 
-#By: Alysa Solomon
-def get_pop_searches(service: ServiceContainer):
+#By: Alysa Solomon and Jon Bailey
+def get_pop_searches(service: ServiceContainer, search_engine: SearchEngine.RecipeSearchEngine):
     while True:
-        print("How many recipes do you want?\n")
+        print("How many popular searches do you want? The default is 10. Press enter for default selection\n")
+
         try:
-            count = int(input())
-            return service.get_popular_searches(count)
+            raw = input()
+
+            if raw.strip() == "":
+                count = 10
+            else:
+                count = int(raw)
+
+            popular = service.get_popular_searches(count)
+
+            if not popular:
+                print("No popular searches available.")
+                return []
+
+            print("\nPopular Searches:")
+            for i, item in enumerate(popular, start=1):
+                print(f"{i}. {item['query']} ({item['count']} searches)")
+
+            choice = int(input("Select a search (number): "))
+
+            if choice < 1 or choice > len(popular):
+                print("Invalid choice.")
+                continue  # 👈 don't exit, let them retry
+
         except ValueError:
             print("Please input a valid input")
+            continue
 
+        selected_query = popular[choice - 1]["query"]
+
+        print(f"\nSearching for: {selected_query}")
+
+        results = search_engine.search_recipes_by_name(selected_query)
+
+        return results
 
 #By Alysa Solomon
 def main():
