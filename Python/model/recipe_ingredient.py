@@ -22,7 +22,7 @@ class RecipeIngredient(Base):
         back_populates = "_ingredients")
     ingredient: Mapped["Ingredient"] = relationship(
         "Ingredient", 
-        back_populates = "recipe_association")
+        back_populates = "recipe_associations")
 
     def __init__(
             self, 
@@ -52,7 +52,11 @@ class RecipeIngredient(Base):
         if not isinstance(other, RecipeIngredient):
             return False
         from model import Ingredient, Recipe
-        return self.ingredient == other.ingredient and self.recipe == other.recipe
+        return (
+            self.ingredient_id is not None and
+            self.self.recipe_id is not None and
+            self.ingredient_id == other.ingredient_id and 
+            self.recipe_id == other.recipe_id)
     
     def __hash__(
             self

@@ -12,11 +12,13 @@ class DBConnect:
     """
     _instance = None
 
+    # By Jon Bailey
     def __new__(cls):
         if cls._instance is None:
             cls._instance = super(DBConnect, cls).__new__(cls)
         return cls._instance
     
+    # By Jon Bailey
     def __init__(self):
         if hasattr(self, "_initialized") and self._initialized:
             return
@@ -53,12 +55,14 @@ class DBConnect:
 
         self._initialized = True
 
+    # By Jon Bailey
     def get_session(self) -> Session:
         """
         Return a session.
         """
         return self.SessionLocal()
 
+    # By Jon Bailey
     def test_connection(self) -> bool:
         from sqlalchemy import text
         if self.engine is None:
@@ -70,7 +74,8 @@ class DBConnect:
         except Exception as e:
             print (f"COnnection test failed: {e}")
             return False
-        
+    
+    # By Jon Bailey
     def shutdown(self):
         """
         Clean up database resources (Close connection pool).
@@ -81,6 +86,7 @@ class DBConnect:
             print("Freeing database engine")
             self.engine.dispose()
     
+    # By Jon Bailey
     def create_tables(self):
         from model import Base
         if self.engine is None:
@@ -88,6 +94,7 @@ class DBConnect:
         
         Base.metadata.create_all(self.engine)
 
+    # By Jon Bailey
     def drop_tables(self):
         from model import Base
         from sqlalchemy.exc import SQLAlchemyError
