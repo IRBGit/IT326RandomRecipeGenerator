@@ -10,7 +10,7 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING, Optional
 from sqlalchemy.orm import relationship, Mapped, mapped_column
-from sqlalchemy import Integer, String, Sequence, Text, DateTime
+from sqlalchemy import Integer, String, Sequence, Text, DateTime, func
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm.collections import attribute_mapped_collection
 from sqlalchemy.ext.associationproxy import association_proxy, AssociationProxy
@@ -81,6 +81,21 @@ class Recipe(Base):
         cascade = "all, delete-orphan"
     )
 
+    category: Mapped[Optional[str]] = mapped_column(String(255), nuallable = True, unique = True)
+
+    _tags: Mapped[str] = mapped_column("tags", Text, nullable=True)
+
+    published_time: Mapped[Optional[datetime]] = mapped_column(
+    DateTime,
+    server_default = func.now(),
+    nullable=True
+)
+    
+    video: Mapped[Optional[str]] = mapped_column(
+        String(500),
+        nullable=True
+    )
+
     # def __init__(self, name: str, instructions: list[str] | None = None):
     #     self.name = name
     #     self.instructions = instructions or []
@@ -93,10 +108,10 @@ class Recipe(Base):
         # self.ingredients = ingredients or [] # for now, including all variables, change later
         self.instructions = instructions or []
         self.category = category
-        self.tags = tags
+        self.tags = tags or []
         self.video = video
         # Tolu: removed for now, not in db table yet
-        self.published_time = pub_time
+        self.published_time = pub_time or datetime.now()
 
     def __repr__(self):
         return f"<Recipe(id = {self.id}, name ='{self.name}')>"
@@ -151,6 +166,17 @@ class Recipe(Base):
             return json.loads(self._instructions)
         except (json.JSONDecodeError, TypeError):
             return []
+        
+    @property
+    def tags(self) -> list[str]:
+        try:
+            return json.loads(self._tags) if self._tags else []
+        except (json.JSONDecodeError, TypeError):
+            return []
+
+    @tags.setter
+    def tags(self, value: list[str]):
+        self._tags = json.dumps(value or [])
 
     @instructions.setter
     def instructions(self, value: list[str]):
