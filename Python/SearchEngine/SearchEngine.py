@@ -2,7 +2,7 @@
     Author: Thanvi Ambala
 """
 from abc import ABC, abstractmethod  # Built-in Python module for abstract classes
-from Filter import Filter            # We import Filter because it's used as a parameter type
+from SearchEngine.Filter import Filter            # We import Filter because it's used as a parameter type
 from db.database_operations import ServiceContainer  # For real DB interactions in a full implementation
 from model.recipe import Recipe  # Assuming you have a Recipe model 
 
