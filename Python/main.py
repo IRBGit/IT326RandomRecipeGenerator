@@ -95,19 +95,18 @@ def update_note(service, user):
     except Exception as e:
         print(f"Error updating note: {e}")
 
-def loginHelper():
-    # login part
+def loginHelper(service):
     username = input("Enter username: ")
     password = input("Enter password: ")
 
-    success, message = login(username, password)
+    success, message, user = login(service, username, password)
     print(message)
 
     if success:
         print("You are now logged in!")
-        return True
-    
-    return False
+        return user   # ✅ return user object
+
+    return None
 
 def logoutHelper():
     print(logout())
@@ -363,10 +362,9 @@ def main():
                         print("This feature hasn't been implemented yet.")
                         pass
                     case 7: # Log Out
-                        # TODO: Fix When Login Helper returns User ID
-                        logoutHelper()
+                        success, message, _ = logout()
+                        print(message)
                         user = None
-                        pass
                     case 8: # Delete Account
                         print("This feature hasn't been implemented yet.")
                         pass
@@ -393,8 +391,7 @@ def main():
                 chosen_option = int(chosen_option)
                 match chosen_option:
                     case 1: # Log In  
-                        #TODO: fix when loginHelper returns a user ID
-                        logged_in = loginHelper()
+                        user = loginHelper(service)
                         if not logged_in:
                             print("Reseting Password has not been implemented yet.")
                     case 2: # Get Pop Searches

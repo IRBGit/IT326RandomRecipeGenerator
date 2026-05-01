@@ -1,25 +1,29 @@
 """
     Author: Thanvi Ambala
 """
-def login(username, password):
+def login(service, username, password):
     """
-    Checks if the user entered valid login information.
-    Later, this will connect to the database.
+    Authenticates user using database.
+    Returns (success, message, user)
     """
 
-    if username == "" or password == "":
-        return False, "Username and password cannot be empty"
+    if not username or not password:
+        return False, "Username and password cannot be empty", None
 
-    # temporary login check for now
-    if username == "test" and password == "1234":
-        return True, "Login successful"
+    try:
+        user = service.authenticate_user(username, password)
 
-    return False, "Invalid username or password"
+        if user:
+            return True, "Login successful", user
+        else:
+            return False, "Invalid username or password", None
+
+    except Exception as e:
+        return False, f"Error during login: {e}", None
 
 
 def logout():
     """
     Logs the user out.
     """
-
-    return "Logged out successfully"
+    return True, "Logged out successfully", None
