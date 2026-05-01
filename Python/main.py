@@ -560,7 +560,7 @@ def main():
                 chosen_option = int(chosen_option)
                 match chosen_option:
                     case 1: # Get Popular Searches
-                        recipe_list = get_pop_searches(service)
+                        recipe_list = get_pop_searches(service=service, search_engine=search_func)
                         if recipe_list != []:
                             print(recipe_list)
                         else:
@@ -569,7 +569,7 @@ def main():
                         # print("UNCOMMENT OUT WHEN TESTING")
                     case 2: # Get Random Recipe
                         # TODO: NOT OUTPUTTING LIST OF RECIPES
-                        recipe_list = random_recipe_helper()
+                        recipe_list = random_recipe_helper(search_func)
                         if recipe_list != []:
                             print(recipe_list)
                         else:
@@ -634,7 +634,7 @@ def main():
                             pass
                         input("Press Enter to Continue")
                     case 2: # Get Pop Searches
-                        recipe_list = get_pop_searches(service)
+                        recipe_list = get_pop_searches(service, search_func)
                         if recipe_list != []:
                             print(recipe_list)
                         else:
@@ -643,7 +643,7 @@ def main():
                         # print("UNCOMMENT OUT WHEN TESTING")
                     case 3: # Get Random Recipe
                         # TODO: NOT OUTPUTTING LIST OF RECIPES
-                        recipe_list = random_recipe_helper()
+                        recipe_list = random_recipe_helper(search_func)
                         if recipe_list != []:
                             print(recipe_list)
                         else:
@@ -652,7 +652,7 @@ def main():
                     case 4: # Register Account
                         user = register_user(service)
                     case 5: # Searching For a recipe
-                        search_not_logged_in()
+                        search_not_logged_in(search_func)
                     case 6: # Exit
                         will_continue = False
                         print("Thank you for using our Program!")
