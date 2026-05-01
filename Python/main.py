@@ -3,7 +3,7 @@ from dotenv import load_dotenv
 import pathlib
 from db.database_operations import ServiceContainer
 from model import Recipe, User
-from SearchEngine import SearchEngine, Filter
+from SearchEngine import SearchEngine, Filter, Rank
 from typing import List
 
 load_dotenv()
@@ -249,6 +249,8 @@ def random_recipe_helper():
 def filter_helper():
     pass
 
+
+# SORTING by Alysa Solomon
 # TODO: Add filters and ranking
 def search_by_name(search_func: SearchEngine.RecipeSearchEngine):
     will_continue = True
@@ -271,6 +273,30 @@ def search_by_ing(search_func: SearchEngine.RecipeSearchEngine):
     return recipe_list
 
 
+#RANK by Alysa Solomon
+def rank(recipe_list: List[Recipe]):
+    r = Rank.Rank()
+    get_choice = True
+    while get_choice:
+        try:
+            print("Current Options are listed below")
+            print("1: Rank by Newest")
+            print("2: Rank by Popularity")
+            option = int(input("Select your choice: "))
+            match option:
+                case 1:
+                    recipes = r.rank_by_newest(recipe_list)
+                    return recipes
+                case 2:
+                    recipes = r.rank_by_popularity(recipe_list)
+                    return recipes
+                case _:
+                    print("Invalid Option. Please Try Again.")
+                    pass
+        except ValueError:
+            print("Please input a valid input.")
+            pass
+
 # By Alysa Solomon
 def search_not_logged_in():
     is_searching = True
@@ -289,12 +315,14 @@ def search_not_logged_in():
                 case 1: # search by name
                     recipe_list = search_by_name(search_func)
                     if recipe_list != []:
+                            recipe_list = rank(recipe_list)
                             print(recipe_list)
                     else:
                         print("No Recipes Found")
                 case 2: # Search by Criteria
                     recipe_list = search_by_category(search_func)
                     if recipe_list != []:
+                            recipe_list = rank(recipe_list)
                             print(recipe_list)
                     else:
                         print("No Recipes Found")
@@ -302,6 +330,7 @@ def search_not_logged_in():
                 case 3: # Search by Neccessary Ing
                     recipe_list = search_by_ing(search_func)
                     if recipe_list != []:
+                            recipe_list = rank(recipe_list)
                             print(recipe_list)
                     else:
                         print("No Recipes Found")
