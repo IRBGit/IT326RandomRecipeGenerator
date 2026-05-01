@@ -452,7 +452,8 @@ def register_user(service: ServiceContainer):
 
 #By: Alysa Solomon and Jon Bailey
 def get_pop_searches(service: ServiceContainer, search_engine: SearchEngine.RecipeSearchEngine):
-    while True:
+    get_amount = True
+    while get_amount:
         print("How many popular searches do you want? The default is 10. Press enter for default selection\n")
 
         try:
@@ -560,7 +561,7 @@ def main():
                 chosen_option = int(chosen_option)
                 match chosen_option:
                     case 1: # Get Popular Searches
-                        recipe_list = get_pop_searches(service=service, search_engine=search_func)
+                        recipe_list = get_pop_searches(service,search_func)
                         if recipe_list != []:
                             print(recipe_list)
                         else:
@@ -634,7 +635,7 @@ def main():
                             pass
                         input("Press Enter to Continue")
                     case 2: # Get Pop Searches
-                        recipe_list = get_pop_searches(service, search_func)
+                        recipe_list = get_pop_searches(service,search_func)
                         if recipe_list != []:
                             print(recipe_list)
                         else:

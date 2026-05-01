@@ -555,10 +555,78 @@ class RecipeService:
             recipe = uow.recipes.get_by_id(recipe_id)
             if not recipe:
                 return False
-            
+        
             uow.recipes.delete(recipe)
             uow.commit()
             return True
+    
+    def find_recipes_by_pantry(
+            self,
+            user: User
+    ) -> list[Recipe]:
+        """
+        Return recipes that can be made using ONLY the ingredients
+        available in the user's pantry.
+
+        Args:
+          pantry: list of ingredient names the user currently has at home
+        """
+        with UnitOfWork() as uow:
+            db_user = uow.users.get_by_id(user.id)
+            if db_user is None:
+                raise ValueError("User not found")
+            pantry_ingredients_ids = [item.ingredient.id for item in db_user._pantry.values()]
+            all_recipes = uow.recipes.get_all()
+            matching_recipes = []
+            for recipe in all_recipes:
+                recipe_ingredient_ids = set(recipe._ingredients.keys())
+                if recipe_ingredient_ids.issubset(pantry_ingredients_ids):
+                    matching_recipes.append(recipe)
+            return matching_recipes
+        
+    #By Thanvii Ambala
+    def search_recipe_by_criteria(
+        self,
+        include_ingredients: list[str],
+        exclude_ingredients: list[str],
+        category: str | None,
+        dietary_requirements: list[str]
+    ) -> list[Recipe]:
+        with UnitOfWork() as uow:
+            all_recipes = uow.recipes.get_all()
+            include_set = {name.strip().lower() for name in include_ingredients}
+            exclude_set = {name.strip().lower() for name in exclude_ingredients}
+            diet_set = {tag.strip().lower() for tag in dietary_requirements}
+            results = []
+            for recipe in all_recipes:
+                # -------------------------
+                # INGREDIENT SET
+                # -------------------------
+                recipe_ing_names = {
+                    ri.ingredient.name.strip().lower()
+                    for ri in recipe._ingredients.values()
+                }
+                # include check (must contain ALL)
+                if include_set and not include_set.issubset(recipe_ing_names):
+                    continue
+                # exclude check (must contain NONE)
+                if exclude_set.intersection(recipe_ing_names):
+                    continue
+                # -------------------------
+                # CATEGORY CHECK
+                # -------------------------
+                if category:
+                    if not recipe.category or recipe.category.strip().lower() != category.strip().lower():
+                        continue
+                # -------------------------
+                # DIETARY TAGS CHECK
+                # -------------------------
+                recipe_tags = set(recipe.tags or [])
+                recipe_tags = {t.strip().lower() for t in recipe_tags}
+                if diet_set and not diet_set.issubset(recipe_tags):
+                    continue
+                results.append(recipe)
+            return results
     
     def find_recipes_by_ingredients(
             self,
@@ -581,6 +649,22 @@ class RecipeService:
                     matching_recipes.append(recipe)
             return matching_recipes 
 
+    def get_recipe_by_id(
+            self,       
+            recipe_id: int
+    ) -> Optional[Recipe]:
+        """
+        Retrieve a recipe by its ID.
+
+         Args:
+            recipe_id: The unique number that identifies the recipe.
+
+        Returns:
+            A Recipe object, or None if not found.
+        """
+        with UnitOfWork() as uow:
+            return uow.recipes.get_by_id(recipe_id)
+        
     def find_recipes_by_category(
             self,
             category: str
@@ -1003,6 +1087,18 @@ class ServiceContainer:
         ) -> list[Recipe]:
         return self.recipe_service.find_recipes_by_ingredients(ingredients)
     
+    def find_recipes_by_pantry(
+            self,
+            user: User
+    ) -> list[Recipe]:
+        return self.recipe_service.find_recipes_by_pantry(user)
+    
+    def get_recipe_by_id(
+            self,
+            recipe_id: int
+    ) -> Optional[Recipe]:
+        return self.recipe_service.get_recipe_by_id(recipe_id)
+    
     def find_recipes_by_category(
             self, 
             category: str
@@ -1095,7 +1191,21 @@ class ServiceContainer:
             ) -> list[Recipe]:
         return self.recipe_service.get_user_favorites(user_id)
     #----------
-
+    
+    #By Thanvi Ambala
+    def search_recipe_by_criteria(
+        self,
+        include_ingredients: list[str],
+        exclude_ingredients: list[str],
+        category: str | None,
+        dietary_requirements: list[str]
+    ) -> list[Recipe]:
+        return self.recipe_service.search_recipe_by_criteria(
+            include_ingredients,
+            exclude_ingredients,
+            category,
+            dietary_requirements
+        )
 
     # ==================== DB CONTROL ==================== #
 

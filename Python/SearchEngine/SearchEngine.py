@@ -1,10 +1,12 @@
 """
     Author: Thanvi Ambala
 """
-from abc import ABC, abstractmethod  # Built-in Python module for abstract classes
+from abc import ABC, abstractmethod
+from random import random  # Built-in Python module for abstract classes
 from SearchEngine.Filter import Filter            # We import Filter because it's used as a parameter type
 from db.database_operations import ServiceContainer  # For real DB interactions in a full implementation
-from model.recipe import Recipe  # Assuming you have a Recipe model 
+from model.recipe import Recipe  # Assuming you have a Recipe model
+from model.user import User      # Assuming you have a User model
 
 class SearchEngine(ABC):  # ABC = Abstract Base Class — acts like an <<Interface>>
     """
@@ -112,7 +114,6 @@ class SearchEngine(ABC):  # ABC = Abstract Base Class — acts like an <<Interfa
         """
         pass
 
-
 # Concrete implementation 
 # It implements every @abstractmethod so Python allows us to create instances.
 
@@ -147,16 +148,7 @@ class RecipeSearchEngine(SearchEngine):
         import random
         return random.sample(all_recipes, count)
 
-    def search_with_filter(self, recipes: list, pantry: list, recipe_filter: Filter) -> list:
-        """
-        Uses the Filter object temporarily to narrow down recipes.
-        Notice: we do NOT do self.filter = recipe_filter — that would be
-        an association. We just call recipe_filter.apply() and move on.
-        This reflects the dashed dependency arrow in the UML diagram.
-        """
-        return recipe_filter.apply(recipes, pantry) 
-
-    def offer_recipes_with_pantry(self, pantry: list) -> list:
+    def offer_recipes_with_pantry(self, user: User) -> list:
         """
         Return recipes that can be made using ONLY the ingredients
         available in the user's pantry.
@@ -167,4 +159,36 @@ class RecipeSearchEngine(SearchEngine):
         Returns:
           List of recipes the user can make
         """
+        return self.service.find_recipes_by_pantry(user)
         
+    def search_with_filter(self, recipes: list, user: User, recipe_filter: Filter) -> list:
+        """
+        Uses the Filter object temporarily to narrow down recipes.
+        Notice: we do NOT do self.filter = recipe_filter — that would be
+        an association. We just call recipe_filter.apply() and move on.
+        This reflects the dashed dependency arrow in the UML diagram.
+        """
+        if recipes is None:
+            print("No recipes to filter.")
+            return []
+        pantryrecipe = self.offer_recipes_with_pantry(user)
+        return recipe_filter.apply(pantryrecipe) 
+
+    def search_recipes_by_criteria(self, include_ingredients: list, exclude_ingredients: list, category: str, dietary_tags: list) -> list:
+        return self.service.search_recipe_by_criteria(
+            include_ingredients,
+            exclude_ingredients,
+            category,
+            dietary_tags
+        )  
+
+    def get_random_recipe_with_filter(self, count: int, user: User, recipe_filter: Filter) -> list:
+        if user:
+            all_recipes = self.offer_recipes_with_pantry(user)
+        else:           
+            all_recipes = self.service.get_all_recipes()
+        filtered_recipes =recipe_filter.apply(all_recipes)
+        if count >= len(filtered_recipes):
+            return filtered_recipes  # Return everything if count exceeds available recipes
+        import random
+        return random.sample(filtered_recipes, count)

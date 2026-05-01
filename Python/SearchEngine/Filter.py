@@ -1,132 +1,81 @@
 """
     Author: Thanvi Ambala
 """
+from Python.model.recipe import Recipe
+
+
 class Filter:
     """
-    The Filter class stores a set of preferences/rules that can be applied
-    to a list of recipes to narrow them down to what the user actually wants.
+    The Filter class stores rules that can be applied to recipes.
+    It helps return only the recipes that match what the user wants.
     """
 
     def __init__(self):
-        # The minimum and maximum cook time (in minutes) allowed
-        self.min_cook_time: int = 0
-        self.max_cook_time: int = 9999  # default: no upper limit
-
-        # A list of ingredients the user prefers (dietary restrictions / allowed ingredients)
-        # Example: ["gluten-free", "vegan"]
         self.dietary_restrictions: list = []
-
-        # The minimum and maximum calories allowed per recipe
-        self.min_calories: int = 0
-        self.max_calories: int = 9999  # default: no upper limit
-
-        # Ingredients the user wants to completely avoid
-        # Example: ["peanuts", "shellfish"]
         self.blocked_ingredients: list = []
-
-        # If True, only return recipes that can be made using pantry items the user has
         self.use_pantry_only: bool = False
 
-    def validate(self) -> bool:
-        """
-        Checks if the filter settings make sense before using them.
-        For example, min cook time should not be greater than max cook time.
-
-        Returns:
-            True if everything is valid, False if something is wrong.
-        """
-        if self.min_cook_time > self.max_cook_time:
-            print("Error: min_cook_time cannot be greater than max_cook_time.")
-            return False
-
-        if self.min_calories > self.max_calories:
-            print("Error: min_calories cannot be greater than max_calories.")
-            return False
-
-        if self.min_cook_time < 0 or self.min_calories < 0:
-            print("Error: Time and calorie values cannot be negative.")
-            return False
-
-        return True  # All checks passed!
-    
-    # Tolu: clean one ingredient name
     def _clean_name(self, value):
         return str(value).strip().lower()
 
-    # Tolu: added to clean a whole ingredient list
     def _clean_list(self, values):
         cleaned = []
+
+        if values is None:
+            return cleaned
+
         for value in values:
             cleaned.append(self._clean_name(value))
+
         return cleaned
 
-    def matches(self, recipe: dict, pantry: list) -> bool:
+    def _get_recipe_ingredient_names(self, recipe: Recipe) -> list:
         """
-        Checks whether a single recipe passes all of the filter rules.
-
-        Args:
-            recipe: A dictionary representing one recipe.
-                    Expected keys: 'cook_time', 'calories', 'ingredients'
-            pantry: A list of ingredient names the user currently has at home.
-
-        Returns:
-            True if the recipe matches all filter rules, False otherwise.
+        Gets all ingredient names from a recipe.
         """
-        # Tolu: Check cook time range
-        cook_time = recipe.get("cook_time")
 
-        if cook_time is None:
-            return False
+        ingredient_names = []
 
-        if not (self.min_cook_time <= cook_time <= self.max_cook_time):
-            return False
-            
-        # Check calorie range
-        calories = recipe.get("calories", 0)
-        if not (self.min_calories <= calories <= self.max_calories):
-            return False
+        for recipe_ingredient in recipe._ingredients.values():
+            ingredient = recipe_ingredient.ingredient
 
-        # Check that none of the recipe's ingredients are blocked
-        recipe_ingredients = self._clean_list(recipe.get("ingredients", []))
-        pantry_ingredients = self._clean_list(pantry)
-        blocked_ingredients = self._clean_list(self.blocked_ingredients)
+            if ingredient is not None:
+                ingredient_names.append(self._clean_name(ingredient.name))
 
-        
-        for ingredient in recipe_ingredients:
-            if ingredient in blocked_ingredients:
+        return ingredient_names
+
+    def matches(self, recipe: Recipe) -> bool:
+        """
+        Checks if one recipe passes the filter rules.
+        """
+
+        recipe_ingredient_names = self._get_recipe_ingredient_names(recipe)
+        recipe_tags = self._clean_list(recipe.tags)
+
+        cleaned_blocked = self._clean_list(self.blocked_ingredients)
+        cleaned_dietary = self._clean_list(self.dietary_restrictions)
+
+        # Rule 1: blocked ingredients should NOT be in the recipe
+        for blocked in cleaned_blocked:
+            if blocked in recipe_ingredient_names:
                 return False
 
-        # If use_pantry_only is True, every ingredient must be in the pantry
-        if self.use_pantry_only:
-            for ingredient in recipe_ingredients:
-                if ingredient not in pantry_ingredients:
-                    return False # Missing an ingredient from the pantry
+        # Rule 2: dietary restrictions should match recipe tags
+        for restriction in cleaned_dietary:
+            if restriction not in recipe_tags:
+                return False
 
-        return True  # Recipe passed all checks!
+        return True
 
-    def apply(self, recipes: list, pantry: list) -> list:
+    def apply(self, recipes: list) -> list:
         """
-        Filters a whole list of recipes, returning only those that match
-        the current filter settings.
-
-        Args:
-            recipes: A list of recipe dictionaries.
-            pantry: A list of ingredient names the user has at home.
-
-        Returns:
-            A new list containing only the recipes that passed the filter.
+        Filters a list of recipes.
         """
-        # First, make sure the filter settings are valid
-        if not self.validate():
-            print("Filter settings are invalid. Returning empty list.")
-            return []
 
-        # Go through each recipe and keep only those that match
-        matching_recipes = []
+        filtered_recipes = []
+
         for recipe in recipes:
-            if self.matches(recipe, pantry):
-                matching_recipes.append(recipe)
+            if self.matches(recipe):
+                filtered_recipes.append(recipe)
 
-        return matching_recipes
-
-
+        return filtered_recipes
