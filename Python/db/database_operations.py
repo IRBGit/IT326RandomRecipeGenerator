@@ -555,11 +555,35 @@ class RecipeService:
             recipe = uow.recipes.get_by_id(recipe_id)
             if not recipe:
                 return False
-            
+        
             uow.recipes.delete(recipe)
             uow.commit()
             return True
     
+    def find_recipes_by_pantry(
+            self,
+            user: User
+    ) -> list[Recipe]:
+        """
+        Return recipes that can be made using ONLY the ingredients
+        available in the user's pantry.
+
+        Args:
+          pantry: list of ingredient names the user currently has at home
+        """
+        with UnitOfWork() as uow:
+            db_user = uow.users.get_by_id(user.id)
+            if db_user is None:
+                raise ValueError("User not found")
+            pantry_ingredients_ids = [item.ingredient.id for item in db_user._pantry.values()]
+            all_recipes = uow.recipes.get_all()
+            matching_recipes = []
+            for recipe in all_recipes:
+                recipe_ingredient_ids = set(recipe._ingredients.keys())
+                if recipe_ingredient_ids.issubset(pantry_ingredients_ids):
+                    matching_recipes.append(recipe)
+            return matching_recipes
+
     def find_recipes_by_ingredients(
             self,
             ingredients: list[str]
@@ -581,6 +605,22 @@ class RecipeService:
                     matching_recipes.append(recipe)
             return matching_recipes 
 
+    def get_recipe_by_id(
+            self,       
+            recipe_id: int
+    ) -> Optional[Recipe]:
+        """
+        Retrieve a recipe by its ID.
+
+         Args:
+            recipe_id: The unique number that identifies the recipe.
+
+        Returns:
+            A Recipe object, or None if not found.
+        """
+        with UnitOfWork() as uow:
+            return uow.recipes.get_by_id(recipe_id)
+        
     def find_recipes_by_category(
             self,
             category: str
@@ -1002,6 +1042,12 @@ class ServiceContainer:
             ingredients: list[str]
         ) -> list[Recipe]:
         return self.recipe_service.find_recipes_by_ingredients(ingredients)
+    
+    def get_recipe_by_id(
+            self,
+            recipe_id: int
+    ) -> Optional[Recipe]:
+        return self.recipe_service.get_recipe_by_id(recipe_id)
     
     def find_recipes_by_category(
             self, 
