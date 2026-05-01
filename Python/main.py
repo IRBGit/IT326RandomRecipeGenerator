@@ -3,7 +3,6 @@ from dotenv import load_dotenv
 import pathlib
 from db.database_operations import ServiceContainer
 from model import Recipe, User
-from model.auth import login, logout
 from SearchEngine import SearchEngine, Filter
 from typing import List
 
@@ -98,24 +97,52 @@ def update_note(service, user):
     except Exception as e:
         print(f"Error updating note: {e}")
 
-# By Thanvi Ambala
-def loginHelper():
-    # login part
-    username = input("Enter username: ")
+# By Thanvii Ambala
+def login(service, username, password):
+    """
+    Authenticates user using database.
+    Returns (success, message, user)
+    """
+
+    if not username or not password:
+        return False, "Username and password cannot be empty", None
+
+    try:
+        user = service.authenticate_user(username, password)
+
+        if user:
+            return True, "Login successful", user
+        else:
+            return False, "Invalid username or password", None
+
+    except Exception as e:
+        return False, f"Error during login: {e}", None
+    
+# By Thanvii Ambala
+def logout():
+    """
+    Logs the user out.
+    """
+    return True, "Logged out successfully", None
+
+# By Thanvii Ambala and Alysa Solomon
+def loginHelper(service):
+    email = input("Enter email: ")
     password = input("Enter password: ")
 
-    success, message = login(username, password)
+    success, message, user = login(service, email, password)
     print(message)
 
     if success:
         print("You are now logged in!")
-        return True
-    
-    return False
+        return user
 
+    return None
+
+# By Thanvii Ambala
 def logoutHelper():
     print(logout())
-    return False
+    return None
 
 # By Alysa Solomon
 #TODO: NOT DONE
@@ -136,7 +163,6 @@ def get_ingredients(outputString: str):
             pass
         pass
 
-
     ing_list = []
     print("Please input name of ingredients, one at a time.")
     for _ in range(count):
@@ -147,7 +173,8 @@ def get_ingredients(outputString: str):
 def get_category():
     category_list = ["Beef",
                      "Breakfast",
-                     "Chicken","Dessert", 
+                     "Chicken",
+                     "Dessert", 
                      "Goat",
                      "Lamb", 
                      "Miscellaneous",
@@ -180,7 +207,10 @@ def get_category():
 # By Alysa Solomon
 def get_dietary():
     #TODO: I don't know if this is correct
-    category_list = ["Algerian","American","Argentinian","Australian","British","Canadian","Chinese","Croatian","Dutch","Egyptian","Filipino","French","Greek","Indian","Irish","Italian","Jamaican","Japanese","Kenyan","Malaysian","Mexican","Moroccan","Norwegian","Polish","Portuguese","Russian","Saudi Arabian","Slovakian","Spanish","Syrian","Thai","Tunisian","Turkish","Ukrainian","Uruguayan","Venezulan","Vietnamese"]
+    category_list = ["Algerian","American","Argentinian","Australian","British","Canadian","Chinese","Croatian","Dutch",
+                     "Egyptian","Filipino","French","Greek","Indian","Irish","Italian","Jamaican","Japanese","Kenyan",
+                     "Malaysian","Mexican","Moroccan","Norwegian","Polish","Portuguese","Russian","Saudi Arabian","Slovakian",
+                     "Spanish","Syrian","Thai","Tunisian","Turkish","Ukrainian","Uruguayan","Venezulan","Vietnamese"]
     while True:
         print("Valid Categories:")
         for i in range(len(category_list)):
@@ -201,10 +231,10 @@ def get_dietary():
 
 # By Alysa Solomon
 def random_recipe_helper():
-    req_ing = get_ingredients("In Arabic Numerals, How many ingredients do you want to include in the recipe?\n")
+    req_ing = get_ingredients("How many ingredients do you want to include in the recipe?\n")
     get_value = True
     while get_value:
-        print("In Arabic Numerals, How many recipes do you want?\n")
+        print("How many recipes do you want?\n")
         try:
             choose = int(input())
             get_value = False
@@ -229,14 +259,14 @@ def search_by_name(search_func: SearchEngine.RecipeSearchEngine):
         return recipe_list
     pass
 def search_by_criteria(search_func: SearchEngine.RecipeSearchEngine):
-    req_ing = get_ingredients("In Arabic Numerals, How many ingredients do you want to include in the recipe?\n")
-    ew_ing = get_ingredients("In Arabic Numerals, How many ingredients do you want to exclude from the recipe?\n")
+    req_ing = get_ingredients("How many ingredients do you want to include in the recipe?\n")
+    ew_ing = get_ingredients("How many ingredients do you want to exclude from the recipe?\n")
     category = get_category()
     dietary_list = get_dietary()
     recipe_list = search_func.search_recipes_by_criteria(req_ing,ew_ing,category,dietary_list)
     return recipe_list
 def search_by_ing(search_func: SearchEngine.RecipeSearchEngine):
-    req_ing = get_ingredients("In Arabic Numerals, How many ingredients do you want to include in the recipe?\n")
+    req_ing = get_ingredients("How many ingredients do you want to include in the recipe?\n")
     recipe_list = search_func.search_recipes_by_ingredients(req_ing)
     return recipe_list
 
@@ -246,7 +276,7 @@ def search_not_logged_in():
     is_searching = True
     search_func = SearchEngine.RecipeSearchEngine()
     while is_searching:
-        print("Current Options are listed below:")
+        print("\nCurrent Options are listed below:")
         print("1: Search by Name")  # Somewhat Implemented
         print("2: Search by Specified Criteria") # Not Implemented
         print("3: Search by Necessary Ingredients") # Not Implemented
@@ -258,18 +288,27 @@ def search_not_logged_in():
             match chosen_option:
                 case 1: # search by name
                     recipe_list = search_by_name(search_func)
-                    print(recipe_list)
+                    if recipe_list != []:
+                            print(recipe_list)
+                    else:
+                        print("No Recipes Found")
                 case 2: # Search by Criteria
                     recipe_list = search_by_criteria(search_func)
-                    print(recipe_list)
+                    if recipe_list != []:
+                            print(recipe_list)
+                    else:
+                        print("No Recipes Found")
                     pass
                 case 3: # Search by Neccessary Ing
                     recipe_list = search_by_ing(search_func)
-                    print(recipe_list)
+                    if recipe_list != []:
+                            print(recipe_list)
+                    else:
+                        print("No Recipes Found")
                     pass
                 case 4: #Help Menu
                     print("1: You input a name of a recipe, and our database finds all recipes that have that name in it's title")
-                    print("2: You give us a list of wanted ingredients, unwanted ingredients, any style of food, or dietary restrictions, and we will give you recipes that follow your requirements.")
+                    print("2: You give us a list of wanted ingredients, unwanted ingredients, desired type of food, or cuisine type, and we will give you recipes that follow your requirements.")
                     print("3: You give us a recipe of ingredients you desire and we will find recipes that have those ingredients")
                     print("4: Descriptions of every menu option")
                     print("5: Stop Searching and go to previous menu")
@@ -319,7 +358,7 @@ def register_user(service: ServiceContainer):
 #By: Alysa Solomon
 def get_pop_searches(service: ServiceContainer):
     while True:
-        print("In Arabic Numerals, How many recipes do you want?\n")
+        print("How many recipes do you want?\n")
         try:
             count = int(input())
             return service.get_popular_searches(count)
@@ -367,10 +406,9 @@ def main():
                         print("This feature hasn't been implemented yet.")
                         pass
                     case 7: # Log Out
-                        # TODO: Fix When Login Helper returns User ID
-                        logoutHelper()
+                        success, message, _ = logout()
+                        print(message)
                         user = None
-                        pass
                     case 8: # Delete Account
                         print("This feature hasn't been implemented yet.")
                         pass
@@ -397,10 +435,11 @@ def main():
                 chosen_option = int(chosen_option)
                 match chosen_option:
                     case 1: # Log In  
-                        #TODO: fix when loginHelper returns a user ID
-                        logged_in = loginHelper()
+                        user = loginHelper(service)
                         if not logged_in:
                             print("Reseting Password has not been implemented yet.")
+                            pass
+                        input("Press Enter to Continue")
                     case 2: # Get Pop Searches
                         # recipe_list = get_pop_searches(service)
                         # if recipe_list != []:
@@ -416,6 +455,7 @@ def main():
                             print(recipe_list)
                         else:
                             print("No Recipes Found.")
+                            pass
                     case 4: # Register Account
                         user = register_user()
                     case 5: # Searching For a recipe
@@ -425,11 +465,12 @@ def main():
                         print("Thank you for using our Program!")
                     case _:
                         print("Invalid Option. Please Try Again.")
-                    
+                if chosen_option != 5:
+                    input("Press Enter to Continue")
             except ValueError:
                 print("Please input a valid input.")
                 pass
-            input("Press Enter to Continue")
+            
             pass
         pass
     service.close()

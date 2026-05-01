@@ -1,5 +1,6 @@
 from sqlalchemy.orm import Session
 from model import User, Recipe, Ingredient, UserSearch
+from sqlalchemy import func
 
 class BaseRepository:
     def __init__(self, session: Session):
@@ -26,7 +27,7 @@ class RecipeRepository(BaseRepository):
     
     def get_by_name(self, recipe_name: str) -> list[Recipe] | None:
         return list(self.session.query(Recipe).filter_by(name=recipe_name))
-    
+        
     def get_all(self) -> list[Recipe]:
         return self.session.query(Recipe).all()
 
@@ -50,8 +51,6 @@ class SearchRepository(BaseRepository):
         )
     
     def get_popular(self, limit: int = 10):
-        from sqlalchemy import func
-
         return(
             self.session.query(
                 UserSearch.query,
