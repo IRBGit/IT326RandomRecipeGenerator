@@ -123,12 +123,12 @@ def logout():
     """
     return True, "Logged out successfully", None
 
-# By Thanvii Ambala
+# By Thanvii Ambala and Alysa Solomon
 def loginHelper(service):
-    username = input("Enter username: ")
+    email = input("Enter email: ")
     password = input("Enter password: ")
 
-    success, message, user = login(service, username, password)
+    success, message, user = login(service, email, password)
     print(message)
 
     if success:
@@ -140,7 +140,7 @@ def loginHelper(service):
 # By Thanvii Ambala
 def logoutHelper():
     print(logout())
-    return False
+    return None
 
 # By Alysa Solomon
 #TODO: NOT DONE
@@ -161,7 +161,6 @@ def get_ingredients(outputString: str):
             pass
         pass
 
-
     ing_list = []
     print("Please input name of ingredients, one at a time.")
     for _ in range(count):
@@ -172,7 +171,8 @@ def get_ingredients(outputString: str):
 def get_category():
     category_list = ["Beef",
                      "Breakfast",
-                     "Chicken","Dessert", 
+                     "Chicken",
+                     "Dessert", 
                      "Goat",
                      "Lamb", 
                      "Miscellaneous",
@@ -205,7 +205,10 @@ def get_category():
 # By Alysa Solomon
 def get_dietary():
     #TODO: I don't know if this is correct
-    category_list = ["Algerian","American","Argentinian","Australian","British","Canadian","Chinese","Croatian","Dutch","Egyptian","Filipino","French","Greek","Indian","Irish","Italian","Jamaican","Japanese","Kenyan","Malaysian","Mexican","Moroccan","Norwegian","Polish","Portuguese","Russian","Saudi Arabian","Slovakian","Spanish","Syrian","Thai","Tunisian","Turkish","Ukrainian","Uruguayan","Venezulan","Vietnamese"]
+    category_list = ["Algerian","American","Argentinian","Australian","British","Canadian","Chinese","Croatian","Dutch",
+                     "Egyptian","Filipino","French","Greek","Indian","Irish","Italian","Jamaican","Japanese","Kenyan",
+                     "Malaysian","Mexican","Moroccan","Norwegian","Polish","Portuguese","Russian","Saudi Arabian","Slovakian",
+                     "Spanish","Syrian","Thai","Tunisian","Turkish","Ukrainian","Uruguayan","Venezulan","Vietnamese"]
     while True:
         print("Valid Categories:")
         for i in range(len(category_list)):
@@ -226,10 +229,10 @@ def get_dietary():
 
 # By Alysa Solomon
 def random_recipe_helper():
-    req_ing = get_ingredients("In Arabic Numerals, How many ingredients do you want to include in the recipe?\n")
+    req_ing = get_ingredients("How many ingredients do you want to include in the recipe?\n")
     get_value = True
     while get_value:
-        print("In Arabic Numerals, How many recipes do you want?\n")
+        print("How many recipes do you want?\n")
         try:
             choose = int(input())
             get_value = False
@@ -254,14 +257,14 @@ def search_by_name(search_func: SearchEngine.RecipeSearchEngine):
         return recipe_list
     pass
 def search_by_criteria(search_func: SearchEngine.RecipeSearchEngine):
-    req_ing = get_ingredients("In Arabic Numerals, How many ingredients do you want to include in the recipe?\n")
-    ew_ing = get_ingredients("In Arabic Numerals, How many ingredients do you want to exclude from the recipe?\n")
+    req_ing = get_ingredients("How many ingredients do you want to include in the recipe?\n")
+    ew_ing = get_ingredients("How many ingredients do you want to exclude from the recipe?\n")
     category = get_category()
     dietary_list = get_dietary()
     recipe_list = search_func.search_recipes_by_criteria(req_ing,ew_ing,category,dietary_list)
     return recipe_list
 def search_by_ing(search_func: SearchEngine.RecipeSearchEngine):
-    req_ing = get_ingredients("In Arabic Numerals, How many ingredients do you want to include in the recipe?\n")
+    req_ing = get_ingredients("How many ingredients do you want to include in the recipe?\n")
     recipe_list = search_func.search_recipes_by_ingredients(req_ing)
     return recipe_list
 
@@ -303,7 +306,7 @@ def search_not_logged_in():
                     pass
                 case 4: #Help Menu
                     print("1: You input a name of a recipe, and our database finds all recipes that have that name in it's title")
-                    print("2: You give us a list of wanted ingredients, unwanted ingredients, any style of food, or dietary restrictions, and we will give you recipes that follow your requirements.")
+                    print("2: You give us a list of wanted ingredients, unwanted ingredients, desired type of food, or cuisine type, and we will give you recipes that follow your requirements.")
                     print("3: You give us a recipe of ingredients you desire and we will find recipes that have those ingredients")
                     print("4: Descriptions of every menu option")
                     print("5: Stop Searching and go to previous menu")
@@ -353,7 +356,7 @@ def register_user(service: ServiceContainer):
 #By: Alysa Solomon
 def get_pop_searches(service: ServiceContainer):
     while True:
-        print("In Arabic Numerals, How many recipes do you want?\n")
+        print("How many recipes do you want?\n")
         try:
             count = int(input())
             return service.get_popular_searches(count)
