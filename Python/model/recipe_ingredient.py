@@ -22,7 +22,7 @@ class RecipeIngredient(Base):
         back_populates = "_ingredients")
     ingredient: Mapped["Ingredient"] = relationship(
         "Ingredient", 
-        back_populates = "recipe_association")
+        back_populates = "recipe_associations")
 
     def __init__(
             self, 
