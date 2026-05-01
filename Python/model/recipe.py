@@ -81,7 +81,7 @@ class Recipe(Base):
         cascade = "all, delete-orphan"
     )
 
-    category: Mapped[Optional[str]] = mapped_column(String(255), nuallable = True, unique = True)
+    category: Mapped[Optional[str]] = mapped_column(String(255), nullable = True)
 
     _tags: Mapped[str] = mapped_column("tags", Text, nullable=True)
 
