@@ -8,6 +8,7 @@ from typing import List
 
 load_dotenv()
 
+# By Jon Bailey
 def add_note_to_recipe(service: ServiceContainer, user: User, recipe: Recipe):
     try:
         note = input(f"Please enter the note you want to add to {recipe.name}: ").strip()

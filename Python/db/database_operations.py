@@ -462,9 +462,12 @@ class RecipeService:
         """
 
         with UnitOfWork() as uow:
-            recipe = uow.recipes.get_by_name(name)
-            if recipe:
-                return recipe
+            recipes = uow.recipes.get_by_name(name)
+            
+            if recipes:
+                for r in recipes:
+                    if r.name.strip().lower() == name.strip().lower():
+                        return r
                 
             recipe = Recipe(
                 name=name,
@@ -897,7 +900,7 @@ class ServiceContainer:
     def delete_recipe(self, recipe_id: int) -> bool:
         return self.recipe_service.delete_recipe(recipe_id)
 
-    def find_recipe(self, name: str) -> Recipe | None:
+    def find_recipe(self, name: str) -> list[Recipe] | None:
         return self.recipe_service.find_recipe(name)
     
     def get_recipe_by_id(self, recipe_id: int) -> Recipe | None:

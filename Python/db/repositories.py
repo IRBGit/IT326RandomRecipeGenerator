@@ -26,7 +26,11 @@ class RecipeRepository(BaseRepository):
     
     def get_by_name(self, recipe_name: str) -> list[Recipe] | None:
         return list(self.session.query(Recipe).filter_by(name=recipe_name))
+<<<<<<< HEAD
         
+=======
+    
+>>>>>>> 971dc9f9eca41e22a2bfc117aa3902628c5d3757
     def get_all(self) -> list[Recipe]:
         return self.session.query(Recipe).all()
 
