@@ -141,10 +141,11 @@ class RecipeSearchEngine(SearchEngine):
         return self.service.find_recipes_by_category(category)
 
     def get_random_recipes(self, count: int) -> list:
+        all_recipes = self.service.get_all_recipes()
+        if count >= len(all_recipes):
+            return all_recipes  # Return everything if count exceeds available recipes
         import random
-        shuffled = self._recipes.copy()
-        random.shuffle(shuffled)
-        return shuffled[:count]
+        return random.sample(all_recipes, count)
 
     def search_with_filter(self, recipes: list, pantry: list, recipe_filter: Filter) -> list:
         """
@@ -166,16 +167,4 @@ class RecipeSearchEngine(SearchEngine):
         Returns:
           List of recipes the user can make
         """
-        matched_recipes = []
-
-        # Convert pantry to lowercase for comparison
-        pantry_items = [item.lower() for item in pantry]
-
-        for recipe in self._recipes:
-            recipe_ingredients = [ing.lower() for ing in recipe["ingredients"]]
-
-            # Check if ALL recipe ingredients exist in pantry
-            if all(ingredient in pantry_items for ingredient in recipe_ingredients):
-                matched_recipes.append(recipe)
-
-        return matched_recipes
+        

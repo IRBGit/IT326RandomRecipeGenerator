@@ -231,8 +231,8 @@ def get_dietary():
             pass
 
 # By Alysa Solomon
-def random_recipe_helper():
-    req_ing = get_ingredients("How many ingredients do you want to include in the recipe?\n")
+def random_recipe_helper(search_func: SearchEngine.RecipeSearchEngine):
+    req_ing = get_ingredients("In Arabic Numerals, How many ingredients do you want to include in the recipe?\n")
     get_value = True
     while get_value:
         print("How many recipes do you want?\n")
@@ -241,7 +241,6 @@ def random_recipe_helper():
             get_value = False
         except ValueError:
             print("Please input a valid input")
-    search_func = SearchEngine.RecipeSearchEngine()
     if req_ing == []:
         return search_func.get_random_recipes(choose)
     f = Filter.Filter()
@@ -299,9 +298,8 @@ def rank(recipe_list: List[Recipe]):
             pass
 
 # By Alysa Solomon
-def search_not_logged_in():
+def search_not_logged_in(search_func: SearchEngine.RecipeSearchEngine):
     is_searching = True
-    search_func = SearchEngine.RecipeSearchEngine()
     while is_searching:
         print("\nCurrent Options are listed below:")
         print("1: Search by Name")  # Somewhat Implemented
@@ -472,6 +470,7 @@ def add_recipe(service: ServiceContainer):
 #By Alysa Solomon
 def main():
     service = ServiceContainer()
+    search_func = SearchEngine.RecipeSearchEngine(service)
     user = None
     will_continue = True
     while(will_continue):
