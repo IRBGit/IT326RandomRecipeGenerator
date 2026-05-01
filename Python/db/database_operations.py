@@ -835,7 +835,7 @@ class ServiceContainer:
     def get_all_pantry_items(
             self,
             user: User
-    ) -> list[PantryItem]:
+    ) -> list[dict]:
         return self.pantry_service.get_all_pantry_items(user)
     
     #Recipe Service
