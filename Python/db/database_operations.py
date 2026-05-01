@@ -173,7 +173,32 @@ class UserService:
         print("Password must include at least 3 of 4 types: uppercase, lowercase, digits, and special characters")
         return False
 
-    #By Jon Bailey
+    #By Thanvii Ambala
+    def change_password(self, user: User, new_password: str) -> bool:
+        """
+        Change the user's password.
+
+        Args:
+            user(User): The ORM user object.
+            new_password(str): The new password to set.
+
+        Returns:
+            True if the password was changed successfully, False otherwise.
+        """
+        if not self.validate_password(new_password):
+            return False
+        
+        with UnitOfWork() as uow:
+            db_user = uow.users.get_by_id(user.id)
+
+            if db_user is None:
+                raise ValueError("User not found")
+            
+            db_user.password = new_password
+            uow.commit()
+            return True
+        
+
     def get_user_by_email(self, email: str) -> User | None:
         """
         Retrieve a user by email
@@ -725,7 +750,14 @@ class ServiceContainer:
         ) -> Optional[User]:
         return self.user_service.create_user(email, password)
     
-    #By Jon Bailey
+    #By Thanvii Ambala
+    def change_password(
+            self,
+            user: User,
+            new_password: str
+    ) -> bool:
+        return self.user_service.change_password(user, new_password)
+    
     def get_user_by_email(
             self, 
             email: str

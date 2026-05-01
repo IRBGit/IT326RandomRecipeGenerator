@@ -291,11 +291,15 @@ class User(Base):
         self.notes[recipe] = notes_list
 
         return notes_list
+    
+    #By Thanvii Ambala
     def delete_account(self):
         print("Deleting user account...")
 
+    #By Thanvii Ambala
     def reset_password(self, new_password: str):
         self.password = PWHash().hashPassword(new_password)
 
+    #By Thanvii Ambala
     def get_pantry_items(self) -> list[PantryItem]:
         return list(self._pantry.values())
