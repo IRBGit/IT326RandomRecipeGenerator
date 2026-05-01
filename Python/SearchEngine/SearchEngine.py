@@ -1,12 +1,7 @@
-"""
-    Authors: Thanvii Ambala and 
-"""
-
 from abc import ABC, abstractmethod  # Built-in Python module for abstract classes
 from .Filter import Filter           # We import Filter because it's used as a parameter type
 import random
-
-
+from db.database_operations import ServiceContainer
 
 class SearchEngine(ABC):  # ABC = Abstract Base Class — acts like an <<Interface>>
     """
@@ -24,12 +19,7 @@ class SearchEngine(ABC):  # ABC = Abstract Base Class — acts like an <<Interfa
         # These are the private attributes shown in the UML diagram.
         # Subclasses will connect these to real services.
         self._api_client = None          # Connects to an external recipe API
-        self._db_query = None            # Runs database queries
-        self._user_service = None        # Manages user accounts
-        self._ingredient_service = None  # Manages ingredient data
-        self._pantry_service = None      # Manages the user's pantry
-        self._recipe_service = None      # Manages recipe storage/retrieval
-
+        self._service_container = None       # Accesses other services like UserService
     # Abstract methods 
     # Each method below MUST be implemented by any subclass.
     # If a subclass skips even one, Python will raise a TypeError.
@@ -121,30 +111,46 @@ class SearchEngine(ABC):  # ABC = Abstract Base Class — acts like an <<Interfa
 
 # Concrete implementation 
 # It implements every @abstractmethod so Python allows us to create instances.
-
 class RecipeSearchEngine(SearchEngine):
     """
     A concrete (real) implementation of the SearchEngine interface.
     Uses an in-memory list of recipes so you can run this file immediately
     without any database or API setup.
     """
-
     def __init__(self):
         super().__init__()  # Run the parent __init__ to set up service attributes
 
         # Demo recipe data — replace with real DB/API calls in production
         self._recipes = []
+        self._service_container = ServiceContainer()
 
     def get_recipe_by_id(self, recipe_id: int) -> dict | None:
-        for recipe in self._recipes:
-            if recipe["id"] == recipe_id:
-                return recipe
-        print(f"No recipe found with id {recipe_id}.")
-        return None
+        receipe = self._service_container.recipe_service.get_recipe_by_id(recipe_id)
+        if receipe is None:
+            return None
+        return {
+            "id": receipe.id,
+            "name": receipe.name,
+            "description": receipe.description,
+            "ingredients": receipe.ingredients,
+            "category": receipe.category,
+            "dietary_tags": receipe.dietary_tags
+        }
 
     def search_recipes_by_name(self, name: str) -> list:
-        name_lower = name.lower()
-        return [r for r in self._recipes if name_lower in r["name"].lower()]
+        search_term = name.lower()
+        recipes = self._service_container.recipe_service.search_recipes_by_name(search_term)
+        return [
+            {
+                "id": recipe.id,    
+                "name": recipe.name,
+                "description": recipe.description,
+                "ingredients": recipe.ingredients,
+                "category": recipe.category,
+                "dietary_tags": recipe.dietary_tags
+            }
+            for recipe in recipes               
+        ]
 
     def search_recipes_by_ingredients(self, ingredients: list) -> list:
         search_terms = [i.lower() for i in ingredients]

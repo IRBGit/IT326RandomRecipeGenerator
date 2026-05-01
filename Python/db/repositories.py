@@ -24,9 +24,9 @@ class RecipeRepository(BaseRepository):
     def get_by_id(self, recipe_id: int) -> Recipe | None:
         return self.session.get(Recipe, recipe_id)
     
-    def get_by_name(self, recipe_name: str) -> Recipe | None:
-        return self.session.query(Recipe).filter_by(name=recipe_name).first()
-    
+    def get_by_name(self, recipe_name: str) -> list[Recipe] | None:
+        return list(self.session.query(Recipe).filter_by(name=recipe_name))
+        
     def get_all(self) -> list[Recipe]:
         return self.session.query(Recipe).all()
 
