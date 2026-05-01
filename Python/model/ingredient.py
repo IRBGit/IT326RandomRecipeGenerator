@@ -44,23 +44,27 @@ class Ingredient(Base):
     cascade = "all, delete-orphan"
         )
 
+    # By Jon Bailey
     def __init__(
             self, 
             name: str
             ):
         self.name = name
 
+    # By Jon Bailey
     def __repr__(
             self
             ):
         return f"<Ingredient(id={self.id}, name='{self.name}')>"
 
+    # By Jon Bailey
     def get_name(
             self
             ) -> str:
         assert isinstance(self.name, str)
         return self.name
     
+    # By Jon Bailey
     def __eq__(
             self, 
             other: object

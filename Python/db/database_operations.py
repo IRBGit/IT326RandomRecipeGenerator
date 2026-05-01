@@ -462,9 +462,9 @@ class RecipeService:
     def find_recipe(
             self,
             name: str
-            ) -> list[Recipe] | None:
+            ) -> list[Recipe]:
         with UnitOfWork() as uow:
-            return uow.recipes.get_by_name(name)
+            return uow.recipes.search_by_name(name)
     
     #By Jon Bailey
     def add_recipe(
@@ -484,12 +484,10 @@ class RecipeService:
         """
 
         with UnitOfWork() as uow:
-            recipes = uow.recipes.get_by_name(name)
+            existing = uow.recipes.get_by_name(name)
             
-            if recipes:
-                for r in recipes:
-                    if r.name.strip().lower() == name.strip().lower():
-                        return r
+            if existing:
+                return existing
                 
             recipe = Recipe(
                 name=name,
@@ -499,22 +497,18 @@ class RecipeService:
             )
             uow.recipes.add(recipe)
 
-            if ingredients is None:
-                uow.commit()
-                return recipe
+            if ingredients:
+                for ing_name in ingredients:
+                    ingredient = uow.ingredients.get_by_name(ing_name)
 
-            for ing_name in ingredients:
-                ingredient = uow.ingredients.get_by_name(ing_name)
+                    if not ingredient:
+                        ingredient = Ingredient(name=ing_name)
+                        uow.ingredients.add(ingredient)
+                        if uow.session is not None:
+                            uow.session.flush()
 
-                if not ingredient:
-                    ingredient = Ingredient(name=ing_name)
-                    uow.ingredients.add(ingredient)
-                    if uow.session is not None:
-                        uow.session.flush()
+                    recipe.add_ingredient(ingredient)
 
-                recipe.add_ingredient(ingredient)
-
-            uow.recipes.add(recipe)
             uow.commit()
             return recipe
     
@@ -602,7 +596,7 @@ class RecipeService:
             return recipes
 
     #-save to favorites/favorites methods
-    #By Jon Bailey
+    #By Lu
     def add_recipe_to_favorites(
             self,
             user_id: int,
@@ -626,7 +620,8 @@ class RecipeService:
                 uow.commit()
 
             return added
-    #By Jon Bailey
+        
+    #By Lu
     def remove_recipe_from_favorites(
             self,
             user_id: int,
@@ -650,7 +645,7 @@ class RecipeService:
                 uow.commit()
 
             return removed
-    #By Jon Bailey
+    #By Lu
     def get_user_favorites(
             self,
             user_id: int
@@ -949,7 +944,7 @@ class ServiceContainer:
         return self.recipe_service.delete_recipe(recipe_id)
 
     #By Jon Bailey
-    def find_recipe(self, name: str) -> list[Recipe] | None:
+    def find_recipe(self, name: str) -> list[Recipe]:
         return self.recipe_service.find_recipe(name)
     
     #By Jon Bailey
@@ -1008,6 +1003,7 @@ class ServiceContainer:
         
 
     #---------------- lu: STF Block | favorites container methods
+    #By Lu
     def add_recipe_to_favorites(
             self,
             user_id: int,
@@ -1015,6 +1011,7 @@ class ServiceContainer:
             ) -> bool:
         return self.recipe_service.add_recipe_to_favorites(user_id, recipe_id)
     
+    #By Lu
     def remove_recipe_from_favorites(
             self,
             user_id: int,
@@ -1022,6 +1019,7 @@ class ServiceContainer:
             ) -> bool:
         return self.recipe_service.remove_recipe_from_favorites(user_id, recipe_id)
     
+    #By Lu
     def get_user_favorites(
             self,
             user_id: int
@@ -1032,6 +1030,7 @@ class ServiceContainer:
 
     # ==================== DB CONTROL ==================== #
 
+    # By Jon Bailey
     def reset_database(self):
         """
         This option will drop the entire database and rebuild columns ONLY.
@@ -1041,6 +1040,7 @@ class ServiceContainer:
         self.db_connect.drop_tables()
         self.db_connect.create_tables()
 
+    # By Jon Bailey
     def close(self):
         """
         Use this to close the database connection at application
