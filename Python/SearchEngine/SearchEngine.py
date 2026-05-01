@@ -147,15 +147,6 @@ class RecipeSearchEngine(SearchEngine):
         import random
         return random.sample(all_recipes, count)
 
-    def search_with_filter(self, recipes: list, pantry: list, recipe_filter: Filter) -> list:
-        """
-        Uses the Filter object temporarily to narrow down recipes.
-        Notice: we do NOT do self.filter = recipe_filter — that would be
-        an association. We just call recipe_filter.apply() and move on.
-        This reflects the dashed dependency arrow in the UML diagram.
-        """
-        return recipe_filter.apply(recipes, pantry) 
-
     def offer_recipes_with_pantry(self, pantry: list) -> list:
         """
         Return recipes that can be made using ONLY the ingredients
@@ -167,4 +158,19 @@ class RecipeSearchEngine(SearchEngine):
         Returns:
           List of recipes the user can make
         """
+        return self.service.find_recipes_by_ingredients(pantry)
         
+    def search_with_filter(self, recipes: list, pantry: list, recipe_filter: Filter) -> list:
+        """
+        Uses the Filter object temporarily to narrow down recipes.
+        Notice: we do NOT do self.filter = recipe_filter — that would be
+        an association. We just call recipe_filter.apply() and move on.
+        This reflects the dashed dependency arrow in the UML diagram.
+        """
+        if recipes is None:
+            print("No recipes to filter.")
+            return []
+        if pantry is None:
+            return recipe_filter.apply(recipes)  # If no pantry info, just apply the filter as is
+        pantryrecipe = self.offer_recipes_with_pantry(pantry)
+        return recipe_filter.apply(pantryrecipe) 

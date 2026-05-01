@@ -8,17 +8,9 @@ class Filter:
     """
 
     def __init__(self):
-        # The minimum and maximum cook time (in minutes) allowed
-        self.min_cook_time: int = 0
-        self.max_cook_time: int = 9999  # default: no upper limit
-
         # A list of ingredients the user prefers (dietary restrictions / allowed ingredients)
         # Example: ["gluten-free", "vegan"]
         self.dietary_restrictions: list = []
-
-        # The minimum and maximum calories allowed per recipe
-        self.min_calories: int = 0
-        self.max_calories: int = 9999  # default: no upper limit
 
         # Ingredients the user wants to completely avoid
         # Example: ["peanuts", "shellfish"]
@@ -26,28 +18,6 @@ class Filter:
 
         # If True, only return recipes that can be made using pantry items the user has
         self.use_pantry_only: bool = False
-
-    def validate(self) -> bool:
-        """
-        Checks if the filter settings make sense before using them.
-        For example, min cook time should not be greater than max cook time.
-
-        Returns:
-            True if everything is valid, False if something is wrong.
-        """
-        if self.min_cook_time > self.max_cook_time:
-            print("Error: min_cook_time cannot be greater than max_cook_time.")
-            return False
-
-        if self.min_calories > self.max_calories:
-            print("Error: min_calories cannot be greater than max_calories.")
-            return False
-
-        if self.min_cook_time < 0 or self.min_calories < 0:
-            print("Error: Time and calorie values cannot be negative.")
-            return False
-
-        return True  # All checks passed!
     
     # Tolu: clean one ingredient name
     def _clean_name(self, value):
@@ -60,7 +30,7 @@ class Filter:
             cleaned.append(self._clean_name(value))
         return cleaned
 
-    def matches(self, recipe: dict, pantry: list) -> bool:
+    def matches(self, recipe: dict) -> bool:
         """
         Checks whether a single recipe passes all of the filter rules.
 
@@ -73,22 +43,8 @@ class Filter:
             True if the recipe matches all filter rules, False otherwise.
         """
         # Tolu: Check cook time range
-        cook_time = recipe.get("cook_time")
-
-        if cook_time is None:
-            return False
-
-        if not (self.min_cook_time <= cook_time <= self.max_cook_time):
-            return False
-            
-        # Check calorie range
-        calories = recipe.get("calories", 0)
-        if not (self.min_calories <= calories <= self.max_calories):
-            return False
-
         # Check that none of the recipe's ingredients are blocked
         recipe_ingredients = self._clean_list(recipe.get("ingredients", []))
-        pantry_ingredients = self._clean_list(pantry)
         blocked_ingredients = self._clean_list(self.blocked_ingredients)
 
         
@@ -104,7 +60,7 @@ class Filter:
 
         return True  # Recipe passed all checks!
 
-    def apply(self, recipes: list, pantry: list) -> list:
+    def apply(self, recipes: list) -> list:
         """
         Filters a whole list of recipes, returning only those that match
         the current filter settings.
@@ -116,15 +72,10 @@ class Filter:
         Returns:
             A new list containing only the recipes that passed the filter.
         """
-        # First, make sure the filter settings are valid
-        if not self.validate():
-            print("Filter settings are invalid. Returning empty list.")
-            return []
-
         # Go through each recipe and keep only those that match
         matching_recipes = []
         for recipe in recipes:
-            if self.matches(recipe, pantry):
+            if self.matches(recipe):  # Pass an empty pantry list
                 matching_recipes.append(recipe)
 
         return matching_recipes
