@@ -491,6 +491,7 @@ def get_pop_searches(service: ServiceContainer, search_engine: SearchEngine.Reci
 
         return results
     
+# By Jon Bailey
 def add_recipe(service: ServiceContainer):
     now = datetime.now()
     name = input("What do you want to call your recipe?").strip()
@@ -532,6 +533,9 @@ def add_recipe(service: ServiceContainer):
         print(f"\nRecipe: '{recipe.name}' added successfully.")
     except Exception as e:
         print(f"Error adding Recipe: {e}")
+
+def delete_account(service: ServiceContainer, user: User):
+    return service.delete_user(user)
 
 #By Alysa Solomon
 def main():
@@ -575,8 +579,9 @@ def main():
                         print("This feature hasn't been implemented yet.")
                         pass
                     case 4: # Add Recipe
-                        print("This feature hasn't been implemented yet.")
-                        pass
+                        #print("This feature hasn't been implemented yet.")
+                        #pass
+                        add_recipe(service)
                     case 5: # Add Ingredients to Pantry
                         print("This feature hasn't been implemented yet.")
                         pass
@@ -587,8 +592,14 @@ def main():
                         _, message, user = logout()
                         print(message)
                     case 8: # Delete Account
-                        print("This feature hasn't been implemented yet.")
-                        pass
+                        # print("This feature hasn't been implemented yet.")
+                        # pass
+                        if delete_account(user=user, service=service):
+                            print("Account Successfully deleted.")
+                            logged_in = False
+                            user = None
+                        else:
+                            print("Account not deleted")
                     case 9: # Exit
                         will_continue = False
                         print("You will be automatically logged out.\nThank you for using our Program!")
