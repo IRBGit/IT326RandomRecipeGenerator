@@ -457,7 +457,7 @@ def main():
                             print("No Recipes Found.")
                             pass
                     case 4: # Register Account
-                        user = register_user()
+                        user = register_user(service)
                     case 5: # Searching For a recipe
                         search_not_logged_in()
                     case 6: # Exit
