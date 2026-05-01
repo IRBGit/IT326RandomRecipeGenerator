@@ -3,10 +3,12 @@ from db.db_connect import DBConnect
 from db.repositories import UserRepository, RecipeRepository, IngredientRepository, SearchRepository
 
 class UnitOfWork:
+    # By Jon Bailey
     def __init__(self):
         self.session: Session | None = None
         self.db = DBConnect()
 
+    # By Jon Bailey
     def __enter__(self):
 
         self.session = self.db.get_session()
@@ -19,6 +21,7 @@ class UnitOfWork:
 
         return self
 
+    # By Jon Bailey
     def __exit__(self, exc_type, exc, tb):
         assert self.session is not None
         if exc:
@@ -26,6 +29,7 @@ class UnitOfWork:
 
         self.session.close()
 
+    # By Jon Bailey
     def commit(self):
         assert self.session is not None
         try:
@@ -34,6 +38,7 @@ class UnitOfWork:
             self.session.rollback()
             raise
 
+    # By Jon Bailey
     def rollback(self):
         assert self.session is not None
         self.session.rollback()

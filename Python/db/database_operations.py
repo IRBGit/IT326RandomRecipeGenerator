@@ -10,6 +10,11 @@ from typing import Optional, List
 from sqlalchemy.orm import Session
 from sqlalchemy import Row
 from datetime import datetime
+from typing import TypedDict
+
+class PopularSearch(TypedDict):
+    query: str
+    count: int
 
 # By Jon Bailey
 class PantryService:
@@ -686,7 +691,7 @@ class SearchService:
     def get_popular_searches(
             self, 
             limit: int = 10
-            ) -> list[dict[str, int]]:
+            ) -> list[PopularSearch]:
         with UnitOfWork() as uow:
             return [
                 {
@@ -989,7 +994,7 @@ class ServiceContainer:
     def get_popular_searches(
             self,
             limit: int
-    ) -> list[dict[str, int]]:
+    ) -> list[PopularSearch]:
         """
         Get the most popular searches.
 
