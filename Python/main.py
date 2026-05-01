@@ -452,7 +452,8 @@ def register_user(service: ServiceContainer):
 
 #By: Alysa Solomon and Jon Bailey
 def get_pop_searches(service: ServiceContainer, search_engine: SearchEngine.RecipeSearchEngine):
-    while True:
+    get_amount = True
+    while get_amount:
         print("How many popular searches do you want? The default is 10. Press enter for default selection\n")
 
         try:
