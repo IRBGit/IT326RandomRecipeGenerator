@@ -271,7 +271,7 @@ def search_not_logged_in():
     is_searching = True
     search_func = SearchEngine.RecipeSearchEngine()
     while is_searching:
-        print("Current Options are listed below:")
+        print("\nCurrent Options are listed below:")
         print("1: Search by Name")  # Somewhat Implemented
         print("2: Search by Specified Criteria") # Not Implemented
         print("3: Search by Necessary Ingredients") # Not Implemented
@@ -283,14 +283,23 @@ def search_not_logged_in():
             match chosen_option:
                 case 1: # search by name
                     recipe_list = search_by_name(search_func)
-                    print(recipe_list)
+                    if recipe_list != []:
+                            print(recipe_list)
+                    else:
+                        print("No Recipes Found")
                 case 2: # Search by Criteria
                     recipe_list = search_by_criteria(search_func)
-                    print(recipe_list)
+                    if recipe_list != []:
+                            print(recipe_list)
+                    else:
+                        print("No Recipes Found")
                     pass
                 case 3: # Search by Neccessary Ing
                     recipe_list = search_by_ing(search_func)
-                    print(recipe_list)
+                    if recipe_list != []:
+                            print(recipe_list)
+                    else:
+                        print("No Recipes Found")
                     pass
                 case 4: #Help Menu
                     print("1: You input a name of a recipe, and our database finds all recipes that have that name in it's title")
@@ -424,6 +433,8 @@ def main():
                         user = loginHelper(service)
                         if not logged_in:
                             print("Reseting Password has not been implemented yet.")
+                            pass
+                        input("Press Enter to Continue")
                     case 2: # Get Pop Searches
                         # recipe_list = get_pop_searches(service)
                         # if recipe_list != []:
@@ -439,6 +450,7 @@ def main():
                             print(recipe_list)
                         else:
                             print("No Recipes Found.")
+                            pass
                     case 4: # Register Account
                         user = register_user()
                     case 5: # Searching For a recipe
@@ -448,11 +460,12 @@ def main():
                         print("Thank you for using our Program!")
                     case _:
                         print("Invalid Option. Please Try Again.")
-                    
+                if chosen_option != 5:
+                    input("Press Enter to Continue")
             except ValueError:
                 print("Please input a valid input.")
                 pass
-            input("Press Enter to Continue")
+            
             pass
         pass
     service.close()
