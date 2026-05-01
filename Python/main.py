@@ -94,7 +94,7 @@ def update_note(service, user):
         print("Invalid input.")
     except Exception as e:
         print(f"Error updating note: {e}")
-
+# By Thanvii Ambala
 def loginHelper(service):
     username = input("Enter username: ")
     password = input("Enter password: ")
@@ -104,10 +104,11 @@ def loginHelper(service):
 
     if success:
         print("You are now logged in!")
-        return user   # ✅ return user object
+        return user
 
     return None
 
+# By Thanvii Ambala
 def logoutHelper():
     print(logout())
     return False
