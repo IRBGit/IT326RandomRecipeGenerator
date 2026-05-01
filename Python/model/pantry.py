@@ -63,6 +63,8 @@ class PantryItem(Base):
             return False
         from model import User, Ingredient
         return (
+            self.user_id is not None and
+            self.self.ingredient_id is not None and
             self.user_id == other.user_id and
             self.ingredient_id == other.ingredient_id
         )

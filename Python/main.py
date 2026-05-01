@@ -5,6 +5,7 @@ from db.database_operations import ServiceContainer
 from model import Recipe, User
 from SearchEngine import SearchEngine, Filter, Rank
 from typing import List
+from datetime import datetime
 
 load_dotenv()
 
@@ -425,6 +426,48 @@ def get_pop_searches(service: ServiceContainer):
         results = search_engine.search_recipes_by_name(selected_query)
 
         return results
+    
+def add_recipe(service: ServiceContainer):
+    now = datetime.now()
+    name = input("What do you want to call your recipe?").strip()
+    if not name:
+        print("Recipe name cannot be empty")
+        return
+    try:
+        ing_num = int(input("How many ingredients does your recipe have?"))
+        if ing_num < 0:
+            raise ValueError
+    except ValueError:
+        print("Invalid number of ingredients")
+        return
+    
+    ingredients = []
+    for i in range (ing_num):
+        ing = input(f"What is ingredient {i+1} called?").strip()
+        if ing:
+            ingredients.append(ing)
+        else:
+            print("Empty ingredient skipped")
+
+    print("\nEnter instructions (type 'done' when finished):")
+    instructions = []
+    step = 1
+    while True:
+        line = input(f"Step {step}: ").strip()
+        if line.lower() == "done":
+            break
+        if line:
+            instructions.append(line)
+            step += 1
+
+    try:
+        recipe = service.add_recipe(name = name, instructions = instructions, ingredients = ingredients, pub_time=now)
+        if recipe is None:
+            print("Error creating recipe, Recipe returned as None")
+            raise
+        print(f"\nRecipe: '{recipe.name}' added successfully.")
+    except Exception as e:
+        print(f"Error adding Recipe: {e}")
 
 #By Alysa Solomon
 def main():
@@ -508,7 +551,9 @@ def main():
                 match chosen_option:
                     case 1: # Log In  
                         user = loginHelper(service)
-                        if user == None:
+                        if user:
+                            logged_in = True
+                        if not logged_in:
                             print("Reseting Password has not been implemented yet.")
                             pass
                         input("Press Enter to Continue")
