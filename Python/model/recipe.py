@@ -96,7 +96,7 @@ class Recipe(Base):
         self.tags = tags
         self.video = video
         # Tolu: removed for now, not in db table yet
-        # self.published_time = pub_time
+        self.published_time = pub_time
 
     def __repr__(self):
         return f"<Recipe(id = {self.id}, name ='{self.name}')>"
@@ -242,14 +242,17 @@ class Recipe(Base):
 
         return self._ingredients.pop(key)
     
-
     def __eq__(
             self, 
             other: object
             ) -> bool:
         if not isinstance(other, Recipe):
             return False
-        return self.id is not None and other.id is not None and self.id == other.id
+        return (
+            self.id is not None and 
+            other.id is not None and 
+            self.id == other.id
+        )
     
     def __hash__(
             self

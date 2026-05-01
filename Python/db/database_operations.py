@@ -10,7 +10,13 @@ from typing import Optional, List
 from sqlalchemy.orm import Session
 from sqlalchemy import Row
 from datetime import datetime
+from typing import TypedDict
 
+class PopularSearch(TypedDict):
+    query: str
+    count: int
+
+# By Jon Bailey
 class PantryService:
     """
     A service layer for database operations using the pantry.
@@ -18,6 +24,7 @@ class PantryService:
     def __init__(self):
         pass
     
+    #By Jon Bailey
     def add_ingredient_to_pantry(
             self, 
             user: "User", 
@@ -52,7 +59,7 @@ class PantryService:
             uow.commit()
         return item
             
-    
+    #By Jon Bailey
     def remove_ingredient_from_pantry(
             self, 
             user: User, 
@@ -81,7 +88,7 @@ class PantryService:
 
             return item
             
-    
+    #By Jon Bailey
     def update_pantry_item(
             self, 
             user: User, 
@@ -107,6 +114,7 @@ class PantryService:
 
             return item
     
+    #By Jon Bailey
     def get_all_pantry_items(
             self,
             user: User
@@ -210,7 +218,8 @@ class UserService:
             user = uow.users.get_by_email(email)
         
             return user
-        
+    
+    #By Jon Bailey
     def get_user_by_id(
             self,
             user_id: int
@@ -221,6 +230,7 @@ class UserService:
         with UnitOfWork() as uow:
             return uow.users.get_by_id(user_id)
     
+    #By Jon Bailey
     def create_user(
             self, 
             email: str, 
@@ -239,7 +249,8 @@ class UserService:
             uow.commit()
             
             return user
-        
+    
+    #By Jon Bailey
     def delete_user(
             self, 
             user_id: int
@@ -256,7 +267,8 @@ class UserService:
             uow.users.delete(user)
             uow.commit()
             return True
-        
+    
+    #By Jon Bailey
     def authenticate_user(
             self,
             email: str,
@@ -273,6 +285,7 @@ class UserService:
             
             return user
 
+    #By Jon Bailey
     def add_personal_note(
             self,
             user: User,
@@ -294,7 +307,8 @@ class UserService:
             uow.commit()
 
             return item
-        
+    
+    #By Jon Bailey
     def delete_personal_note(
             self,
             user: User,
@@ -322,6 +336,7 @@ class UserService:
 
             return updated_notes
 
+    #By Jon Bailey
     def get_all_user_notes(self, user_id: int) -> list[tuple[Recipe, str]]:
         with UnitOfWork() as uow:
             user = uow.users.get_by_id(user_id)
@@ -345,6 +360,7 @@ class IngredientService:
     def __init__(self):
         pass
 
+    #By Jon Bailey
     def find_ingredient(
             self, 
             name: str
@@ -361,6 +377,7 @@ class IngredientService:
         with UnitOfWork() as uow:
             return uow.ingredients.get_by_name(name)
     
+    #By Jon Bailey
     def add_ingredient(
             self, 
             name: str
@@ -381,6 +398,7 @@ class IngredientService:
             uow.commit()
             return ingredient
     
+    #By Jon Bailey
     def remove_ingredient(
             self,
             name: str
@@ -403,6 +421,7 @@ class IngredientService:
             uow.commit()
             return True
     
+    #By Jon Bailey
     def remove_ingredient_obj(
             self,
             ingredient: Ingredient
@@ -420,6 +439,7 @@ class IngredientService:
             uow.commit()
             return True
     
+    #By Jon Bailey
     def get_ingredient_by_id(
             self,
             ing_id: int
@@ -438,13 +458,15 @@ class RecipeService:
     def __init__(self):
         pass
 
+    #By Jon Bailey
     def find_recipe(
             self,
             name: str
-            ) -> list[Recipe] | None:
+            ) -> list[Recipe]:
         with UnitOfWork() as uow:
-            return uow.recipes.get_by_name(name)
-        
+            return uow.recipes.search_by_name(name)
+    
+    #By Jon Bailey
     def add_recipe(
         self,
         name: str,
@@ -462,12 +484,10 @@ class RecipeService:
         """
 
         with UnitOfWork() as uow:
-            recipes = uow.recipes.get_by_name(name)
+            existing = uow.recipes.get_by_name(name)
             
-            if recipes:
-                for r in recipes:
-                    if r.name.strip().lower() == name.strip().lower():
-                        return r
+            if existing:
+                return existing
                 
             recipe = Recipe(
                 name=name,
@@ -477,25 +497,22 @@ class RecipeService:
             )
             uow.recipes.add(recipe)
 
-            if ingredients is None:
-                uow.commit()
-                return recipe
+            if ingredients:
+                for ing_name in ingredients:
+                    ingredient = uow.ingredients.get_by_name(ing_name)
 
-            for ing_name in ingredients:
-                ingredient = uow.ingredients.get_by_name(ing_name)
+                    if not ingredient:
+                        ingredient = Ingredient(name=ing_name)
+                        uow.ingredients.add(ingredient)
+                        if uow.session is not None:
+                            uow.session.flush()
 
-                if not ingredient:
-                    ingredient = Ingredient(name=ing_name)
-                    uow.ingredients.add(ingredient)
-                    if uow.session is not None:
-                        uow.session.flush()
+                    recipe.add_ingredient(ingredient)
 
-                recipe.add_ingredient(ingredient)
-
-            uow.recipes.add(recipe)
             uow.commit()
             return recipe
-        
+    
+    #By Jon Bailey
     def delete_recipe(
             self,
             recipe_id: int
@@ -576,6 +593,7 @@ class RecipeService:
             uow.commit()
             return recipe
 
+    #By Jon Bailey
     def rate_recipe(
             self, 
             user_id: int, 
@@ -600,10 +618,7 @@ class RecipeService:
             recipe.add_rating(user, rating)
             uow.commit()
     
-    def get_recipe_by_id(self, recipe_id: int) -> Recipe | None:
-        with UnitOfWork() as uow:
-            return uow.recipes.get_by_id(recipe_id)     
-
+    #By Jon Bailey
     def get_all_recipes(self) -> list[Recipe]:
         """
         Retrieve all recipes from the database. Implementation of 
@@ -614,7 +629,7 @@ class RecipeService:
             return recipes
 
     #-save to favorites/favorites methods
-
+    #By Lu
     def add_recipe_to_favorites(
             self,
             user_id: int,
@@ -638,7 +653,8 @@ class RecipeService:
                 uow.commit()
 
             return added
-    
+        
+    #By Lu
     def remove_recipe_from_favorites(
             self,
             user_id: int,
@@ -662,7 +678,7 @@ class RecipeService:
                 uow.commit()
 
             return removed
-    
+    #By Lu
     def get_user_favorites(
             self,
             user_id: int
@@ -685,7 +701,7 @@ class SearchService:
     """
     A class to contain services related to searches.
     """
-
+    #By Jon Bailey
     def record_search(
             self, 
             query: str):
@@ -698,11 +714,12 @@ class SearchService:
             
             uow.searches.add(search)
             uow.commit()
-    
+
+    #By Jon Bailey
     def get_popular_searches(
             self, 
             limit: int = 10
-            ) -> list[dict[str, int]]:
+            ) -> list[PopularSearch]:
         with UnitOfWork() as uow:
             return [
                 {
@@ -711,7 +728,8 @@ class SearchService:
                 }
                 for row in uow.searches.get_popular(limit = limit)
             ]
-    
+        
+    #By Jon Bailey
     def get_recent_searches(
             self,
             limit: int = 50
@@ -721,6 +739,7 @@ class SearchService:
             return result
 
 class ServiceContainer:
+    #By Jon Bailey
     def __init__(self):
         self.db_connect = DBConnect()
 
@@ -730,27 +749,33 @@ class ServiceContainer:
         self._recipe_service = RecipeService()
         self._search_service = SearchService()
 
+    #By Jon Bailey
     @property
     def user_service(self):
         return self._user_service
     
+    #By Jon Bailey
     @property
     def ingredient_service(self):
         return self._ingredient_service
     
+    #By Jon Bailey
     @property
     def pantry_service(self):
         return self._pantry_service
     
+    #By Jon Bailey
     @property
     def recipe_service(self):
         return self._recipe_service
     
+    #By Jon Bailey
     @property
     def search_service(self):
         return self._search_service
 
     #User Service
+    #By Jon Bailey
     def create_user(
             self, 
             email: str, 
@@ -776,6 +801,7 @@ class ServiceContainer:
         """
         return self.user_service.get_user_by_email(email)
     
+    #By Jon Bailey
     def delete_user(
             self, 
             user: User
@@ -785,6 +811,7 @@ class ServiceContainer:
         """
         return self.user_service.delete_user(user.get_id())
     
+    #By Jon Bailey
     def authenticate_user(
             self, 
             email: str,
@@ -795,6 +822,7 @@ class ServiceContainer:
         """
         return self.user_service.authenticate_user(email, password)
     
+    #By Jon Bailey
     def get_user_by_id(
             self,
             user_id: int
@@ -804,6 +832,7 @@ class ServiceContainer:
         """
         return self.user_service.get_user_by_id(user_id)
     
+    #By Jon Bailey
     def add_personal_note(
             self,
             user: User,
@@ -812,6 +841,7 @@ class ServiceContainer:
     ) -> list[str]:
         return self.user_service.add_personal_note(user = user, recipe = recipe, note = note)
     
+    #By Jon Bailey
     def delete_personal_note(
             self,
             user: User,
@@ -820,6 +850,7 @@ class ServiceContainer:
     ) -> list[str]:
         return self.user_service.delete_personal_note(user = user, recipe = recipe, note = note)
     
+    #By Jon Bailey
     def update_note(
             self,
             user: User,
@@ -830,6 +861,7 @@ class ServiceContainer:
         self.user_service.delete_personal_note(user, recipe, old_note)
         return self.user_service.add_personal_note(user, recipe, new_note)
     
+    #By Jon Bailey
     def get_all_user_notes(
             self, 
             user: User
@@ -843,24 +875,28 @@ class ServiceContainer:
         ) -> Optional[Ingredient]:
         return self.ingredient_service.add_ingredient(name)
     
+    #By Jon Bailey
     def remove_ingredient(
             self, 
             name: str
         ) -> bool:
         return self.ingredient_service.remove_ingredient(name)
     
+    #By Jon Bailey
     def find_ingredient(
             self, 
             name: str
         ) -> Optional[Ingredient]:
         return self.ingredient_service.find_ingredient(name)
     
+    #By Jon Bailey
     def remove_ingredient_obj(
             self, 
             ingredient: Ingredient
         ) -> bool:
         return self.ingredient_service.remove_ingredient_obj(ingredient)
     
+    #By Jon Bailey
     def get_ingredient_by_id(
             self,
             ing_id: int
@@ -868,6 +904,7 @@ class ServiceContainer:
         return self.ingredient_service.get_ingredient_by_id(ing_id)
     
     #Pantry Service
+    #By Jon Bailey
     def add_to_pantry(
             self,
             user: User,
@@ -882,6 +919,7 @@ class ServiceContainer:
             unit
         )
     
+    #By Jon Bailey
     def remove_from_pantry(
             self,
             user: User,
@@ -892,6 +930,7 @@ class ServiceContainer:
             ingredient
         )
     
+    #By Jon Bailey
     def update_pantry(
             self,
             user: User,
@@ -906,6 +945,7 @@ class ServiceContainer:
             unit
         )
     
+    #By Jon Bailey
     def get_all_pantry_items(
             self,
             user: User
@@ -913,6 +953,7 @@ class ServiceContainer:
         return self.pantry_service.get_all_pantry_items(user)
     
     #Recipe Service
+    #By Jon Bailey
     def add_recipe(
             self,
             name: str,
@@ -946,12 +987,11 @@ class ServiceContainer:
     def delete_recipe(self, recipe_id: int) -> bool:
         return self.recipe_service.delete_recipe(recipe_id)
 
-    def find_recipe(self, name: str) -> list[Recipe] | None:
+    #By Jon Bailey
+    def find_recipe(self, name: str) -> list[Recipe]:
         return self.recipe_service.find_recipe(name)
     
-    def get_recipe_by_id(self, recipe_id: int) -> Recipe | None:
-        return self.recipe_service.get_recipe_by_id(recipe_id)
-    
+    #By Jon Bailey
     def add_ingredient_to_recipe(
             self,
             recipe_id: int,
@@ -962,6 +1002,7 @@ class ServiceContainer:
         """
         return self.recipe_service.add_ingredient_to_recipe(recipe_id, ingredient_name)
 
+    #By Jon Bailey
     def rate_recipe(
         self,
         user_id: int,
@@ -973,6 +1014,7 @@ class ServiceContainer:
         """
         return self.recipe_service.rate_recipe(user_id, recipe_id, rating)
     
+    #By Jon Bailey
     def get_all_recipes(self) -> list[Recipe]:
         """
         Retrieve all recipes from the database.
@@ -980,17 +1022,18 @@ class ServiceContainer:
         return self.recipe_service.get_all_recipes()
     
     # ==================== Searches ====================== #
-
+    #By Jon Bailey
     def record_search(
             self,
             query: str
     ):
         self.search_service.record_search(query )
 
+    #By Jon Bailey
     def get_popular_searches(
             self,
             limit: int
-    ) -> list[dict[str, int]]:
+    ) -> list[PopularSearch]:
         """
         Get the most popular searches.
 
@@ -1004,6 +1047,7 @@ class ServiceContainer:
         
 
     #---------------- lu: STF Block | favorites container methods
+    #By Lu
     def add_recipe_to_favorites(
             self,
             user_id: int,
@@ -1011,6 +1055,7 @@ class ServiceContainer:
             ) -> bool:
         return self.recipe_service.add_recipe_to_favorites(user_id, recipe_id)
     
+    #By Lu
     def remove_recipe_from_favorites(
             self,
             user_id: int,
@@ -1018,6 +1063,7 @@ class ServiceContainer:
             ) -> bool:
         return self.recipe_service.remove_recipe_from_favorites(user_id, recipe_id)
     
+    #By Lu
     def get_user_favorites(
             self,
             user_id: int
@@ -1028,6 +1074,7 @@ class ServiceContainer:
 
     # ==================== DB CONTROL ==================== #
 
+    # By Jon Bailey
     def reset_database(self):
         """
         This option will drop the entire database and rebuild columns ONLY.
@@ -1037,6 +1084,7 @@ class ServiceContainer:
         self.db_connect.drop_tables()
         self.db_connect.create_tables()
 
+    # By Jon Bailey
     def close(self):
         """
         Use this to close the database connection at application
