@@ -16,6 +16,13 @@ class PopularSearch(TypedDict):
     query: str
     count: int
 
+class Pantry(TypedDict):
+    index: int
+    ingredient_id: int
+    ingredient_name: str
+    quantity: float | None
+    unit: str | None
+
 # By Jon Bailey
 class PantryService:
     """
@@ -93,18 +100,22 @@ class PantryService:
             self, 
             user: User, 
             ingredient: Ingredient, 
-            quantity: Optional[int] = None, 
+            quantity: Optional[float] = None, 
             unit: Optional[str] = None
         ) -> Optional[PantryItem]:
 
         with UnitOfWork() as uow:
             db_user = uow.users.get_by_id(user.id)
+            db_ingredient = uow.ingredients.get_by_id(ingredient.id)
 
             if db_user is None:
                 raise ValueError("User not found")
+            
+            if db_ingredient is None:
+                raise ValueError("Ingtredient not found")
 
             item = db_user.update_pantry_item(
-                ingredient=ingredient,
+                ingredient=db_ingredient,
                 quantity=quantity,
                 unit=unit
             )
@@ -118,7 +129,7 @@ class PantryService:
     def get_all_pantry_items(
             self,
             user: User
-    ) -> list[dict]:
+    ) -> list[Pantry]:
         with UnitOfWork() as uow:
             db_user = uow.users.get_by_id(user.id)
 
@@ -137,6 +148,20 @@ class PantryService:
                 }
                 for i, item in enumerate(pantry_items)
             ]
+    
+    def get_pantry_item_by_index(self, user: User, index: int) -> PantryItem:
+        with UnitOfWork() as uow:
+            db_user = uow.users.get_by_id(user.id)
+
+            if db_user is None:
+                raise ValueError("User does not exist")
+
+            pantry_items = list(db_user._pantry.values())
+
+            if index < 0 or index >= len(pantry_items):
+                raise ValueError("Invalid pantry index")
+
+            return pantry_items[index]
 
 class UserService:
     """
@@ -876,7 +901,7 @@ class ServiceContainer:
             self,
             user: User,
             ingredient: Ingredient,
-            quantity: Optional[int] = None,
+            quantity: Optional[float] = None,
             unit: Optional[str] = None
     ) -> Optional[PantryItem]:
         return self.pantry_service.add_ingredient_to_pantry(
@@ -902,7 +927,7 @@ class ServiceContainer:
             self,
             user: User,
             ingredient: Ingredient,
-            quantity: Optional[int] = None,
+            quantity: Optional[float] = None,
             unit: Optional[str] = None
     ) -> PantryItem | None:
         return self.pantry_service.update_pantry_item(
@@ -916,7 +941,7 @@ class ServiceContainer:
     def get_all_pantry_items(
             self,
             user: User
-    ) -> list[dict]:
+    ) -> list[Pantry]:
         return self.pantry_service.get_all_pantry_items(user)
     
     #Recipe Service
@@ -1048,5 +1073,41 @@ class ServiceContainer:
         """
         from sqlalchemy.orm import Session
         self.db_connect.shutdown()
+
+    def migrate_database(self):
+        from sqlalchemy import inspect, text
+
+        engine = self.db_connect.engine
+
+        if engine is None:
+            raise RuntimeError("Database engine not initialized")
+
+        inspector = inspect(engine)
+
+        columns = [col["name"] for col in inspector.get_columns("recipes")]
+
+        with engine.connect() as conn:
+
+            if "published_time" not in columns:
+                conn.execute(text(
+                    "ALTER TABLE recipes ADD COLUMN published_time DATETIME NULL"
+                ))
+
+            if "tags" not in columns:
+                conn.execute(text(
+                    "ALTER TABLE recipes ADD COLUMN tags TEXT NULL"
+                ))
+
+            if "video" not in columns:
+                conn.execute(text(
+                    "ALTER TABLE recipes ADD COLUMN video VARCHAR(500) NULL"
+                ))
+            
+            if "category" not in columns:
+                conn.execute(text(
+                    "ALTER TABLE recipes ADD COLUMN category VARCHAR(255) NULL"
+                ))
+
+            conn.commit()
 
     

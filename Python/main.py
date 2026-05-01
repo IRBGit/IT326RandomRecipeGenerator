@@ -8,6 +8,73 @@ from typing import List
 from datetime import datetime
 
 load_dotenv()
+# By Jon Bailey
+def print_pantry(service: ServiceContainer, user: User):
+    items = service.get_all_pantry_items(user)
+
+    if not items:
+        print("Your pantry is empty.")
+        return
+    
+    print("\n--- Pantry ---")
+    for item in items:
+        print(
+            f"{item['index'] }"
+            f"{item['ingredient_name']} "
+            f"({item['quantity'] or 'N/A/'} {item['unit'] or ''})"
+        )
+
+    return items
+
+def add_pantry_item(service: ServiceContainer, user: User):
+    name = input("Ingredient name: ")
+
+    ingredient = service.find_ingredient(name)
+    if not ingredient:
+        ingredient = service.add_ingredient(name)
+
+    quantity = input("Quantity (optional): ")
+    unit = input("Unit (Optional): ")
+
+    quantity = float(quantity) if quantity.strip() else None
+    unit  = unit if unit.strip() else None
+
+    try:
+        service.add_to_pantry(
+            user, ingredient, quantity, unit
+        )
+    except:
+        print("User not found")
+
+def delete_pantry_item(service: ServiceContainer, user: User):
+    items = print_pantry(service, user)
+
+    try:
+        index = int(input("Select item number to delete: "))
+    except ValueError:
+        print("Invalid input")
+        return
+    
+    if items is not None:
+        if index < 0 or index >= len(items):
+            print("Invaldi Selection")
+            return
+    
+        ingredient = service.get_ingredient_by_id(items[index]['ingredient_id'])
+
+        service.remove_from_pantry(user, ingredient)
+    
+def update_pantry_item(service: ServiceContainer, user: User):
+    items = print_pantry(service, user)
+
+    try:
+        index = int(input("Select item number to update: "))
+    except ValueError:
+        print("Invalid input.")
+        return
+
+    
+    
 
 # By Jon Bailey
 def add_note_to_recipe(service: ServiceContainer, user: User, recipe: Recipe):
@@ -472,7 +539,7 @@ def main():
                     case 4: # Add Recipe
                         print("This feature hasn't been implemented yet.")
                         pass
-                    case 5: # Add Ingrediets to Pantry
+                    case 5: # Add Ingredients to Pantry
                         print("This feature hasn't been implemented yet.")
                         pass
                     case 6: # Update User Info
@@ -480,6 +547,7 @@ def main():
                         pass
                     case 7: # Log Out
                         success, message, _ = logout()
+                        logged_in = False
                         print(message)
                         user = None
                     case 8: # Delete Account
