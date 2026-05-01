@@ -210,3 +210,28 @@ class RecipeSearchEngine(SearchEngine):
         This reflects the dashed dependency arrow in the UML diagram.
         """
         return recipe_filter.apply(recipes, pantry) 
+
+    def offer_recipes_with_pantry(self, pantry: list) -> list:
+        """
+        Return recipes that can be made using ONLY the ingredients
+        available in the user's pantry.
+
+        Args:
+          pantry: list of ingredient names the user currently has
+
+        Returns:
+          List of recipes the user can make
+        """
+        matched_recipes = []
+
+        # Convert pantry to lowercase for comparison
+        pantry_items = [item.lower() for item in pantry]
+
+        for recipe in self._recipes:
+            recipe_ingredients = [ing.lower() for ing in recipe["ingredients"]]
+
+            # Check if ALL recipe ingredients exist in pantry
+            if all(ingredient in pantry_items for ingredient in recipe_ingredients):
+                matched_recipes.append(recipe)
+
+        return matched_recipes

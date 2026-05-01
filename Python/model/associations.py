@@ -1,16 +1,10 @@
+# associations.py
 """
     Author: Jon Bailey
 """
 
 from sqlalchemy import Table, Column, Integer, ForeignKey
 from model.base import Base
-
-recipe_ingredients = Table(
-    "recipe_ingredients", Base.metadata,
-    Column("recipe_id", Integer, ForeignKey("recipes.id"), primary_key=True),
-    Column("ingredient_id", Integer, ForeignKey("ingredients.id"), primary_key=True)
-    
-)
 
 user_favorites = Table(
     'user_favorites', Base.metadata,
