@@ -4,7 +4,6 @@
 
 from abc import ABC, abstractmethod  # Built-in Python module for abstract classes
 from SearchEngine.Filter import Filter           # We import Filter because it's used as a parameter type
-import random
 
 
 
