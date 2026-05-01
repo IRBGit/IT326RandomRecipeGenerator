@@ -100,6 +100,23 @@ def update_note(service, user):
         print(f"Error updating note: {e}")
 
 
+from model.auth import login, logout
+
+load_dotenv()
+
+def loginHelper():
+        # login part
+    username = input("Enter username: ")
+    password = input("Enter password: ")
+
+    success, message = login(username, password)
+    print(message)
+    return True
+
+def logoutHelper():
+    print(logout())
+    return False
+
 def main():
     logged_in = False
     will_continue = True
