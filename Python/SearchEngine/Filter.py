@@ -77,11 +77,15 @@ class Filter:
         Returns:
             True if the recipe matches all filter rules, False otherwise.
         """
-        # Check cook time range
-        cook_time = recipe.get("cook_time", 0)
-        if not (self.min_cook_time <= cook_time <= self.max_cook_time):
+        # Tolu: Check cook time range
+        cook_time = recipe.get("cook_time")
+
+        if cook_time is None:
             return False
 
+        if not (self.min_cook_time <= cook_time <= self.max_cook_time):
+            return False
+            
         # Check calorie range
         calories = recipe.get("calories", 0)
         if not (self.min_calories <= calories <= self.max_calories):
