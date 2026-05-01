@@ -26,6 +26,7 @@ def add_note_to_recipe(service: ServiceContainer, user: User, recipe: Recipe):
     except Exception as e:
         print(f"Error adding note: {e}")
 
+# By Jon Bailey
 def delete_note_from_recipe(service: ServiceContainer,user: User):
     try:
         indexed_notes = service.get_all_user_notes(user)
@@ -54,7 +55,8 @@ def delete_note_from_recipe(service: ServiceContainer,user: User):
         print("Invlaid input")
     except Exception as e:
         print(f"Error deleting note: {e}")
-    
+
+# By Jon Bailey    
 def update_note(service, user):
     try:
         # Get all notes (flattened list)
@@ -96,6 +98,7 @@ def update_note(service, user):
     except Exception as e:
         print(f"Error updating note: {e}")
 
+# By Thanvi Ambala
 def loginHelper():
     # login part
     username = input("Enter username: ")
