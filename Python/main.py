@@ -1403,7 +1403,6 @@ def main():
             except ValueError:
                 print("Please input a valid input.")
                 pass
-
         else:
             print("\nCurrent options are listed below. \nInput the number on the left to select your choice.")
             print("1: Log In")
