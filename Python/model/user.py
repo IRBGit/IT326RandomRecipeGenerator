@@ -221,7 +221,7 @@ class User(Base):
                 "quantity": item.quantity,
                 "unit": item.unit
             }
-            for ing, item in self._pantry_items
+            for ing_id, item in self._pantr.items()
             ]
     #---------------------------- :lu favorites methods
     def add_favorite_recipe(self, recipe: Recipe) -> bool:

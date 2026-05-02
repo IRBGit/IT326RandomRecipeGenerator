@@ -883,6 +883,14 @@ def add_rating_to_recipe(service: ServiceContainer, user: User, recipe: Recipe):
     #TODO Needs to be written
     pass
 
+def delete_recipe(service: ServiceContainer, recipe: Recipe):
+    if recipe is None:
+        print("Recipe not passed to method.")
+        return False
+    
+    if service.delete_recipe(recipe.get_id()):
+        print("Recipe deleted.")
+
 # By Jon Bailey
 def recipe_workflow(service: ServiceContainer, recipe: Recipe, user: User | None = None):
     while True:
@@ -909,32 +917,59 @@ def recipe_workflow(service: ServiceContainer, recipe: Recipe, user: User | None
             case 2:
                 update_recipe(service, recipe)
             case 3:
-                add_recipe_to_favorites(service, user, recipe)
+                if user is not None:
+                    add_recipe_to_favorites(service, user, recipe)
+                else:
+                    print("No user logged in")
+                    continue
             case 4:
-                remove_recipe_from_favorites(service, user, recipe)
+                if user is not None:
+                    remove_recipe_from_favorites(service, user, recipe)
+                else:
+                    print("No user logged in")
+                    continue
             case 5:
-                print(" --- Notes ---")
-                print("1) Add a new note")
-                print("2) Update an exisitng note")
-                print("3) Delete a note")
-                try:
-                    note = int(input("Make a choice: ").strip())
-                except ValueError:
-                    print("Selection was not a number")
+                if user is not None:
+                    print(" --- Notes ---")
+                    print("1) Add a new note")
+                    print("2) Update an exisitng note")
+                    print("3) Delete a note")
+                    try:
+                        note = int(input("Make a choice: ").strip())
+                    except ValueError:
+                        print("Selection was not a number")
+                        continue
+                    if choice < 1 or choice > 3:
+                        print("Not a valid choice")
+                        continue
+                    match note:
+                        case 1:
+                            add_note_to_recipe(service, user, recipe)
+                        case 2:
+                            update_note(service, user)
+                        case 3:
+                            delete_note_from_recipe(service, user)
                     continue
-                if choice < 1 or choice > 3:
-                    print("Not a valid choice")
+                else:
+                    print("No user logged in")
                     continue
-                match note:
-                    case 1:
-                        add_note_to_recipe(service, user, recipe)
-                    case 2:
-                        update_note(service, user)
-                    case 3:
-                        delete_note_from_recipe(service, user)
-                continue
             case 6:
-                add_rating_to_recipe(service, user, recipe)
+                if user is not None:
+                    add_rating_to_recipe(service, user, recipe)
+                    continue
+                else:
+                    print("No user is logged in")
+                    continue
+            case 7:
+                next = input("Are you sure? Yes or yes or Y or y to confirm: ").strip()
+                if next.lower() == "yes" or next.lower() == "y":
+                    delete_recipe(service, recipe)
+                    recipe = None
+                    break
+                else:
+                    continue
+            case 0:
+                break
                 
 
 #By Alysa Solomon

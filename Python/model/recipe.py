@@ -83,7 +83,7 @@ class Recipe(Base):
 
     category: Mapped[Optional[str]] = mapped_column(String(255), nullable = True)
 
-    _tags: Mapped[str] = mapped_column("tags", Text, nullable=True)
+    _tags: Mapped[Optional[str]] = mapped_column("tags", Text, nullable=True)
 
     published_time: Mapped[Optional[datetime]] = mapped_column(
     DateTime,
@@ -103,7 +103,6 @@ class Recipe(Base):
         # init includes name, category, instructions, tags, and video as setters
     def __init__(self, name: str, ingredients: Optional[List["Ingredient"]], instructions: Optional[List[str]] | None = None, pub_time: Optional[datetime] | None = None,category: Optional[str] = None, tags = None, video: Optional[str] = None):
         self.name = name
-        self.category = None
         self.area = None
         # self.ingredients = ingredients or [] # for now, including all variables, change later
         self.instructions = instructions or []
@@ -169,14 +168,14 @@ class Recipe(Base):
         
     @property
     def tags(self) -> list[str]:
-        try:
-            return json.loads(self._tags) if self._tags else []
-        except (json.JSONDecodeError, TypeError):
+        if not self._tags:
             return []
+        return json.loads(self._tags)
 
     @tags.setter
-    def tags(self, value: list[str]):
-        self._tags = json.dumps(value or [])
+    def tags(self, value: list[str] | None):
+        cleaned = [t.strip().lower() for t in (value or []) if t.strip()]
+        self._tags = json.dumps(cleaned)
 
     @instructions.setter
     def instructions(self, value: list[str]):
