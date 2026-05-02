@@ -21,11 +21,12 @@ class TestRankNewest(unittest.TestCase):
         #it works now
     def test_is_sorted(self):
         r : Rank.Rank= Rank.Rank()
+        base_time = dt.datetime.now()
         
         with self.subTest():
             item_list = ["Apples","Cucumbers","Kiwi","Fruit","Bannana"]
-            recipe_list = [recipe(item_list[i],[item_list[i]],["Cut them up","Eat"],dt.datetime.now()) for i in range(len(item_list))]
-            sorted = recipe_list
+            recipe_list = [recipe(item_list[i],[item_list[i]],["Cut them up","Eat"],(base_time+dt.timedelta(i))) for i in range(len(item_list))]
+            sorted = recipe_list.copy()
             shuffle(recipe_list)
             self.assertEqual(r.rank_by_newest(recipe_list), sorted)
         pass
@@ -40,3 +41,4 @@ class TestRankNewest(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+    
