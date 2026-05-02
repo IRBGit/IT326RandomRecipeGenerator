@@ -455,7 +455,7 @@ def get_ingredients(outputString: str):
         pass
 
     ing_list = []
-    print("Please input name of ingredients, one at a time.")
+    print("Please input name of ingredients, one at a time: ")
     for _ in range(count):
         ing_list.append(input())
     return ing_list
@@ -550,6 +550,7 @@ def search_by_name(search_func: SearchEngine.RecipeSearchEngine):
         # print("Additonal Features not supported")
         return recipe_list
     pass
+
 def search_by_category(search_func: SearchEngine.RecipeSearchEngine):
     # req_ing = get_ingredients("How many ingredients do you want to include in the recipe?\n")
     # ew_ing = get_ingredients("How many ingredients do you want to exclude from the recipe?\n")
@@ -557,9 +558,24 @@ def search_by_category(search_func: SearchEngine.RecipeSearchEngine):
     # dietary_list = get_dietary()
     recipe_list = search_func.search_recipes_by_category(category)
     return recipe_list
+
 def search_by_ing(search_func: SearchEngine.RecipeSearchEngine):
     req_ing = get_ingredients("How many ingredients do you want to include in the recipe?\n")
     recipe_list = search_func.search_recipes_by_ingredients(req_ing)
+    return recipe_list
+
+def search_by_criteria(search_func: SearchEngine.RecipeSearchEngine):
+
+    include_ingredients = get_ingredients("How many ingredients do you want to INCLUDE?: ")
+    exclude_ingredients = get_ingredients("How many ingredients do you want to EXCLUDE?: ")
+    category = get_category()
+    dietary_tags = [get_dietary()]
+    recipe_list = search_func.search_recipes_by_criteria(
+        include_ingredients = include_ingredients, 
+        exclude_ingredients = exclude_ingredients,
+        dietary_tags = dietary_tags,
+        category = category
+    )
     return recipe_list
 
 def get_saved_dietary_preferences(user: User) -> list[str]:
