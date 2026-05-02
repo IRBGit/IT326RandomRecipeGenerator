@@ -740,8 +740,83 @@ def add_recipe(service: ServiceContainer):
     except Exception as e:
         print(f"Error adding Recipe: {e}")
 
+# By Jon Bailey
 def delete_account(service: ServiceContainer, user: User):
     return service.delete_user(user)
+
+def display_recipe(service: ServiceContainer, recipe:Recipe):
+    #TODO Needs to be written
+    pass
+
+def update_recipe(service: ServiceContainer, recipe:Recipe):
+    #TODO Needs to be written
+    pass
+
+def add_recipe_to_favorites(service: ServiceContainer, user: User, recipe: Recipe):
+    #TODO Needs to be written
+    pass
+
+def remove_recipe_from_favorites(service: ServiceContainer, user: User, recipe: Recipe):
+    #TODO Needs to be written
+    pass
+
+def add_rating_to_recipe(service: ServiceContainer, user: User, recipe: Recipe):
+    #TODO Needs to be written
+    pass
+
+# By Jon Bailey
+def recipe_workflow(service: ServiceContainer, recipe: Recipe, user: User | None = None):
+    while True:
+        print(f"\n --- Recipe: {recipe.get_name()} ---")
+        print("1. View Recipe")
+        print("2. Update Recipe Information")
+        if user is not None:
+            print("3. Add to favorites")
+            print("4. Remove from Favorites")
+            print("5. Add Personal Note")
+            print("6. Rate Recipe")
+        print("7. Delete Recipe")
+        print("0. Back to Main Menu")
+
+        try:
+            choice = int(input("Select an ption: ").strip())
+        except ValueError:
+            print("Selection was not a number")
+            continue
+
+        match choice:
+            case 1:
+                display_recipe(service, recipe)
+            case 2:
+                update_recipe(service, recipe)
+            case 3:
+                add_recipe_to_favorites(service, user, recipe)
+            case 4:
+                remove_recipe_from_favorites(service, user, recipe)
+            case 5:
+                print(" --- Notes ---")
+                print("1) Add a new note")
+                print("2) Update an exisitng note")
+                print("3) Delete a note")
+                try:
+                    note = int(input("Make a choice: ").strip())
+                except ValueError:
+                    print("Selection was not a number")
+                    continue
+                if choice < 1 or choice > 3:
+                    print("Not a valid choice")
+                    continue
+                match note:
+                    case 1:
+                        add_note_to_recipe(service, user, recipe)
+                    case 2:
+                        update_note(service, user)
+                    case 3:
+                        delete_note_from_recipe(service, user)
+                continue
+            case 6:
+                add_rating_to_recipe(service, user, recipe)
+                
 
 #By Alysa Solomon
 def main():
