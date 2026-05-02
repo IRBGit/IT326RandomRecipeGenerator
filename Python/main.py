@@ -335,6 +335,54 @@ def search_by_ing(search_func: SearchEngine.RecipeSearchEngine):
     recipe_list = search_func.search_recipes_by_ingredients(req_ing)
     return recipe_list
 
+# By Thanvii Ambala
+def reset_password(email: str, new_password: str, service: ServiceContainer) -> bool:
+    """
+    Reset a user's password.
+    Returns True if successful, otherwise False.
+    """
+    email = email.strip().lower()
+
+    if new_password == "":
+        raise ValueError("New password cannot be empty")
+    user = service.get_user_by_email(email)
+    if user is None:
+        print("User not found.")
+        return False
+    
+    if service.change_password(user, new_password):
+        print(f"Password for {email} was reset successfully.")
+        return True
+
+    return False
+
+# By Thanvii Ambala
+def reset_password_helper(service: ServiceContainer):
+    email = input("Enter your email: ")
+    new_password = input("Enter your new password: ")
+    if email == "":
+        print("Email cannot be empty.")
+        raise ValueError("Email cannot be empty.")
+    reset_password(email, new_password, service)
+
+# By Thanvii Ambala
+def change_password_helper(service: ServiceContainer, user: User):
+    old_password = input("Enter your current password: ")
+    if not service.authenticate_user(user.email, old_password):
+        print("Current password is incorrect.")
+        return
+    new_password = input("Enter your new password: ")
+    new_password_again = input("Re-enter your new password: ")
+    if new_password == "":
+        print("New password cannot be empty.")
+        raise ValueError("New password cannot be empty.")
+    if new_password != new_password_again:
+        print("Passwords do not match.")
+        return
+    if service.change_password(user, new_password):
+        print("Password changed successfully.")
+    else:
+        print("Error changing password.")
 
 #RANK by Alysa Solomon
 def rank(recipe_list: List[Recipe]):

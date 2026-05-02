@@ -3,7 +3,6 @@
 """
 from model.recipe import Recipe
 
-
 class Filter:
     """
     The Filter class stores rules that can be applied to recipes.
@@ -33,7 +32,6 @@ class Filter:
         """
         Gets all ingredient names from a recipe.
         """
-
         ingredient_names = []
 
         for recipe_ingredient in recipe._ingredients.values():
@@ -48,7 +46,6 @@ class Filter:
         """
         Checks if one recipe passes the filter rules.
         """
-
         recipe_ingredient_names = self._get_recipe_ingredient_names(recipe)
         recipe_tags = self._clean_list(recipe.tags)
 
@@ -71,7 +68,6 @@ class Filter:
         """
         Filters a list of recipes.
         """
-
         filtered_recipes = []
 
         for recipe in recipes:
