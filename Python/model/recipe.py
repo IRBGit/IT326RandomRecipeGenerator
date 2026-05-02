@@ -1,5 +1,5 @@
 """
-    Authors: Jon Bailey and 
+    Authors: Jon Bailey and Alysa Solomon
 """
 
 # This class handles the data of Recipes

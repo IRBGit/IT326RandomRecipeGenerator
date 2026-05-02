@@ -73,9 +73,6 @@ def update_pantry_item(service: ServiceContainer, user: User):
         print("Invalid input.")
         return
 
-    
-    
-
 # By Jon Bailey
 def add_note_to_recipe(service: ServiceContainer, user: User, recipe: Recipe):
     try:
@@ -223,8 +220,7 @@ def get_ingredients(outputString: str):
     gettingCount = True
     while gettingCount:
         try:
-            count = input(outputString)
-            count = int(count)
+            count = int(input(outputString))
             gettingCount = False
         except ValueError:
             print("Please input a valid input.")
@@ -298,7 +294,7 @@ def get_dietary():
             pass
 
 # By Alysa Solomon
-def random_recipe_helper(search_func: SearchEngine.RecipeSearchEngine):
+def random_recipe_helper(search_func: SearchEngine.RecipeSearchEngine, user: User | None):
     req_ing = get_ingredients("In Arabic Numerals, How many ingredients do you want to include in the recipe?\n")
     get_value = True
     while get_value:
@@ -311,7 +307,7 @@ def random_recipe_helper(search_func: SearchEngine.RecipeSearchEngine):
     if req_ing == []:
         return search_func.get_random_recipes(choose)
     f = Filter.Filter()
-    return search_func.get_random_recipe_with_filter(choose,req_ing,f)
+    return search_func.get_random_recipe_with_filter(choose,user,f)
 
 def filter_helper():
     pass
@@ -339,6 +335,54 @@ def search_by_ing(search_func: SearchEngine.RecipeSearchEngine):
     recipe_list = search_func.search_recipes_by_ingredients(req_ing)
     return recipe_list
 
+# By Thanvii Ambala
+def reset_password(email: str, new_password: str, service: ServiceContainer) -> bool:
+    """
+    Reset a user's password.
+    Returns True if successful, otherwise False.
+    """
+    email = email.strip().lower()
+
+    if new_password == "":
+        raise ValueError("New password cannot be empty")
+    user = service.get_user_by_email(email)
+    if user is None:
+        print("User not found.")
+        return False
+    
+    if service.change_password(user, new_password):
+        print(f"Password for {email} was reset successfully.")
+        return True
+
+    return False
+
+# By Thanvii Ambala
+def reset_password_helper(service: ServiceContainer):
+    email = input("Enter your email: ")
+    new_password = input("Enter your new password: ")
+    if email == "":
+        print("Email cannot be empty.")
+        raise ValueError("Email cannot be empty.")
+    reset_password(email, new_password, service)
+
+# By Thanvii Ambala
+def change_password_helper(service: ServiceContainer, user: User):
+    old_password = input("Enter your current password: ")
+    if not service.authenticate_user(user.email, old_password):
+        print("Current password is incorrect.")
+        return
+    new_password = input("Enter your new password: ")
+    new_password_again = input("Re-enter your new password: ")
+    if new_password == "":
+        print("New password cannot be empty.")
+        raise ValueError("New password cannot be empty.")
+    if new_password != new_password_again:
+        print("Passwords do not match.")
+        return
+    if service.change_password(user, new_password):
+        print("Password changed successfully.")
+    else:
+        print("Error changing password.")
 
 #RANK by Alysa Solomon
 def rank(recipe_list: List[Recipe]):
@@ -380,7 +424,7 @@ def search_not_logged_in(search_func: SearchEngine.RecipeSearchEngine):
             match chosen_option:
                 case 1: # search by name
                     recipe_list = search_by_name(search_func)
-                    if recipe_list != []:
+                    if recipe_list is not None and recipe_list != []:
                             recipe_list = rank(recipe_list)
                             print(recipe_list)
                     else:
@@ -451,7 +495,7 @@ def register_user(service: ServiceContainer):
                     pass
 
 #By: Alysa Solomon and Jon Bailey
-def get_pop_searches(service: ServiceContainer, search_engine: SearchEngine.RecipeSearchEngine):
+def get_pop_searches(service: ServiceContainer, search_engine: SearchEngine.RecipeSearchEngine) -> list[Recipe]:
     get_amount = True
     while get_amount:
         print("How many popular searches do you want? The default is 10. Press enter for default selection\n")
@@ -490,7 +534,11 @@ def get_pop_searches(service: ServiceContainer, search_engine: SearchEngine.Reci
 
         results = search_engine.search_recipes_by_name(selected_query)
 
+        if results is None:
+            return []
         return results
+    # Fallback for type checker only.
+    return []
     
 # By Jon Bailey
 def add_recipe(service: ServiceContainer):
@@ -570,7 +618,7 @@ def main():
                         # print("UNCOMMENT OUT WHEN TESTING")
                     case 2: # Get Random Recipe
                         # TODO: NOT OUTPUTTING LIST OF RECIPES
-                        recipe_list = random_recipe_helper()
+                        recipe_list = random_recipe_helper(search_func, user)
                         if recipe_list != []:
                             print(recipe_list)
                         else:
@@ -644,7 +692,7 @@ def main():
                         # print("UNCOMMENT OUT WHEN TESTING")
                     case 3: # Get Random Recipe
                         # TODO: NOT OUTPUTTING LIST OF RECIPES
-                        recipe_list = random_recipe_helper()
+                        recipe_list = random_recipe_helper(search_func, user)
                         if recipe_list != []:
                             print(recipe_list)
                         else:
@@ -653,7 +701,7 @@ def main():
                     case 4: # Register Account
                         user = register_user(service)
                     case 5: # Searching For a recipe
-                        search_not_logged_in()
+                        search_not_logged_in(search_func)
                     case 6: # Exit
                         will_continue = False
                         print("Thank you for using our Program!")

@@ -1,5 +1,5 @@
 """
-    Authors: Jon Bailey and 
+    Authors: Jon Bailey 
 """
 from __future__ import annotations
 from sqlalchemy import Column, Integer, ForeignKey, Float, String
