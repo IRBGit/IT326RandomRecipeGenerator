@@ -54,6 +54,7 @@ class Recipe(Base):
         cascade="all, delete-orphan"
     )
 
+    area: Mapped[Optional[str]] = mapped_column(String(255), nullable = True)
 
     recipe_ingredients: AssociationProxy[dict["Ingredient", "RecipeIngredient"]] = association_proxy(
         "_ingredients",
@@ -101,9 +102,19 @@ class Recipe(Base):
     #     self.instructions = instructions or []
 
         # init includes name, category, instructions, tags, and video as setters
-    def __init__(self, name: str, ingredients: Optional[List["Ingredient"]], instructions: Optional[List[str]] | None = None, pub_time: Optional[datetime] | None = None,category: Optional[str] = None, tags = None, video: Optional[str] = None):
+    def __init__(
+            self, 
+            name: str, 
+            ingredients: Optional[List["Ingredient"]], 
+            instructions: Optional[List[str]] | None = None, 
+            pub_time: Optional[datetime] | None = None,
+            category: Optional[str] = None, 
+            tags = None, 
+            video: Optional[str] = None, 
+            area: Optional[str] = None
+        ):
         self.name = name
-        self.area = None
+        self.area = area
         # self.ingredients = ingredients or [] # for now, including all variables, change later
         self.instructions = instructions or []
         self.category = category

@@ -827,7 +827,8 @@ def search_logged_in(search_func: SearchEngine.RecipeSearchEngine, user: User, s
             match chosen_option:
                 case 1:
                     recipe_list = search_by_name(search_func)
-                    recipe_list = apply_saved_dietary_preferences(recipe_list, user)
+                    if recipe_list is not None:
+                        recipe_list = apply_saved_dietary_preferences(recipe_list, user)
 
                     if recipe_list is not None and recipe_list != []:
                         recipe_list = rank(recipe_list)
