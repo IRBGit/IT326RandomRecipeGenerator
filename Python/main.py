@@ -335,6 +335,53 @@ def search_by_ing(search_func: SearchEngine.RecipeSearchEngine):
     recipe_list = search_func.search_recipes_by_ingredients(req_ing)
     return recipe_list
 
+def get_saved_dietary_preferences(user: User) -> list[str]:
+    # Tolu: saved diet preferences as a list
+    if user is None or not user.dietary_preferences:
+        return []
+
+    preferences = user.dietary_preferences.split(",")
+    clean_preferences = []
+
+    for preference in preferences:
+        preference = preference.strip().lower()
+
+        if preference:
+            clean_preferences.append(preference)
+
+    return clean_preferences
+
+
+def apply_saved_dietary_preferences(recipe_list: list[Recipe], user: User) -> list[Recipe]:
+    # apply saved diet preferences to search results
+    if recipe_list is None:
+        return []
+
+    saved_preferences = get_saved_dietary_preferences(user)
+
+    if not saved_preferences:
+        return recipe_list
+
+    filtered_recipes = []
+
+    for recipe in recipe_list:
+        recipe_tags = recipe.tags or []
+        clean_tags = []
+
+        for tag in recipe_tags:
+            clean_tags.append(tag.strip().lower())
+
+        matches_preferences = True
+
+        for preference in saved_preferences:
+            if preference not in clean_tags:
+                matches_preferences = False
+
+        if matches_preferences:
+            filtered_recipes.append(recipe)
+
+    return filtered_recipes
+
 # By Thanvii Ambala
 def reset_password(email: str, new_password: str, service: ServiceContainer) -> bool:
     """
@@ -384,6 +431,51 @@ def change_password_helper(service: ServiceContainer, user: User):
     else:
         print("Error changing password.")
 
+def update_account_info_helper(service: ServiceContainer, user: User):
+    # Tolu: let user choose what account info to update
+    is_updating = True
+
+    while is_updating:
+        print("\nUpdate Account Information")
+        print("1: Update Email")
+        print("2: Update Password")
+        print("3: Update Dietary Preferences")
+        print("4: Back")
+
+        try:
+            choice = int(input("Select your choice: "))
+
+            match choice:
+                case 1:
+                    new_email = input("Enter your new email: ")
+
+                    if service.update_email(user, new_email):
+                        user.email = new_email.strip().lower()
+                        print("Email updated successfully.")
+                    else:
+                        print("Email was not updated.")
+
+                case 2:
+                    change_password_helper(service, user)
+
+                case 3:
+                    new_preferences = input("Enter your dietary preferences: ")
+
+                    if service.update_dietary_preferences(user, new_preferences):
+                        user.dietary_preferences = new_preferences.strip()
+                        print("Dietary preferences updated successfully.")
+                    else:
+                        print("Dietary preferences were not updated.")
+
+                case 4:
+                    is_updating = False
+
+                case _:
+                    print("Invalid option. Please try again.")
+
+        except ValueError:
+            print("Please input a valid input.")
+
 #RANK by Alysa Solomon
 def rank(recipe_list: List[Recipe]):
     r = Rank.Rank()
@@ -413,9 +505,9 @@ def search_not_logged_in(search_func: SearchEngine.RecipeSearchEngine):
     is_searching = True
     while is_searching:
         print("\nCurrent Options are listed below:")
-        print("1: Search by Name")  # Somewhat Implemented
-        print("2: Search by Specified Criteria") # Not Implemented
-        print("3: Search by Necessary Ingredients") # Not Implemented
+        print("1: Search by Name")  
+        print("2: Search by Specified Criteria") 
+        print("3: Search by Necessary Ingredients") 
         print("4: Help")
         print("5: Back")
         try:
@@ -459,6 +551,71 @@ def search_not_logged_in(search_func: SearchEngine.RecipeSearchEngine):
         except ValueError:
             print("Please input a valid input.")
             pass
+        input("Press Enter to Continue")
+
+def search_logged_in(search_func: SearchEngine.RecipeSearchEngine, user: User):
+    # Tolu: search menu for logged-in users with saved diet preferences
+    is_searching = True
+
+    while is_searching:
+        print("\nCurrent Options are listed below:")
+        print("1: Search by Name")
+        print("2: Search by Specified Criteria")
+        print("3: Search by Necessary Ingredients")
+        print("4: Help")
+        print("5: Back")
+
+        try:
+            chosen_option = input("Select your choice:")
+            chosen_option = int(chosen_option)
+
+            match chosen_option:
+                case 1:
+                    recipe_list = search_by_name(search_func)
+                    recipe_list = apply_saved_dietary_preferences(recipe_list, user)
+
+                    if recipe_list is not None and recipe_list != []:
+                        recipe_list = rank(recipe_list)
+                        print(recipe_list)
+                    else:
+                        print("No Recipes Found")
+
+                case 2:
+                    recipe_list = search_by_category(search_func)
+                    recipe_list = apply_saved_dietary_preferences(recipe_list, user)
+
+                    if recipe_list != []:
+                        recipe_list = rank(recipe_list)
+                        print(recipe_list)
+                    else:
+                        print("No Recipes Found")
+
+                case 3:
+                    recipe_list = search_by_ing(search_func)
+                    recipe_list = apply_saved_dietary_preferences(recipe_list, user)
+
+                    if recipe_list != []:
+                        recipe_list = rank(recipe_list)
+                        print(recipe_list)
+                    else:
+                        print("No Recipes Found")
+
+                case 4:
+                    print("1: You input a name of a recipe, and our database finds recipes with that name.")
+                    print("2: You give us criteria and we find recipes that follow your requirements.")
+                    print("3: You give us ingredients and we find recipes that use those ingredients.")
+                    print("4: Descriptions of every menu option")
+                    print("5: Stop searching and go to previous menu")
+
+                case 5:
+                    is_searching = False
+
+                case _:
+                    print("Invalid Option. Please Try Again.")
+
+        except ValueError:
+            print("Please input a valid input.")
+
         input("Press Enter to Continue")
 
 # By Alysa Solomon
@@ -595,14 +752,14 @@ def main():
     while(will_continue):
         if user != None:
             print("\nCurrent options are listed below. \nInput the number on the left to select your choice.")
-            print("1: Get Popular Searches") #Not Implemented
-            print("2: Get Random Recipe")  #Not Implemented
-            print("3: Search for Recipe") #Not Implemented
-            print("4: Add Your Own Recipe") #Not Implemented
-            print("5: Add Ingredients to Pantry") #Not Implemented
-            print("6: Update User Information") #Not Implemented
+            print("1: Get Popular Searches") 
+            print("2: Get Random Recipe")  
+            print("3: Search for Recipe") 
+            print("4: Add Your Own Recipe") 
+            print("5: Add Ingredients to Pantry") 
+            print("6: Update User Information")
             print("7: Log Out")
-            print("8: Delete Account") #Not Implemented
+            print("8: Delete Account") 
             print("9: Exit")
             try:
                 chosen_option = input("Select your choice:")
@@ -610,6 +767,7 @@ def main():
                 match chosen_option:
                     case 1: # Get Popular Searches
                         recipe_list = get_pop_searches(service,search_func)
+                        recipe_list = apply_saved_dietary_preferences(recipe_list, user)
                         if recipe_list != []:
                             print(recipe_list)
                         else:
@@ -625,18 +783,16 @@ def main():
                             print("No Recipes Found.")
                             pass
                     case 3: # Search for Recipe
-                        print("This feature hasn't been implemented yet.")
-                        pass
+                        search_logged_in(search_func, user)
                     case 4: # Add Recipe
                         #print("This feature hasn't been implemented yet.")
                         #pass
                         add_recipe(service)
                     case 5: # Add Ingredients to Pantry
-                        print("This feature hasn't been implemented yet.")
+                        add_pantry_item(service, user)
                         pass
                     case 6: # Update User Info
-                        print("This feature hasn't been implemented yet.")
-                        pass
+                        update_account_info_helper(service, user)
                     case 7: # Log Out
                         _, message, user = logout()
                         print(message)
@@ -668,7 +824,7 @@ def main():
             print("2: Get Popular Searches") # Not Working (Not Main.Py Issue)
             print("3: Get Random Recipe") # Not Working (Not Main.Py Issue)
             print("4: Create New Account") # Not Working (Not Main.Py Issue)
-            print("5: Search for Recipe") # Somewhat Implemented
+            print("5: Search for Recipe") 
             print("6: Exit")
             try:
                 chosen_option = input("Select your choice:")
@@ -679,7 +835,8 @@ def main():
                         if user:
                             logged_in = True
                         if not logged_in:
-                            print("Reseting Password has not been implemented yet.")
+                            reset_password_helper(service)
+                            print("Please try to Login Again.")
                             pass
                         input("Press Enter to Continue")
                     case 2: # Get Pop Searches
