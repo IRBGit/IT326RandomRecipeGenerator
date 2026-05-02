@@ -385,6 +385,51 @@ def change_password_helper(service: ServiceContainer, user: User):
     else:
         print("Error changing password.")
 
+def update_account_info_helper(service: ServiceContainer, user: User):
+    # Tolu: let user choose what account info to update
+    is_updating = True
+
+    while is_updating:
+        print("\nUpdate Account Information")
+        print("1: Update Email")
+        print("2: Update Password")
+        print("3: Update Dietary Preferences")
+        print("4: Back")
+
+        try:
+            choice = int(input("Select your choice: "))
+
+            match choice:
+                case 1:
+                    new_email = input("Enter your new email: ")
+
+                    if service.update_email(user, new_email):
+                        user.email = new_email.strip().lower()
+                        print("Email updated successfully.")
+                    else:
+                        print("Email was not updated.")
+
+                case 2:
+                    change_password_helper(service, user)
+
+                case 3:
+                    new_preferences = input("Enter your dietary preferences: ")
+
+                    if service.update_dietary_preferences(user, new_preferences):
+                        user.dietary_preferences = new_preferences.strip()
+                        print("Dietary preferences updated successfully.")
+                    else:
+                        print("Dietary preferences were not updated.")
+
+                case 4:
+                    is_updating = False
+
+                case _:
+                    print("Invalid option. Please try again.")
+
+        except ValueError:
+            print("Please input a valid input.")
+
 #RANK by Alysa Solomon
 def rank(recipe_list: List[Recipe]):
     r = Rank.Rank()
@@ -597,7 +642,7 @@ def main():
             print("3: Search for Recipe") #Not Implemented
             print("4: Add Your Own Recipe") #Not Implemented
             print("5: Add Ingredients to Pantry") #Not Implemented
-            print("6: Update User Information") #Not Implemented
+            print("6: Update User Information")
             print("7: Log Out")
             print("8: Delete Account") #Not Implemented
             print("9: Exit")
@@ -632,8 +677,7 @@ def main():
                         print("This feature hasn't been implemented yet.")
                         pass
                     case 6: # Update User Info
-                        print("This feature hasn't been implemented yet.")
-                        pass
+                        update_account_info_helper(service, user)
                     case 7: # Log Out
                         _, message, user = logout()
                         print(message)

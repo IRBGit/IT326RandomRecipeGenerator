@@ -227,6 +227,42 @@ class UserService:
             db_user.reset_password(new_password)
             uow.commit()
             return True
+
+    def update_email(self, user: User, new_email: str) -> bool:
+        # Tolu: update the user's email in the database
+        new_email = new_email.strip().lower()
+
+        if new_email == "":
+            print("Email cannot be empty.")
+            return False
+
+        with UnitOfWork() as uow:
+            db_user = uow.users.get_by_id(user.id)
+
+            if db_user is None:
+                raise ValueError("User not found")
+
+            if uow.users.get_by_email(new_email):
+                print("Email is already being used.")
+                return False
+
+            db_user.update_email(new_email)
+            uow.commit()
+            return True
+
+    def update_dietary_preferences(self, user: User, new_preferences: str) -> bool:
+        # Tolu: updates the user's saved diet preferences in the database
+        new_preferences = new_preferences.strip()
+
+        with UnitOfWork() as uow:
+            db_user = uow.users.get_by_id(user.id)
+
+            if db_user is None:
+                raise ValueError("User not found")
+
+            db_user.update_dietary_preferences(new_preferences)
+            uow.commit()
+            return True
         
     #By Thanvii Ambala
     def get_user_by_email(self, email: str) -> User | None:
@@ -903,6 +939,22 @@ class ServiceContainer:
             new_password: str
     ) -> bool:
         return self.user_service.change_password(user, new_password)
+
+    def update_email(
+            self,
+            user: User,
+            new_email: str
+    ) -> bool:
+        # Tolu: sends email update to UserService
+        return self.user_service.update_email(user, new_email)
+
+    def update_dietary_preferences(
+            self,
+            user: User,
+            new_preferences: str
+    ) -> bool:
+        # Tolu: sends diet preference update to UserService
+        return self.user_service.update_dietary_preferences(user, new_preferences)
     
     #By Thanvii Ambala
     def get_user_by_email(

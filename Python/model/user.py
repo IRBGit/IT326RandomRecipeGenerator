@@ -37,6 +37,11 @@ class User(Base):
         String(255), 
         nullable=False
         )
+    # Tolu: save dietary preferences for the user
+    dietary_preferences: Mapped[str] = mapped_column(
+        String(255),
+        nullable=True
+        )
 
     # Many-to-many relationship to Recipe
     favorites: Mapped[List["Recipe"]] = relationship(
@@ -91,9 +96,11 @@ class User(Base):
         creator = lambda r, n: UserRecipeNote(recipe = r, notes = n)
     )
 
-    def __init__(self, email: str, password: str):
+    def __init__(self, email: str, password: str, dietary_preferences: str = ""):
         self.email = email
         self.password = PWHash().hashPassword(password)
+        # Tolu: start new users with no saved diet preferences
+        self.dietary_preferences = dietary_preferences
         
 
     def check_password(self, toCheck: str) -> bool:
@@ -299,6 +306,14 @@ class User(Base):
     #By Thanvii Ambala
     def reset_password(self, new_password: str):
         self.password = PWHash().hashPassword(new_password)
+
+    def update_email(self, new_email: str):
+        # Tolu: updates the user's email
+        self.email = new_email
+
+    def update_dietary_preferences(self, new_preferences: str):
+        # Tolu: updates the user's saved diet preferences
+        self.dietary_preferences = new_preferences
 
     #By Thanvii Ambala
     def get_pantry_items(self) -> list[PantryItem]:

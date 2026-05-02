@@ -1,7 +1,7 @@
 """
     Author: Thanvi Ambala
 """
-from Python.model.recipe import Recipe
+from model.recipe import Recipe
 
 class Filter:
     """
