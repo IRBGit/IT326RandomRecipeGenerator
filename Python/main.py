@@ -191,7 +191,7 @@ def view_recipe_results(recipe_list, service, user: User | None = None):
         return
 
     recipe = recipe_list[choice - 1]
-    recipe_detail_menu(service, recipe, user)
+    recipe_workflow(service, recipe, user)
 #-----------conv flow
 
 # By Jon Bailey
@@ -1225,7 +1225,7 @@ def recipe_workflow(service: ServiceContainer, recipe: Recipe, user: User | None
         return
     while True:
         print(f"\n --- Recipe: {recipe.get_name()} ---")
-        print("1. View Recipe")
+        print("1. View Recipe (include print options)")
         print("2. Update Recipe Information")
         if user is not None:
             print("3. Add to favorites")
@@ -1233,7 +1233,6 @@ def recipe_workflow(service: ServiceContainer, recipe: Recipe, user: User | None
             print("5. Add Personal Note")
             print("6. Rate Recipe")
         print("7. Delete Recipe")
-        print("8. Print Recipe to PDF")
         print("0. Back to Main Menu")
 
         try:
@@ -1299,8 +1298,6 @@ def recipe_workflow(service: ServiceContainer, recipe: Recipe, user: User | None
                     break
                 else:
                     continue
-            case 8:
-                print_to_pdf(recipe)
             case 0:
                 break
                 
