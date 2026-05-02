@@ -54,11 +54,11 @@ class RecipeIngredient(Base):
         from model import Ingredient, Recipe
         return (
             self.ingredient_id is not None and
-            self.self.recipe_id is not None and
+            self.recipe_id is not None and
             self.ingredient_id == other.ingredient_id and 
             self.recipe_id == other.recipe_id)
     
     def __hash__(
             self
             ) -> int:
-        return hash((type(self), self.id))
+        return hash((type(self), self.ingredient_id, self.recipe_id))

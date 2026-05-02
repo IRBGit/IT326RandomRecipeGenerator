@@ -963,6 +963,8 @@ class SearchService:
             query: str):
         query = query.strip().lower()
         with UnitOfWork() as uow:
+            if not query or query == "":
+                return
 
             search = UserSearch(
                 query = query

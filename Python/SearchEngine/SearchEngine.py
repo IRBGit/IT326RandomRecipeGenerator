@@ -137,12 +137,9 @@ class RecipeSearchEngine(SearchEngine):
         return self.service.find_recipe(name) or []
 
     def search_recipes_by_ingredients(self, ingredients: list) -> list:
-        for each in ingredients:
-            self.service.record_search(each)  # Record each ingredient for analytics
         return self.service.find_recipes_by_ingredients(ingredients)
 
     def search_recipes_by_category(self, category: str) -> list:
-        self.service.record_search(category)  # Record the category for analytics
         return self.service.find_recipes_by_category(category)
 
     def get_random_recipes(self, count: int) -> list:

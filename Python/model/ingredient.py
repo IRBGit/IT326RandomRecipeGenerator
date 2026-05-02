@@ -13,9 +13,6 @@ if TYPE_CHECKING:
 
 # This class is for the backend of ingredients
 
-#TODO: include methods for the different Use Cases, acording to Class Diagram
-#TODO: Add setters/getters
-
 
 class Ingredient(Base):
     __tablename__ = "ingredients"

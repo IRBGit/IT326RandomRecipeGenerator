@@ -30,14 +30,7 @@ class Recipe(Base):
                 Sequence('recipe_id_seq'),
                 primary_key=True)
     name: Mapped[str] = mapped_column(String(255), nullable = False, unique=True)
-    # area = Column() # I don't know what this is supposed to be but it can't be an empty column to write to the database.
     _instructions: Mapped[str] = mapped_column("intstructions", Text, nullable=False)
-    # Alysa Solomon: published time should be added here, IDK how to add it
-    # It should be able to store a big number, from reaserch DATETIME will probably be most helpful
-    # additonally need to add quanity, still don't know how to add columns via code
-
-    # Tolu: removed for now, not in db table yet
-    # published_time: Mapped[datetime] = mapped_column("published_time", DateTime, nullable=True)
 
     # This relationship is automatically created via the backref in User and explicitly identified here.
     favorited_by: Mapped[List["User"]] = relationship(
@@ -62,22 +55,16 @@ class Recipe(Base):
         creator = lambda i, ri: ri
     )
     
-    _ratings: Mapped[dict["User", "Rating"]] = relationship(
+    _ratings: Mapped[dict[int, "Rating"]] = relationship(
         "Rating",
-        collection_class = attribute_mapped_collection("user"),
+        collection_class = attribute_mapped_collection("user_id"),
         back_populates = "recipe",
         cascade = "all, delete-orphan"
     )
 
-    user_ratings: AssociationProxy[dict["User", int]] = association_proxy(
-        "_ratings",
-        "rating",
-        creator = lambda u, v: Rating(user = u, rating = v)
-    )
-
-    _user_notes: Mapped[dict["User", "UserRecipeNote"]] = relationship(
+    _user_notes: Mapped[dict[int, "UserRecipeNote"]] = relationship(
         "UserRecipeNote",
-        collection_class = attribute_mapped_collection("user"),
+        collection_class = attribute_mapped_collection("user_id"),
         back_populates = "recipe",
         cascade = "all, delete-orphan"
     )
@@ -202,27 +189,33 @@ class Recipe(Base):
         self._instructions = json.dumps(value or [])
 
     def get_average_rating(self) -> float:
-        from model import Rating
         if not self.user_ratings:
             return 0.0
-        return sum(self.user_ratings.values()) / len(self.user_ratings)
+        return sum(r.rating for r in self._ratings.values()) / len(self._ratings)
 
     def get_user_rating(self, user) -> int | None:
-        from model import Rating
-        return self.user_ratings.get(user)
+        rating = self._ratings.get(user.id)
+        return rating.rating if rating else None
     
     def add_rating(self, user: User, value: int):
-        from model import Rating
-
         if value < 0 or value > 5:
             raise ValueError("rating must be between 0 and 5")
 
-        if user in self._ratings:
-            self._ratings[user].rating = value
-            return self._ratings[user]
+        key = user.id
 
-        rating = Rating(user=user, recipe=self, rating=value)
-        self._ratings[user] = rating
+        # update existing
+        if key in self._ratings:
+            self._ratings[key].rating = value
+            return self._ratings[key]
+
+        # SAFE: no relationship assignment
+        from model import Rating
+        rating = Rating()
+        rating.user_id = user.id
+        rating.recipe_id = self.id
+        rating.rating = value
+
+        self._ratings[key] = rating
         return rating
     
     def get_name(self) -> str:

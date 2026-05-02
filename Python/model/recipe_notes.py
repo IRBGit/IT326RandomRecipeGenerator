@@ -96,4 +96,4 @@ class UserRecipeNote(Base):
     def __hash__(
             self
             ) -> int:
-        return hash((type(self), self.id))
+        return hash((type(self), self.user_id, self.recipe_id))
