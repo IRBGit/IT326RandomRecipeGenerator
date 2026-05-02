@@ -8,6 +8,7 @@ from typing import List
 from datetime import datetime
 from model.conversions import format_converted_amount
 from exportFiles.exporter import export_recipe
+from exportFiles.shopping_list import build_shopping_list, print_shopping_list
 
 load_dotenv()
 
@@ -113,7 +114,7 @@ def export_recipe_to_pdf(recipe: Recipe):
         print(f"Error exporting recipe: {exc}")
 
 
-def recipe_detail_menu(service: ServiceContainer, recipe: Recipe):
+def recipe_detail_menu(service: ServiceContainer, recipe: Recipe, user: User | None = None):
     while True:
         recipe_data = service.get_recipe_display_data(recipe.id)
 
@@ -124,6 +125,7 @@ def recipe_detail_menu(service: ServiceContainer, recipe: Recipe):
         print("\nRecipe Actions")
         print("1: View recipe details")
         print("2: Export recipe to PDF")
+        print("3: Build shopping list")
         print("0: Back")
 
         try:
@@ -157,10 +159,19 @@ def recipe_detail_menu(service: ServiceContainer, recipe: Recipe):
             export_recipe_to_pdf(recipe)
             continue
 
+        if choice == 3:
+            if user is None:
+                print("Please log in to build a shopping list from your pantry.")
+                continue
+
+            shopping_list = build_shopping_list(service, user, recipe)
+            print_shopping_list(recipe, shopping_list)
+            continue
+
         print("Invalid selection.")
 
 
-def view_recipe_results(recipe_list, service):
+def view_recipe_results(recipe_list, service, user: User | None = None):
     if recipe_list is None or recipe_list == []:
         print("No Recipes Found")
         return
@@ -180,7 +191,7 @@ def view_recipe_results(recipe_list, service):
         return
 
     recipe = recipe_list[choice - 1]
-    recipe_detail_menu(service, recipe)
+    recipe_detail_menu(service, recipe, user)
 #-----------conv flow
 
 # By Jon Bailey
@@ -821,7 +832,7 @@ def search_logged_in(search_func: SearchEngine.RecipeSearchEngine, user: User, s
 
                     if recipe_list is not None and recipe_list != []:
                         recipe_list = rank(recipe_list)
-                        view_recipe_results(recipe_list, service)
+                        view_recipe_results(recipe_list, service, user)
                     else:
                         print("No Recipes Found")
 
@@ -831,7 +842,7 @@ def search_logged_in(search_func: SearchEngine.RecipeSearchEngine, user: User, s
 
                     if recipe_list != []:
                         recipe_list = rank(recipe_list)
-                        view_recipe_results(recipe_list, service)
+                        view_recipe_results(recipe_list, service, user)
                     else:
                         print("No Recipes Found")
 
@@ -841,7 +852,7 @@ def search_logged_in(search_func: SearchEngine.RecipeSearchEngine, user: User, s
 
                     if recipe_list != []:
                         recipe_list = rank(recipe_list)
-                        view_recipe_results(recipe_list, service)
+                        view_recipe_results(recipe_list, service, user)
                     else:
                         print("No Recipes Found")
 
@@ -990,29 +1001,9 @@ def delete_account(service: ServiceContainer, user: User):
     return service.delete_user(user)
 
 # By Jon Bailey
-def display_recipe(service: ServiceContainer, recipe:Recipe):
+def display_recipe(service: ServiceContainer, recipe:Recipe, user: User | None = None):
     #TODO Needs to be written
-    recipe_data = service.get_recipe_display_data(recipe.id)
-
-    if recipe_data is None:
-        print("Could not load recipe details.")
-        return
-
-    print("\nMeasurement Options:")
-    print("1: Original")
-    print("2: Metric")
-    print("3: Imperial")
-
-    system_choice = input("Select your choice: ").strip()
-
-    if system_choice == "2":
-        system = "metric"
-    elif system_choice == "3":
-        system = "imperial"
-    else:
-        system = "original"
-
-    print_recipe_details(recipe_data, system)
+    recipe_detail_menu(service, recipe, user)
 
 def update_recipe(service: ServiceContainer, recipe:Recipe):
     #TODO Needs to be written
@@ -1042,9 +1033,7 @@ def add_rating_to_recipe(service: ServiceContainer, user: User, recipe: Recipe):
     pass
 
 def print_to_pdf(recipe: Recipe):
-    #TODO Needs to be written
-    print("Not implemented yet")
-    pass
+    export_recipe_to_pdf(recipe)
 
 # By Jon Bailey
 def delete_recipe(service: ServiceContainer, recipe: Recipe):
@@ -1081,7 +1070,7 @@ def recipe_workflow(service: ServiceContainer, recipe: Recipe, user: User | None
 
         match choice:
             case 1:
-                display_recipe(service, recipe)
+                display_recipe(service, recipe, user)
             case 2:
                 update_recipe(service, recipe)
             case 3:
@@ -1168,7 +1157,7 @@ def main():
                         recipe_list = get_pop_searches(service,search_func)
                         recipe_list = apply_saved_dietary_preferences(recipe_list, user)
                         if recipe_list != []:
-                            view_recipe_results(recipe_list, service)
+                            view_recipe_results(recipe_list, service, user)
                         else:
                             print("No Recipes Found.")
                         # print("BROKEN: WILL NOT WORK")
@@ -1177,7 +1166,7 @@ def main():
                         # TODO: NOT OUTPUTTING LIST OF RECIPES
                         recipe_list = random_recipe_helper(search_func, user)
                         if recipe_list != []:
-                            view_recipe_results(recipe_list, service)
+                            view_recipe_results(recipe_list, service, user)
                         else:
                             print("No Recipes Found.")
                             pass
