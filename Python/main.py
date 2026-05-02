@@ -73,9 +73,6 @@ def update_pantry_item(service: ServiceContainer, user: User):
         print("Invalid input.")
         return
 
-    
-    
-
 # By Jon Bailey
 def add_note_to_recipe(service: ServiceContainer, user: User, recipe: Recipe):
     try:
