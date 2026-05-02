@@ -7,8 +7,10 @@ from SearchEngine import SearchEngine, Filter, Rank
 from typing import List
 from datetime import datetime
 from model.conversions import format_converted_amount
+from exportFiles.exporter import export_recipe
 
 load_dotenv()
+
 # By Jon Bailey
 def print_pantry(service: ServiceContainer, user: User):
     items = service.get_all_pantry_items(user)
@@ -100,6 +102,64 @@ def print_recipe_details(recipe_data, system):
         print(str(i) + ". " + step)
 
 
+def export_recipe_to_pdf(recipe: Recipe):
+    try:
+        export_recipe(recipe.get_name())
+    except LookupError as exc:
+        print(f"Error exporting recipe: {exc}")
+    except RuntimeError as exc:
+        print(f"Error exporting recipe: {exc}")
+    except Exception as exc:
+        print(f"Error exporting recipe: {exc}")
+
+
+def recipe_detail_menu(service: ServiceContainer, recipe: Recipe):
+    while True:
+        recipe_data = service.get_recipe_display_data(recipe.id)
+
+        if recipe_data is None:
+            print("Could not load recipe details.")
+            return
+
+        print("\nRecipe Actions")
+        print("1: View recipe details")
+        print("2: Export recipe to PDF")
+        print("0: Back")
+
+        try:
+            choice = int(input("Select your choice: ").strip())
+        except ValueError:
+            print("Selection was not a number")
+            continue
+
+        if choice == 0:
+            return
+
+        if choice == 1:
+            print("\nMeasurement Options:")
+            print("1: Original")
+            print("2: Metric")
+            print("3: Imperial")
+
+            system_choice = input("Select your choice: ").strip()
+
+            if system_choice == "2":
+                system = "metric"
+            elif system_choice == "3":
+                system = "imperial"
+            else:
+                system = "original"
+
+            print_recipe_details(recipe_data, system)
+            continue
+
+        if choice == 2:
+            export_recipe_to_pdf(recipe)
+            continue
+
+        print("Invalid selection.")
+
+
 def view_recipe_results(recipe_list, service):
     if recipe_list is None or recipe_list == []:
         print("No Recipes Found")
@@ -120,28 +180,7 @@ def view_recipe_results(recipe_list, service):
         return
 
     recipe = recipe_list[choice - 1]
-
-    recipe_data = service.get_recipe_display_data(recipe.id)
-
-    if recipe_data is None:
-        print("Could not load recipe details.")
-        return
-
-    print("\nMeasurement Options:")
-    print("1: Original")
-    print("2: Metric")
-    print("3: Imperial")
-
-    system_choice = input("Select your choice: ").strip()
-
-    if system_choice == "2":
-        system = "metric"
-    elif system_choice == "3":
-        system = "imperial"
-    else:
-        system = "original"
-
-    print_recipe_details(recipe_data, system)
+    recipe_detail_menu(service, recipe)
 #-----------conv flow
 
 def add_pantry_item(service: ServiceContainer, user: User):
@@ -864,8 +903,7 @@ def delete_account(service: ServiceContainer, user: User):
     return service.delete_user(user)
 
 def display_recipe(service: ServiceContainer, recipe:Recipe):
-    #TODO Needs to be written
-    pass
+    recipe_detail_menu(service, recipe)
 
 def update_recipe(service: ServiceContainer, recipe:Recipe):
     #TODO Needs to be written

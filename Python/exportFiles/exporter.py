@@ -8,11 +8,10 @@ import tempfile
 
 from sqlalchemy.exc import OperationalError
 
-project_root = Path(__file__).resolve().parent.parent
+python_root = Path(__file__).resolve().parent.parent
 
-python_dir = project_root / 'Python'
-if str(python_dir) not in sys.path:
-    sys.path.insert(0, str(python_dir))
+if str(python_root) not in sys.path:
+    sys.path.insert(0, str(python_root))
 
 json2pdf_converter = importlib.import_module('json2pdf_converter')
 generate = json2pdf_converter.generate
@@ -116,108 +115,108 @@ def ensure_wkhtmltopdf_available() -> None:
         if src.exists():
             shutil.copy2(src, expected_bin_dir / binary_name)
 
+def export_recipe(recipe_name: str) -> tuple[Path, Path]:
+    ensure_wkhtmltopdf_available()
 
-ensure_wkhtmltopdf_available()
+    recipe_name = recipe_name.strip()
+    if not recipe_name:
+        raise ValueError("Recipe name cannot be empty.")
 
-# Get recipe name from user
-recipe_name = input("Enter the recipe name you want to export to PDF: ").strip()
+    try:
+        recipe = search_recipe(recipe_name)
+    except RuntimeError:
+        raise
 
-if not recipe_name:
-    print("Error: Recipe name cannot be empty.")
-    exit(1)
+    if recipe is None:
+        raise LookupError(f"Recipe '{recipe_name}' not found in the database.")
 
-# Search for the recipe
-try:
-    recipe = search_recipe(recipe_name)
-except RuntimeError as exc:
-    print(f"Error: {exc}")
-    exit(1)
+    print(f"Found recipe: {recipe.get('strMeal', 'Unknown')}")
 
-if recipe is None:
-    print(f"Error: Recipe '{recipe_name}' not found in the database.")
-    exit(1)
+    data = {"meals": [recipe]}
 
-print(f"Found recipe: {recipe.get('strMeal', 'Unknown')}")
+    options = {
+        'encoding': 'UTF-8',
+        'margin-top': '0px',
+        'margin-right': '30px',
+        'margin-bottom': '30px',
+        'margin-left': '30px',
+        'footer-right': "Page [page] of [topage]",
+        'footer-font-size': "9",
+        'orientation': 'Portrait',
+        'page-size': 'A4',
+    }
 
-# Create a data structure with just this recipe
-data = {"meals": [recipe]}
+    data_variables = {
+        "data": data
+    }
+    template_directory = python_root / 'exportFiles'
+    template_name = "recipeExportTemplate.html"
 
-options = {
-    'encoding': 'UTF-8',
-    'margin-top': '0px',
-    'margin-right': '30px',
-    'margin-bottom': '30px',
-    'margin-left': '30px',
-    'footer-right': "Page [page] of [topage]",
-    'footer-font-size': "9",
-    'orientation': 'Portrait',
-    'page-size': 'A4',
-}
+    safe_recipe_name = "".join(c for c in recipe.get('strMeal', 'recipe') if c.isalnum() or c in (' ', '_', '-')).rstrip()
+    output_dir = str(python_root / 'exportFiles')
 
-data_variables = {
-    "data": data
-}
-template_directory = project_root / 'exportFiles'
-template_name = "recipeExportTemplate.html"
+    print(f"Generating PDF: {safe_recipe_name}.pdf")
 
-# Create a safe filename from the recipe name
-safe_recipe_name = "".join(c for c in recipe.get('strMeal', 'recipe') if c.isalnum() or c in (' ', '_', '-')).rstrip()
+    temp_json_path = None
 
-# Directories for output (library expects directories, not full paths)
-output_dir = str(project_root / 'exportFiles')
+    try:
+        with tempfile.NamedTemporaryFile('w', delete=False, suffix='.json', encoding='utf-8') as temp_file:
+            json.dump(data, temp_file, ensure_ascii=False, indent=2)
+            temp_json_path = Path(temp_file.name)
 
-print(f"Generating PDF: {safe_recipe_name}.pdf")
+        generate(
+            json_file_path=str(temp_json_path),
+            template_directory_path=str(template_directory),
+            output_html_path=output_dir,
+            output_pdf_path=output_dir,
+            options=options,
+            template_name=template_name,
+            data_variables=data_variables,
+            custom_filter_functions=[]
+        )
+    finally:
+        if temp_json_path and temp_json_path.exists():
+            temp_json_path.unlink()
 
-temp_json_path = None
+    output_html_file = Path(output_dir) / 'output.html'
+    html_dir = Path(output_dir) / 'html'
+    html_dir.mkdir(exist_ok=True)
+    final_html_file = html_dir / f'{safe_recipe_name}.html'
 
-try:
-    with tempfile.NamedTemporaryFile('w', delete=False, suffix='.json', encoding='utf-8') as temp_file:
-        json.dump(data, temp_file, ensure_ascii=False, indent=2)
-        temp_json_path = Path(temp_file.name)
+    output_pdf_file = Path(output_dir) / 'pdf' / 'merged_output.pdf'
+    pdf_dir = Path(output_dir) / 'pdf'
+    pdf_dir.mkdir(exist_ok=True)
+    final_pdf_file = pdf_dir / f'{safe_recipe_name}.pdf'
 
-    generate(
-        json_file_path=str(temp_json_path),
-        template_directory_path=str(template_directory),
-        output_html_path=output_dir,
-        output_pdf_path=output_dir,
-        options=options,
-        template_name=template_name,
-        data_variables=data_variables,
-        custom_filter_functions=[]
-    )
-finally:
-    if temp_json_path and temp_json_path.exists():
-        temp_json_path.unlink()
+    if output_html_file.exists():
+        if final_html_file.exists():
+            final_html_file.unlink()
+        output_html_file.replace(final_html_file)
+        print(f"HTML created: {final_html_file}")
+    else:
+        print(f"Warning: HTML file not found at {output_html_file}")
 
-# Rename the generated files to use the recipe name
-# HTML file is created in the root output directory, move it to html/
-output_html_file = Path(output_dir) / 'output.html'
-html_dir = Path(output_dir) / 'html'
-html_dir.mkdir(exist_ok=True)
-final_html_file = html_dir / f'{safe_recipe_name}.html'
+    if output_pdf_file.exists():
+        if final_pdf_file.exists():
+            final_pdf_file.unlink()
+        output_pdf_file.replace(final_pdf_file)
+        print(f"PDF created: {final_pdf_file}")
+    else:
+        print(f"Warning: PDF file not found at {output_pdf_file}")
 
-# PDF file is created in the pdf subdirectory
-output_pdf_file = Path(output_dir) / 'pdf' / 'merged_output.pdf'
-pdf_dir = Path(output_dir) / 'pdf'
-pdf_dir.mkdir(exist_ok=True)
-final_pdf_file = pdf_dir / f'{safe_recipe_name}.pdf'
+    print(f"\nPDF successfully created at: {final_pdf_file}")
+    return final_html_file, final_pdf_file
 
-# Move HTML file
-if output_html_file.exists():
-    if final_html_file.exists():
-        final_html_file.unlink()
-    output_html_file.replace(final_html_file)
-    print(f"HTML created: {final_html_file}")
-else:
-    print(f"Warning: HTML file not found at {output_html_file}")
 
-# Move PDF file
-if output_pdf_file.exists():
-    if final_pdf_file.exists():
-        final_pdf_file.unlink()
-    output_pdf_file.replace(final_pdf_file)
-    print(f"PDF created: {final_pdf_file}")
-else:
-    print(f"Warning: PDF file not found at {output_pdf_file}")
+def main() -> None:
+    recipe_name = input("Enter the recipe name you want to export to PDF: ").strip()
 
-print(f"\nPDF successfully created at: {final_pdf_file}")
+    try:
+        export_recipe(recipe_name)
+    except (ValueError, LookupError, RuntimeError, FileNotFoundError) as exc:
+        print(f"Error: {exc}")
+        raise SystemExit(1) from exc
+
+
+if __name__ == "__main__":
+    main()
