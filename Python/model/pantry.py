@@ -72,4 +72,4 @@ class PantryItem(Base):
     def __hash__(
             self
             ) -> int:
-        return hash((self.user_id, self.ingredient_id))
+        return hash((type(self), self.user_id, self.ingredient_id))
