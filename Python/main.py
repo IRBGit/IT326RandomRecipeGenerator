@@ -1002,13 +1002,175 @@ def delete_account(service: ServiceContainer, user: User):
 
 # By Jon Bailey
 def display_recipe(service: ServiceContainer, recipe:Recipe, user: User | None = None):
-    #TODO Needs to be written
     recipe_detail_menu(service, recipe, user)
 
-def update_recipe(service: ServiceContainer, recipe:Recipe):
-    #TODO Needs to be written
-    print("Not implemented yet")
-    pass
+def edit_instructions(current_instructions: list[str]) -> list[str]:
+    instructions = current_instructions.copy()
+
+    while True:
+        print("\n --- Current Instructions --- ")
+        if not instructions:
+            print("No instructions yet.")
+        else:
+            for i, step in enumerate(instructions, start = 1):
+                print(f"{i}. {step}")
+            
+        print("\nOptions:")
+        print("1. Add instruction (append)")
+        print("2. Insert instruction at position")
+        print("3. Update an instruction")
+        print("4. Delete an instruction")
+        print("0. Done")
+
+        try:
+            choice = int(input("Select an option: ").strip())
+        except:
+            print("Invalid input")
+            continue
+
+        match choice:
+            case 1:
+                new_step = input("Enter new instruction: ").strip()
+                if new_step:
+                    instructions.append(new_step)
+
+            case 2:
+                try:
+                    pos = int(input("Enter position to insert at (1-based): ").strip())
+                    if pos < 1 or pos > len(instructions) + 1:
+                        print("Invalid position.")
+                        continue
+                    new_step = input("Enter instruction: ").strip()
+                    instructions.insert(pos - 1, new_step)
+                except ValueError:
+                    print("Invalid input.")
+
+            case 3:
+                try:
+                    idx = int(input("Enter instruction number to update: ").strip())
+                    if idx < 1 or idx > len(instructions):
+                        print("Invalid selection.")
+                        continue
+                    new_text = input("Enter new instruction text: ").strip()
+                    instructions[idx - 1] = new_text
+                except ValueError:
+                    print("Invalid input.")
+
+            case 4:
+                try:
+                    idx = int(input("Enter instruction number to delete: ").strip())
+                    if idx < 1 or idx > len(instructions):
+                        print("Invalid selection.")
+                        continue
+                    removed = instructions.pop(idx - 1)
+                    print(f"Removed: {removed}")
+                except ValueError:
+                    print("Invalid input.")
+
+            case 0:
+                confirm = input("Save changes? (Y/N): ").strip().lower()
+                if confirm in ("y", "yes"):
+                    return instructions
+                else:
+                    print("Continuing editing...")
+
+            case _:
+                print("Invalid choice.")
+
+
+# By Jon Bailey
+def update_recipe(service: ServiceContainer, recipe: Recipe):
+    # ---- NAME ----
+    name = recipe.name
+    choice = input("Update recipe name? (y/n): ").strip().lower()
+    if choice in ("y", "yes"):
+        name = input("Enter new name: ").strip()
+
+    # ---- CATEGORY ----
+    category = recipe.category
+    choice = input("Update category? (y/n): ").strip().lower()
+    if choice in ("y", "yes"):
+        category = get_category()
+
+    # ---- TAGS ----
+    tags = recipe.tags
+    choice = input("Update tags? (y/n): ").strip().lower()
+    if choice in ("y", "yes"):
+        try:
+            count = int(input("How many tags? ").strip())
+            tags = [input("Enter tag: ").strip() for _ in range(count)]
+        except ValueError:
+            print("Invalid number, keeping existing tags.")
+
+    # ---- VIDEO ----
+    video = recipe.video
+    choice = input("Update video link? (y/n): ").strip().lower()
+    if choice in ("y", "yes"):
+        video = input("Enter video URL: ").strip()
+
+    # ---- PUBLISHED TIME ----
+    update_time = False
+    choice = input("Update published time to now? (y/n): ").strip().lower()
+    if choice in ("y", "yes"):
+        update_time = True
+
+    # ---- INSTRUCTIONS ----
+    instructions = edit_instructions(current_instructions=recipe.instructions)
+
+    # ---- INGREDIENTS ----
+    add_ingredients = []
+    remove_ingredients = []
+
+    current_ingredients = [ri.ingredient.name for ri in recipe._ingredients.values()]
+
+    print("\nCurrent Ingredients:")
+    for i, ing in enumerate(current_ingredients, start=1):
+        print(f"{i}. {ing}")
+
+    # Remove
+    choice = input("Remove ingredients? (y/n): ").strip().lower()
+    if choice in ("y", "yes") and current_ingredients:
+        try:
+            count = int(input("How many to remove? ").strip())
+            for _ in range(count):
+                idx = int(input("Enter number: ").strip())
+                if 1 <= idx <= len(current_ingredients):
+                    remove_ingredients.append(current_ingredients[idx - 1])
+        except ValueError:
+            print("Invalid input")
+
+    # Add
+    choice = input("Add ingredients? (y/n): ").strip().lower()
+    if choice in ("y", "yes"):
+        add_ingredients = get_ingredients("How many to add? ")
+
+    # Area
+    area = recipe.area
+    choice  = input("Add or update area? (y/n): ").strip().lower()
+    if choice in ("y", "yes"):
+        area = input("What area is it from?")
+
+    # ---- SAVE ----
+    try:
+        updated = service.update_recipe(
+            recipe_id=recipe.id,
+            name=name,
+            category=category,
+            tags=tags,
+            video=video,
+            instructions=instructions,
+            update_time=update_time,
+            add_ingredients=add_ingredients,
+            remove_ingredients=remove_ingredients,
+            area = area
+        )
+
+        print("Recipe updated successfully.")
+        return updated
+
+    except Exception as e:
+        print(f"Error updating recipe: {e}")
+        return recipe
 
 # By Jon Bailey
 def add_recipe_to_favorites(service: ServiceContainer, user: User, recipe: Recipe):
@@ -1032,6 +1194,7 @@ def add_rating_to_recipe(service: ServiceContainer, user: User, recipe: Recipe):
     print("Not implemented yet")
     pass
 
+#By Jon Bailey
 def print_to_pdf(recipe: Recipe):
     export_recipe_to_pdf(recipe)
 
