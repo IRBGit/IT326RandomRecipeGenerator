@@ -505,9 +505,9 @@ def search_not_logged_in(search_func: SearchEngine.RecipeSearchEngine):
     is_searching = True
     while is_searching:
         print("\nCurrent Options are listed below:")
-        print("1: Search by Name")  # Somewhat Implemented
-        print("2: Search by Specified Criteria") # Not Implemented
-        print("3: Search by Necessary Ingredients") # Not Implemented
+        print("1: Search by Name")  
+        print("2: Search by Specified Criteria") 
+        print("3: Search by Necessary Ingredients") 
         print("4: Help")
         print("5: Back")
         try:
@@ -752,14 +752,14 @@ def main():
     while(will_continue):
         if user != None:
             print("\nCurrent options are listed below. \nInput the number on the left to select your choice.")
-            print("1: Get Popular Searches") #Not Implemented
-            print("2: Get Random Recipe")  #Not Implemented
-            print("3: Search for Recipe") #Not Implemented
-            print("4: Add Your Own Recipe") #Not Implemented
-            print("5: Add Ingredients to Pantry") #Not Implemented
+            print("1: Get Popular Searches") 
+            print("2: Get Random Recipe")  
+            print("3: Search for Recipe") 
+            print("4: Add Your Own Recipe") 
+            print("5: Add Ingredients to Pantry") 
             print("6: Update User Information")
             print("7: Log Out")
-            print("8: Delete Account") #Not Implemented
+            print("8: Delete Account") 
             print("9: Exit")
             try:
                 chosen_option = input("Select your choice:")
@@ -789,7 +789,7 @@ def main():
                         #pass
                         add_recipe(service)
                     case 5: # Add Ingredients to Pantry
-                        print("This feature hasn't been implemented yet.")
+                        add_pantry_item(service, user)
                         pass
                     case 6: # Update User Info
                         update_account_info_helper(service, user)
@@ -824,7 +824,7 @@ def main():
             print("2: Get Popular Searches") # Not Working (Not Main.Py Issue)
             print("3: Get Random Recipe") # Not Working (Not Main.Py Issue)
             print("4: Create New Account") # Not Working (Not Main.Py Issue)
-            print("5: Search for Recipe") # Somewhat Implemented
+            print("5: Search for Recipe") 
             print("6: Exit")
             try:
                 chosen_option = input("Select your choice:")
@@ -835,7 +835,8 @@ def main():
                         if user:
                             logged_in = True
                         if not logged_in:
-                            print("Reseting Password has not been implemented yet.")
+                            reset_password_helper(service)
+                            print("Please try to Login Again.")
                             pass
                         input("Press Enter to Continue")
                     case 2: # Get Pop Searches
