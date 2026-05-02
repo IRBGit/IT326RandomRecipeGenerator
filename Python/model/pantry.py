@@ -64,7 +64,7 @@ class PantryItem(Base):
         from model import User, Ingredient
         return (
             self.user_id is not None and
-            self.self.ingredient_id is not None and
+            self.ingredient_id is not None and
             self.user_id == other.user_id and
             self.ingredient_id == other.ingredient_id
         )
@@ -72,4 +72,4 @@ class PantryItem(Base):
     def __hash__(
             self
             ) -> int:
-        return hash((type(self), self.id))
+        return hash((self.user_id, self.ingredient_id))
