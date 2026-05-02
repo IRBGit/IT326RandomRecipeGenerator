@@ -1189,10 +1189,21 @@ def remove_recipe_from_favorites(service: ServiceContainer, user: User, recipe: 
     else:
         print("Could not removed from favorites.")
 
+# By Jon Bailey
 def add_rating_to_recipe(service: ServiceContainer, user: User, recipe: Recipe):
-    #TODO Needs to be written
-    print("Not implemented yet")
-    pass
+    while True:
+        try:
+            rating = int(input("Enter your rating for this recipe (1-5): ").strip())
+            if rating < 1 or rating > 5:
+                print("Rating must be between 1 and 5.")
+                continue
+            break
+        except ValueError:
+            print("Invalid input. Rating must be a number between 1 and 5.")
+            continue
+        
+    service.rate_recipe(user.id, recipe.id, rating)
+    print("Recipe rated successfully.")
 
 #By Jon Bailey
 def print_to_pdf(recipe: Recipe):
