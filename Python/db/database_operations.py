@@ -224,11 +224,11 @@ class UserService:
             if db_user is None:
                 raise ValueError("User not found")
             
-            db_user.password = new_password
+            db_user.reset_password(new_password)
             uow.commit()
             return True
         
-
+    #By Thanvii Ambala
     def get_user_by_email(self, email: str) -> User | None:
         """
         Retrieve a user by email
@@ -560,6 +560,7 @@ class RecipeService:
             uow.commit()
             return True
     
+    #By Thanvii Ambala
     def find_recipes_by_pantry(
             self,
             user: User
@@ -628,6 +629,7 @@ class RecipeService:
                 results.append(recipe)
             return results
     
+    #By Thanvii Ambala
     def find_recipes_by_ingredients(
             self,
             ingredients: list[str]
@@ -664,7 +666,8 @@ class RecipeService:
         """
         with UnitOfWork() as uow:
             return uow.recipes.get_by_id(recipe_id)
-        
+    
+    #By Thanvii Ambala
     def find_recipes_by_category(
             self,
             category: str
@@ -677,7 +680,8 @@ class RecipeService:
                 if recipe.category and recipe.category.strip().lower() == category_lower:
                     matching_recipes.append(recipe) 
             return matching_recipes 
-            
+
+    #By Thanvii Ambala        
     def add_ingredient_to_recipe(
             self,
             recipe_id: int,
@@ -900,6 +904,7 @@ class ServiceContainer:
     ) -> bool:
         return self.user_service.change_password(user, new_password)
     
+    #By Thanvii Ambala
     def get_user_by_email(
             self, 
             email: str
@@ -1081,30 +1086,35 @@ class ServiceContainer:
             raise RuntimeError("Failed to create Recipe")
         return recipe
     
+    #By Thanvii Ambala
     def find_recipes_by_ingredients(
             self, 
             ingredients: list[str]
         ) -> list[Recipe]:
         return self.recipe_service.find_recipes_by_ingredients(ingredients)
     
+    #By Thanvii Ambala
     def find_recipes_by_pantry(
             self,
             user: User
     ) -> list[Recipe]:
         return self.recipe_service.find_recipes_by_pantry(user)
     
+    #By Thanvii Ambala
     def get_recipe_by_id(
             self,
             recipe_id: int
     ) -> Optional[Recipe]:
         return self.recipe_service.get_recipe_by_id(recipe_id)
     
+    #By Thanvii Ambala
     def find_recipes_by_category(
             self, 
             category: str
         ) -> list[Recipe]:
         return self.recipe_service.find_recipes_by_category(category)
 
+    #By Thanvii Ambala
     def delete_recipe(self, recipe_id: int) -> bool:
         return self.recipe_service.delete_recipe(recipe_id)
 
