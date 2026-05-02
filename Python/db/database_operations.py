@@ -532,7 +532,7 @@ class RecipeService:
         self,
         name: str,
         instructions: Optional[List[str]] = None,
-        ingredients: Optional[list[str]] = None,
+        ingredients: Optional[list] = None,
         pub_time: Optional[datetime] = None
         ) -> Recipe | None:
 
@@ -559,7 +559,20 @@ class RecipeService:
             uow.recipes.add(recipe)
 
             if ingredients:
-                for ing_name in ingredients:
+                for item in ingredients:
+                    quantity = None
+                    unit = ""
+
+                    if isinstance(item, dict):
+                        ing_name = str(item.get("name", "")).strip()
+                        quantity = item.get("quantity")
+                        unit = str(item.get("unit", "")).strip()
+                    else:
+                        ing_name = str(item).strip()
+
+                    if ing_name == "":
+                        continue
+                    
                     ingredient = uow.ingredients.get_by_name(ing_name)
 
                     if not ingredient:
@@ -568,7 +581,10 @@ class RecipeService:
                         if uow.session is not None:
                             uow.session.flush()
 
-                    recipe.add_ingredient(ingredient)
+                    if quantity is not None or unit != "":
+                        recipe.add_ingredient(ingredient, quantity=quantity, unit=unit)
+                    else:
+                        recipe.add_ingredient(ingredient)
 
             uow.commit()
             return recipe
@@ -702,6 +718,29 @@ class RecipeService:
         """
         with UnitOfWork() as uow:
             return uow.recipes.get_by_id(recipe_id)
+
+    def get_recipe_display_data(self, recipe_id: int) -> dict | None:
+        with UnitOfWork() as uow:
+            recipe = uow.recipes.get_by_id(recipe_id)
+
+            if recipe is None:
+                return None
+
+            ingredient_list = []
+
+            for recipe_ingredient in recipe._ingredients.values():
+                ingredient_list.append({
+                    "name": recipe_ingredient.ingredient.name,
+                    "quantity": recipe_ingredient.quantity,
+                    "unit": recipe_ingredient.unit or ""
+                })
+
+            return {
+                "id": recipe.id,
+                "name": recipe.name,
+                "instructions": list(recipe.instructions),
+                "ingredients": ingredient_list
+            }
     
     #By Thanvii Ambala
     def find_recipes_by_category(
@@ -1158,6 +1197,12 @@ class ServiceContainer:
             recipe_id: int
     ) -> Optional[Recipe]:
         return self.recipe_service.get_recipe_by_id(recipe_id)
+    #Lu
+    def get_recipe_display_data(
+            self,
+            recipe_id: int
+    ) -> dict | None:
+        return self.recipe_service.get_recipe_display_data(recipe_id)
     
     #By Thanvii Ambala
     def find_recipes_by_category(

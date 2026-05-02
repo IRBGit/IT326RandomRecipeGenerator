@@ -6,6 +6,7 @@ from model import Recipe, User
 from SearchEngine import SearchEngine, Filter, Rank
 from typing import List
 from datetime import datetime
+from model.conversions import format_converted_amount
 
 load_dotenv()
 # By Jon Bailey
@@ -25,6 +26,123 @@ def print_pantry(service: ServiceContainer, user: User):
         )
 
     return items
+#------lu:
+def format_recipe_ingredient(recipe_ingredient, system):
+    # get saved values
+    quantity = recipe_ingredient.quantity
+    unit = recipe_ingredient.unit or ""
+    name = recipe_ingredient.ingredient.name
+
+    # show normal ingredient text
+    if system == "original":
+        if quantity is None:
+            return name
+        if unit == "":
+            return str(quantity) + " " + name
+        return str(quantity) + " " + unit + " " + name
+
+    # if no quantity, keep original
+    if quantity is None:
+        return name
+
+    # if no unit, keep original
+    if unit == "":
+        return str(quantity) + " " + name
+
+    converted = format_converted_amount(quantity, unit, system)
+
+    # if conversion fails, keep original
+    if converted == "Unit not supported":
+        return str(quantity) + " " + unit + " " + name
+
+    if converted == "System not supported":
+        return str(quantity) + " " + unit + " " + name
+
+    return converted + " " + name
+
+
+def print_recipe_details(recipe_data, system):
+    print("\n--------------------")
+    print("Recipe:", recipe_data["name"])
+    print("--------------------")
+
+    print("\nIngredients:")
+    for item in recipe_data["ingredients"]:
+
+        quantity = item["quantity"]
+        unit = item["unit"]
+        name = item["name"]
+
+        if system == "original":
+            if quantity is None:
+                ingredient_line = name
+            elif unit == "":
+                ingredient_line = str(quantity) + " " + name
+            else:
+                ingredient_line = str(quantity) + " " + unit + " " + name
+        else:
+            if quantity is None:
+                ingredient_line = name
+            elif unit == "":
+                ingredient_line = str(quantity) + " " + name
+            else:
+                converted = format_converted_amount(quantity, unit, system)
+
+                if converted == "Unit not supported" or converted == "System not supported":
+                    ingredient_line = str(quantity) + " " + unit + " " + name
+                else:
+                    ingredient_line = converted + " " + name
+
+        print("- " + ingredient_line)
+
+    print("\nInstructions:")
+    for i, step in enumerate(recipe_data["instructions"], start=1):
+        print(str(i) + ". " + step)
+
+
+def view_recipe_results(recipe_list, service):
+    if recipe_list is None or recipe_list == []:
+        print("No Recipes Found")
+        return
+
+    print("\nRecipes Found:")
+    for i, recipe in enumerate(recipe_list, start=1):
+        print(str(i) + ": " + recipe.name)
+
+    try:
+        choice = int(input("Select a recipe number to view: "))
+    except ValueError:
+        print("Invalid input.")
+        return
+
+    if choice < 1 or choice > len(recipe_list):
+        print("Invalid selection.")
+        return
+
+    recipe = recipe_list[choice - 1]
+
+    recipe_data = service.get_recipe_display_data(recipe.id)
+
+    if recipe_data is None:
+        print("Could not load recipe details.")
+        return
+
+    print("\nMeasurement Options:")
+    print("1: Original")
+    print("2: Metric")
+    print("3: Imperial")
+
+    system_choice = input("Select your choice: ").strip()
+
+    if system_choice == "2":
+        system = "metric"
+    elif system_choice == "3":
+        system = "imperial"
+    else:
+        system = "original"
+
+    print_recipe_details(recipe_data, system)
+#-----------conv flow
 
 def add_pantry_item(service: ServiceContainer, user: User):
     name = input("Ingredient name: ")
@@ -501,7 +619,7 @@ def rank(recipe_list: List[Recipe]):
             pass
 
 # By Alysa Solomon
-def search_not_logged_in(search_func: SearchEngine.RecipeSearchEngine):
+def search_not_logged_in(search_func: SearchEngine.RecipeSearchEngine, service: ServiceContainer):
     is_searching = True
     while is_searching:
         print("\nCurrent Options are listed below:")
@@ -518,14 +636,14 @@ def search_not_logged_in(search_func: SearchEngine.RecipeSearchEngine):
                     recipe_list = search_by_name(search_func)
                     if recipe_list is not None and recipe_list != []:
                             recipe_list = rank(recipe_list)
-                            print(recipe_list)
+                            view_recipe_results(recipe_list, service)
                     else:
                         print("No Recipes Found")
                 case 2: # Search by Criteria
                     recipe_list = search_by_category(search_func)
                     if recipe_list != []:
                             recipe_list = rank(recipe_list)
-                            print(recipe_list)
+                            view_recipe_results(recipe_list, service)
                     else:
                         print("No Recipes Found")
                     pass
@@ -533,7 +651,7 @@ def search_not_logged_in(search_func: SearchEngine.RecipeSearchEngine):
                     recipe_list = search_by_ing(search_func)
                     if recipe_list != []:
                             recipe_list = rank(recipe_list)
-                            print(recipe_list)
+                            view_recipe_results(recipe_list, service)
                     else:
                         print("No Recipes Found")
                     pass
@@ -553,7 +671,8 @@ def search_not_logged_in(search_func: SearchEngine.RecipeSearchEngine):
             pass
         input("Press Enter to Continue")
 
-def search_logged_in(search_func: SearchEngine.RecipeSearchEngine, user: User):
+
+def search_logged_in(search_func: SearchEngine.RecipeSearchEngine, user: User, service: ServiceContainer):
     # Tolu: search menu for logged-in users with saved diet preferences
     is_searching = True
 
@@ -576,7 +695,7 @@ def search_logged_in(search_func: SearchEngine.RecipeSearchEngine, user: User):
 
                     if recipe_list is not None and recipe_list != []:
                         recipe_list = rank(recipe_list)
-                        print(recipe_list)
+                        view_recipe_results(recipe_list, service)
                     else:
                         print("No Recipes Found")
 
@@ -586,7 +705,7 @@ def search_logged_in(search_func: SearchEngine.RecipeSearchEngine, user: User):
 
                     if recipe_list != []:
                         recipe_list = rank(recipe_list)
-                        print(recipe_list)
+                        view_recipe_results(recipe_list, service)
                     else:
                         print("No Recipes Found")
 
@@ -596,7 +715,7 @@ def search_logged_in(search_func: SearchEngine.RecipeSearchEngine, user: User):
 
                     if recipe_list != []:
                         recipe_list = rank(recipe_list)
-                        print(recipe_list)
+                        view_recipe_results(recipe_list, service)
                     else:
                         print("No Recipes Found")
 
@@ -769,7 +888,7 @@ def main():
                         recipe_list = get_pop_searches(service,search_func)
                         recipe_list = apply_saved_dietary_preferences(recipe_list, user)
                         if recipe_list != []:
-                            print(recipe_list)
+                            view_recipe_results(recipe_list, service)
                         else:
                             print("No Recipes Found.")
                         # print("BROKEN: WILL NOT WORK")
@@ -778,12 +897,12 @@ def main():
                         # TODO: NOT OUTPUTTING LIST OF RECIPES
                         recipe_list = random_recipe_helper(search_func, user)
                         if recipe_list != []:
-                            print(recipe_list)
+                            view_recipe_results(recipe_list, service)
                         else:
                             print("No Recipes Found.")
                             pass
                     case 3: # Search for Recipe
-                        search_logged_in(search_func, user)
+                        search_logged_in(search_func, user, service)
                     case 4: # Add Recipe
                         #print("This feature hasn't been implemented yet.")
                         #pass
@@ -841,7 +960,7 @@ def main():
                     case 2: # Get Pop Searches
                         recipe_list = get_pop_searches(service,search_func)
                         if recipe_list != []:
-                            print(recipe_list)
+                            view_recipe_results(recipe_list, service)
                         else:
                             print("No Recipes Found.")
                         # print("BROKEN: WILL NOT WORK")
@@ -850,14 +969,14 @@ def main():
                         # TODO: NOT OUTPUTTING LIST OF RECIPES
                         recipe_list = random_recipe_helper(search_func, user)
                         if recipe_list != []:
-                            print(recipe_list)
+                            view_recipe_results(recipe_list, service)
                         else:
                             print("No Recipes Found.")
                             pass
                     case 4: # Register Account
                         user = register_user(service)
                     case 5: # Searching For a recipe
-                        search_not_logged_in(search_func)
+                        search_not_logged_in(search_func, service)
                     case 6: # Exit
                         will_continue = False
                         print("Thank you for using our Program!")
