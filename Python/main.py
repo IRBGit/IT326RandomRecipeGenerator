@@ -183,6 +183,7 @@ def view_recipe_results(recipe_list, service):
     recipe_detail_menu(service, recipe)
 #-----------conv flow
 
+# By Jon Bailey
 def add_pantry_item(service: ServiceContainer, user: User):
     name = input("Ingredient name: ")
 
@@ -203,6 +204,7 @@ def add_pantry_item(service: ServiceContainer, user: User):
     except:
         print("User not found")
 
+# By Jon Bailey
 def delete_pantry_item(service: ServiceContainer, user: User):
     items = print_pantry(service, user)
 
@@ -221,6 +223,7 @@ def delete_pantry_item(service: ServiceContainer, user: User):
 
         service.remove_from_pantry(user, ingredient)
     
+# By Jon Bailey
 def update_pantry_item(service: ServiceContainer, user: User):
     items = print_pantry(service, user)
 
@@ -248,76 +251,143 @@ def add_note_to_recipe(service: ServiceContainer, user: User, recipe: Recipe):
         print(f"Error adding note: {e}")
 
 # By Jon Bailey
-def delete_note_from_recipe(service: ServiceContainer,user: User):
-    try:
-        indexed_notes = service.get_all_user_notes(user)
+def delete_note_from_recipe(service: ServiceContainer, user: User, recipe: Recipe | None = None):
+    if recipe is None:
+        try:
+            indexed_notes = service.get_all_user_notes(user)
 
-        if not indexed_notes:
-            return
-        
-        #Display numbered list
-        print("\nYour Notes:")
-        for i, (recipe, note) in enumerate(indexed_notes, start = 1):
-            print(f"{i}.{recipe.name}: {note}")
-        
-        
-        choice = int(input("Select the number of the note to delete: "))
+            if not indexed_notes:
+                return
+            
+            #Display numbered list
+            print("\nYour Notes:")
+            for i, (recipe, note) in enumerate(indexed_notes, start = 1):
+                print(f"{i}.{recipe.name}: {note}")
+            
+            
+            choice = int(input("Select the number of the note to delete: "))
 
-        if choice <1 or choice > len(indexed_notes):
-            print("Invalid selection.")
-            return
-        
-        recipe, note = indexed_notes[choice - 1]
+            if choice <1 or choice > len(indexed_notes):
+                print("Invalid selection.")
+                return
+            
+            recipe, note = indexed_notes[choice - 1]
 
-        updated_notes = service.delete_personal_note(user, recipe, note)
+            updated_notes = service.delete_personal_note(user, recipe, note)
 
-        print("Note deleted successfully.")
-    except ValueError:
-        print("Invlaid input")
-    except Exception as e:
-        print(f"Error deleting note: {e}")
+            print("Note deleted successfully.")
+        except ValueError:
+            print("Invlaid input")
+        except Exception as e:
+            print(f"Error deleting note: {e}")
+    else:
+        try:
+            indexed_notes = service.get_all_user_notes(user)
+
+            # Prune notes to only the recipe that was passed
+            recipe_notes = [
+                note for r, note in indexed_notes
+                if r.id == recipe.id
+            ]
+
+            if not recipe_notes:
+                print("No notes for this recipe.")
+                return
+            
+            print(f"\nNotes for {recipe.name}:")
+            for i, note in enumerate(recipe_notes, start = 1):
+                print(f"{i}. {note}")
+
+            choice = int(input("Select the number of the note to delete: "))
+
+            if choice < 1 or choice > len(recipe_notes):
+                print("Invalid selections.")
+                return
+            
+            note = recipe_notes[choice -1]
+
+            service.delete_personal_note(user, recipe, note)
+
+            print("Note deleted successfully.")
+        except ValueError:
+            print("Invalid input")
+        except Exception as e:
+            print(f"Error deleting note: {e}")
 
 # By Jon Bailey    
-def update_note(service, user):
-    try:
-        # Get all notes (flattened list)
-        notes = service.get_all_user_notes(user.id)
+def update_note(service: ServiceContainer, user: User, recipe: Recipe | None = None):
+    if recipe is None:
+        try:
+            # Get all notes (flattened list)
+            notes = service.get_all_user_notes(user)
 
-        if not notes:
-            print("No notes found.")
-            return
-        
-        #Display numbered list
-        print("\nYour Notes:")
-        for i, (recipe, note) in enumerate(notes, start = 1):
-            print(f"{i}.{recipe.name}: {note}")
-        
-        # Select note to update
-        choice = int(input("\nSelect note to update: "))
+            if not notes:
+                print("No notes found.")
+                return
+            
+            #Display numbered list
+            print("\nYour Notes:")
+            for i, (recipe, note) in enumerate(notes, start = 1):
+                print(f"{i}.{recipe.name}: {note}")
+            
+            # Select note to update
+            choice = int(input("\nSelect note to update: "))
 
-        if choice < 1 or choice > len(notes):
-            print("Invalid selection")
-            return
-        
-        recipe, old_note = notes[choice - 1]
+            if choice < 1 or choice > len(notes):
+                print("Invalid selection")
+                return
+            
+            recipe, old_note = notes[choice - 1]
 
-        # Get new note
-        new_note = input("Enter updated note: ").strip()
+            # Get new note
+            new_note = input("Enter updated note: ").strip()
 
-        if not new_note:
-            print("Note cannot be empty.")
-            return
-        
-        updated_notes = service.update_note(user, recipe, old_note, new_note)
+            if not new_note:
+                print("Note cannot be empty.")
+                return
+            
+            updated_notes = service.update_note(user, recipe, old_note, new_note)
 
-        print("\nNote updated successfully.")
-        print(f"Updated notes for '{recipe.name} : ")
-        for n in updated_notes:
-            print(f"- {n}")
-    except ValueError:
-        print("Invalid input.")
-    except Exception as e:
-        print(f"Error updating note: {e}")
+            print("\nNote updated successfully.")
+            print(f"Updated notes for '{recipe.name} : ")
+            for n in updated_notes:
+                print(f"- {n}")
+        except ValueError:
+            print("Invalid input.")
+        except Exception as e:
+            print(f"Error updating note: {e}")
+    else:
+        try:
+            indexed_notes = service.get_all_user_notes(user)
+
+            recipe_notes = [
+                note for r, note in indexed_notes
+                if r.id == recipe.id
+            ]
+
+            if not recipe_notes:
+                print("No notes for this recipe.")
+                return
+            
+            print(f"\nNotes for {recipe.name}: ")
+            for i, note in enumerate(recipe_notes, start = 1):
+                print(f"{i}. {note}")
+
+            choice =  int(input("Select the number of the note to update: "))
+
+            if choice < 1 or choice > len(recipe_notes):
+                print("Invalid selection.")
+                return
+            
+            old_note = recipe_notes[choice - 1]
+
+            new_note = input("Enter the updated note: ").strip()
+
+            service.update_note(user, recipe, old_note, new_note)
+        except ValueError:
+            print("Invalid input")
+        except Exception as e:
+            print("Error updating note: {e}")
 
 # By Thanvii Ambala
 def login(service: ServiceContainer, username, password):
@@ -902,25 +972,64 @@ def add_recipe(service: ServiceContainer):
 def delete_account(service: ServiceContainer, user: User):
     return service.delete_user(user)
 
+# By Jon Bailey
 def display_recipe(service: ServiceContainer, recipe:Recipe):
-    recipe_detail_menu(service, recipe)
+    #TODO Needs to be written
+    recipe_data = service.get_recipe_display_data(recipe.id)
+
+    if recipe_data is None:
+        print("Could not load recipe details.")
+        return
+
+    print("\nMeasurement Options:")
+    print("1: Original")
+    print("2: Metric")
+    print("3: Imperial")
+
+    system_choice = input("Select your choice: ").strip()
+
+    if system_choice == "2":
+        system = "metric"
+    elif system_choice == "3":
+        system = "imperial"
+    else:
+        system = "original"
+
+    print_recipe_details(recipe_data, system)
 
 def update_recipe(service: ServiceContainer, recipe:Recipe):
     #TODO Needs to be written
+    print("Not implemented yet")
     pass
 
+# By Jon Bailey
 def add_recipe_to_favorites(service: ServiceContainer, user: User, recipe: Recipe):
-    #TODO Needs to be written
-    pass
+    if user is None or Recipe is None:
+        print("Missing a user or recipe. Could not add")
+        return
+    if service.add_recipe_to_favorites(user.id, recipe.id):
+        print("Successfully saved to favorites.")
+    else:
+        print("Could not save to favorites.")
 
+# By Jon Bailey
 def remove_recipe_from_favorites(service: ServiceContainer, user: User, recipe: Recipe):
-    #TODO Needs to be written
-    pass
+    if service.remove_recipe_from_favorites(user.id, recipe.id):
+        print("Successfully removed from favorites.")
+    else:
+        print("Could not removed from favorites.")
 
 def add_rating_to_recipe(service: ServiceContainer, user: User, recipe: Recipe):
     #TODO Needs to be written
+    print("Not implemented yet")
     pass
 
+def print_to_pdf(recipe: Recipe):
+    #TODO Needs to be written
+    print("Not implemented yet")
+    pass
+
+# By Jon Bailey
 def delete_recipe(service: ServiceContainer, recipe: Recipe):
     if recipe is None:
         print("Recipe not passed to method.")
@@ -931,6 +1040,9 @@ def delete_recipe(service: ServiceContainer, recipe: Recipe):
 
 # By Jon Bailey
 def recipe_workflow(service: ServiceContainer, recipe: Recipe, user: User | None = None):
+    if recipe is None:
+        print("No recipe recieved")
+        return
     while True:
         print(f"\n --- Recipe: {recipe.get_name()} ---")
         print("1. View Recipe")
@@ -941,6 +1053,7 @@ def recipe_workflow(service: ServiceContainer, recipe: Recipe, user: User | None
             print("5. Add Personal Note")
             print("6. Rate Recipe")
         print("7. Delete Recipe")
+        print("8. Print Recipe to PDF")
         print("0. Back to Main Menu")
 
         try:
@@ -977,16 +1090,16 @@ def recipe_workflow(service: ServiceContainer, recipe: Recipe, user: User | None
                     except ValueError:
                         print("Selection was not a number")
                         continue
-                    if choice < 1 or choice > 3:
+                    if note < 1 or note > 3:
                         print("Not a valid choice")
                         continue
                     match note:
                         case 1:
                             add_note_to_recipe(service, user, recipe)
                         case 2:
-                            update_note(service, user)
+                            update_note(service, user, recipe)
                         case 3:
-                            delete_note_from_recipe(service, user)
+                            delete_note_from_recipe(service, user, recipe)
                     continue
                 else:
                     print("No user logged in")
@@ -1006,6 +1119,8 @@ def recipe_workflow(service: ServiceContainer, recipe: Recipe, user: User | None
                     break
                 else:
                     continue
+            case 8:
+                print_to_pdf(recipe)
             case 0:
                 break
                 
