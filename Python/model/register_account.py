@@ -6,41 +6,6 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 from model.user import User
 
-def register_account(session: Session, email: str, password: str) -> User:
-    """
-    This function creates a new user account.
-
-    Steps:
-    1. Clean the email
-    2. Check if user already exists
-    3. Create new user
-    4. Save to database
-    """
-
-    email = email.strip().lower()
-
-    if email == "":
-        raise ValueError("Email cannot be empty")
-
-    if password == "":
-        raise ValueError("Password cannot be empty")
-
-    existing_user = session.scalar(
-        select(User).where(User.email == email)
-    )
-
-    if existing_user:
-        raise ValueError("User already exists with this email")
-
-    new_user = User(email=email, password=password)
-
-    session.add(new_user)
-    session.commit()
-    session.refresh(new_user)
-
-    return new_user
-
-
 def delete_account(session: Session, email: str) -> bool:
     """
     Delete a user account using the user's email.

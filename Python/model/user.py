@@ -1,5 +1,5 @@
 """
-    Author: Jon Bailey and Thanvi Ambala
+    Author: Jon Bailey
 """
 
 from __future__ import annotations

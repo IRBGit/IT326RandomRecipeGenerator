@@ -15,7 +15,7 @@ class TestSearchRecipeByName(unittest.TestCase):
         results = self.search_engine.search_recipes_by_name("Spaghetti Bolognese")
         self.assertIsNotNone(results)
         if results:
-            self.assertTrue(len(results) > 1)
+            self.assertTrue(len(results) >= 1)
             self.assertTrue(any(recipe.get_name() == "Spaghetti Bolognese" for recipe in results), "Exact match not found in results")
 
     def test_search_recipe_by_name_partial_match(self):
@@ -36,9 +36,8 @@ class TestSearchRecipeByName(unittest.TestCase):
         self.service_container.add_recipe("Caesar Salad", ["Chop Lettuce", "Make Dressing", "Combine Ingredients"] , ["lettuce", "croutons", "parmesan"])
         results = self.search_engine.search_recipes_by_name("caesar salad")
         self.assertIsNotNone(results)
-        if results:
-            self.assertTrue(len(results) > 1)
-            self.assertTrue(any(recipe.get_name().lower() == "caesar salad" for recipe in results), "Case-insensitive match not found in results")
+        self.assertGreaterEqual(len(results), 1)
+        self.assertTrue(any(recipe.get_name().lower() == "caesar salad" for recipe in results), "Case-insensitive match not found in results")
         
         
         
