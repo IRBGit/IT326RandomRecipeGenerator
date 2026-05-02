@@ -209,23 +209,20 @@ class Recipe(Base):
 
     def get_user_rating(self, user) -> int | None:
         from model import Rating
-        for r in self.ratings:
-            if r.user == user:
-                return r.rating
-        return None
+        return self.user_ratings.get(user)
     
-    def add_rating(self, user: User, value: int) -> Rating:
+    def add_rating(self, user: User, value: int):
         from model import Rating
+
         if value < 0 or value > 5:
             raise ValueError("rating must be between 0 and 5")
-        
-        for r in self.ratings:
-            if r.user == user:
-                r.rating = value
-                return r
-        
-        rating = Rating(user = user, recipe = self, rating = value)
-        self.ratings.append(rating)
+
+        if user in self._ratings:
+            self._ratings[user].rating = value
+            return self._ratings[user]
+
+        rating = Rating(user=user, recipe=self, rating=value)
+        self._ratings[user] = rating
         return rating
     
     def get_name(self) -> str:
