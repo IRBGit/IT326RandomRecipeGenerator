@@ -127,23 +127,32 @@ class Recipe(Base):
         return f"<Recipe(id = {self.id}, name ='{self.name}')>"
     
     def _is_valid_operand(self, other):
-        return (hasattr((other, "published_time")))
+        return (isinstance(other, Recipe) and hasattr(other, "published_time"))
 
-    def __lt__(self, other):
-        # if not self._is_valid_operand(self, other):
-        #     return NotImplemented
+    def __lt__(self, other: Recipe):
+        if not self._is_valid_operand(other):
+            return NotImplemented
+        if self.published_time is None or other.published_time is None:
+            return ValueError("One of the operands published time is None")
         return (self.published_time < other.published_time)
-    def __le__(self, other):
-        if not self._is_valid_operand(self,other):
+    
+    def __le__(self, other: Recipe):
+        if not self._is_valid_operand(other):
             return NotImplemented
+        if self.published_time is None or other.published_time is None:
+            return ValueError("One of the operands published time is None")
         return (self.published_time <= other.published_time)
-    def __gt__(self, other):
-        if not self._is_valid_operand(self,other):
+    def __gt__(self, other: Recipe):
+        if not self._is_valid_operand(other):
             return NotImplemented
+        if self.published_time is None or other.published_time is None:
+            return ValueError("One of the operands published time is None")
         return (self.published_time > other.published_time)
-    def __ge__(self, other):
-        if not self._is_valid_operand(self,other):
+    def __ge__(self, other: Recipe):
+        if not self._is_valid_operand(other):
             return NotImplemented
+        if self.published_time is None or other.published_time is None:
+            return ValueError("One of the operands published time is None")
         return (self.published_time >= other.published_time)
     
     # prints a recipe to terminal
