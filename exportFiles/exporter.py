@@ -1,37 +1,78 @@
-from json2pdf_converter import generate
-import json2pdf_converter
 import json
 import os
 from pathlib import Path
 import shutil
+import importlib
+import sys
+import tempfile
+
+from sqlalchemy.exc import OperationalError
 
 project_root = Path(__file__).resolve().parent.parent
 
+python_dir = project_root / 'Python'
+if str(python_dir) not in sys.path:
+    sys.path.insert(0, str(python_dir))
+
+json2pdf_converter = importlib.import_module('json2pdf_converter')
+generate = json2pdf_converter.generate
+UnitOfWork = importlib.import_module('db.unit_of_work').UnitOfWork
+
+
+def _recipe_to_meal_dict(recipe) -> dict:
+    meal = {
+        'idMeal': str(recipe.id) if recipe.id is not None else '',
+        'strMeal': recipe.name,
+        'strCategory': recipe.category or '',
+        'strArea': '',
+        'strInstructions': '\n'.join(recipe.instructions or []),
+        'strMealThumb': '',
+        'strTags': ','.join(recipe.tags or []),
+        'strSource': '',
+        'strYoutube': recipe.video or '',
+        'dateModified': recipe.published_time.strftime('%Y-%m-%d %H:%M:%S') if recipe.published_time else '',
+    }
+
+    for index in range(1, 21):
+        meal[f'strIngredient{index}'] = ''
+        meal[f'strMeasure{index}'] = ''
+
+    for index, recipe_ingredient in enumerate(recipe._ingredients.values(), start=1):
+        if index > 20:
+            break
+
+        meal[f'strIngredient{index}'] = recipe_ingredient.ingredient.name
+
+        measure_parts = []
+        if recipe_ingredient.quantity is not None:
+            measure_parts.append(str(recipe_ingredient.quantity))
+        if recipe_ingredient.unit:
+            measure_parts.append(recipe_ingredient.unit)
+
+        meal[f'strMeasure{index}'] = ' '.join(measure_parts)
+
+    return meal
+
 
 def search_recipe(recipe_name: str) -> dict | None:
-    """Search for a recipe across all JSON recipe files.
-    
-    Args:
-        recipe_name: The name of the recipe to search for (case-insensitive)
-    
-    Returns:
-        A dict containing the recipe if found, None otherwise
-    """
-    recipes_dir = project_root / 'JSON_Recipes'
+    """Search for a recipe in Oracle and return a MealDB-shaped dict."""
+    recipe_name = recipe_name.strip()
+    if not recipe_name:
+        return None
+
     recipe_name_lower = recipe_name.lower()
-    
-    # Iterate through all JSON files in the recipes directory
-    for json_file in recipes_dir.glob('*_recipes.json'):
-        try:
-            with open(json_file, 'r', encoding='utf-8') as f:
-                data = json.load(f)
-                if data.get('meals'):
-                    for meal in data['meals']:
-                        if meal.get('strMeal', '').lower() == recipe_name_lower:
-                            return meal
-        except (json.JSONDecodeError, FileNotFoundError):
-            continue
-    
+
+    try:
+        with UnitOfWork() as uow:
+            for recipe in uow.recipes.search_by_name(recipe_name):
+                if recipe.name.lower() == recipe_name_lower:
+                    return _recipe_to_meal_dict(recipe)
+    except OperationalError as exc:
+        raise RuntimeError(
+            "Unable to reach the Oracle database. Make sure you are on the ISU VPN, "
+            "DB_PW is set, and the database is reachable, then rerun the exporter."
+        ) from exc
+
     return None
 
 
@@ -45,11 +86,17 @@ def ensure_wkhtmltopdf_available() -> None:
     if expected_exe.exists():
         return
 
+    common_windows_paths = [
+        Path(r'C:\Program Files\wkhtmltopdf\bin') / executable_name,
+        Path(r'C:\Program Files (x86)\wkhtmltopdf\bin') / executable_name,
+    ]
+
     installed_exe_path = (
         os.environ.get('WKHTMLTOPDF_BIN')
         or os.environ.get('WKHTMLTOPDF_PATH')
         or shutil.which(executable_name)
         or shutil.which('wkhtmltopdf')
+        or next((str(path) for path in common_windows_paths if path.exists()), None)
     )
     if not installed_exe_path:
         raise FileNotFoundError(
@@ -80,7 +127,11 @@ if not recipe_name:
     exit(1)
 
 # Search for the recipe
-recipe = search_recipe(recipe_name)
+try:
+    recipe = search_recipe(recipe_name)
+except RuntimeError as exc:
+    print(f"Error: {exc}")
+    exit(1)
 
 if recipe is None:
     print(f"Error: Recipe '{recipe_name}' not found in the database.")
@@ -117,19 +168,26 @@ output_dir = str(project_root / 'exportFiles')
 
 print(f"Generating PDF: {safe_recipe_name}.pdf")
 
-# Note: json_file_path is passed to generate() but we're using data_variables instead
-dummy_json_path = project_root / 'JSON_Recipes' / 'a_recipes.json'
+temp_json_path = None
 
-generate(
-    json_file_path=str(dummy_json_path),
-    template_directory_path=str(template_directory),
-    output_html_path=output_dir,
-    output_pdf_path=output_dir,
-    options=options,
-    template_name=template_name,
-    data_variables=data_variables,
-    custom_filter_functions=[]
-)
+try:
+    with tempfile.NamedTemporaryFile('w', delete=False, suffix='.json', encoding='utf-8') as temp_file:
+        json.dump(data, temp_file, ensure_ascii=False, indent=2)
+        temp_json_path = Path(temp_file.name)
+
+    generate(
+        json_file_path=str(temp_json_path),
+        template_directory_path=str(template_directory),
+        output_html_path=output_dir,
+        output_pdf_path=output_dir,
+        options=options,
+        template_name=template_name,
+        data_variables=data_variables,
+        custom_filter_functions=[]
+    )
+finally:
+    if temp_json_path and temp_json_path.exists():
+        temp_json_path.unlink()
 
 # Rename the generated files to use the recipe name
 # HTML file is created in the root output directory, move it to html/
