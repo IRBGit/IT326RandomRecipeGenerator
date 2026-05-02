@@ -882,6 +882,74 @@ class RecipeService:
             favorites = list(user.favorites)
             
             return favorites
+    
+    def update_recipe(
+        self,
+        recipe_id: int,
+        name: Optional[str] = None,
+        category: Optional[str] = None,
+        tags: Optional[list[str]] = None,
+        video: Optional[str] = None,
+        instructions: Optional[list[str]] = None,
+        update_time: bool = False,
+        add_ingredients: Optional[list[str]] = None,
+        remove_ingredients: Optional[list[str]] = None,
+        area: Optional[str] = None
+    ) -> Recipe | None:
+
+        with UnitOfWork() as uow:
+            recipe = uow.recipes.get_by_id(recipe_id)
+
+            if not recipe:
+                raise ValueError("Recipe not found")
+
+            # ---- BASIC FIELDS ----
+            if name is not None:
+                recipe.name = name
+
+            if category is not None:
+                recipe.category = category
+
+            if tags is not None:
+                recipe.tags = tags
+
+            if video is not None:
+                recipe.video = video
+
+            if instructions is not None:
+                recipe.instructions = instructions
+            
+            if area is not None:
+                recipe.area = area
+
+            if update_time:
+                from datetime import datetime
+                recipe.published_time = datetime.now()
+
+            # ---- REMOVE INGREDIENTS ----
+            if remove_ingredients:
+                for ing_name in remove_ingredients:
+                    ingredient = uow.ingredients.get_by_name(ing_name)
+                    if ingredient:
+                        try:
+                            recipe.remove_ingredient(ingredient)
+                        except KeyError:
+                            pass
+
+            # ---- ADD INGREDIENTS ----
+            if add_ingredients:
+                for ing_name in add_ingredients:
+                    ingredient = uow.ingredients.get_by_name(ing_name)
+
+                    if not ingredient:
+                        ingredient = Ingredient(name=ing_name)
+                        uow.ingredients.add(ingredient)
+                        uow.session.flush()
+
+                    recipe.add_ingredient(ingredient)
+
+            uow.commit()
+            return recipe
     #-------------------
         
     
@@ -895,6 +963,8 @@ class SearchService:
             query: str):
         query = query.strip().lower()
         with UnitOfWork() as uow:
+            if not query or query == "":
+                return
 
             search = UserSearch(
                 query = query
@@ -1248,6 +1318,33 @@ class ServiceContainer:
         Retrieve all recipes from the database.
         """
         return self.recipe_service.get_all_recipes()
+    
+    # By Jon Bailey
+    def update_recipe(
+            self,
+            recipe_id: int,
+            name: Optional[str] = None,
+            category: Optional[str] = None,
+            tags: Optional[list[str]] = None,
+            video: Optional[str] = None,
+            instructions: Optional[list[str]] = None,
+            update_time: bool = False,
+            add_ingredients: Optional[list[str]] = None,
+            remove_ingredients: Optional[list[str]] = None,
+            area: Optional[str] = None
+    ) -> Recipe | None:
+        self.recipe_service.update_recipe(
+            recipe_id,
+            name,
+            category,
+            tags,
+            video,
+            instructions,
+            update_time,
+            add_ingredients,
+            remove_ingredients,
+            area
+        )
     
     # ==================== Searches ====================== #
     #By Jon Bailey

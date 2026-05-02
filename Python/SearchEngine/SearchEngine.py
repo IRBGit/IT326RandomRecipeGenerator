@@ -133,6 +133,7 @@ class RecipeSearchEngine(SearchEngine):
         return recipe
 
     def search_recipes_by_name(self, name: str) -> list[Recipe]:
+        self.service.record_search(name)  # Record the search term for analytics
         return self.service.find_recipe(name) or []
 
     def search_recipes_by_ingredients(self, ingredients: list) -> list:
@@ -187,7 +188,7 @@ class RecipeSearchEngine(SearchEngine):
             all_recipes = self.offer_recipes_with_pantry(user)
         else:           
             all_recipes = self.service.get_all_recipes()
-        filtered_recipes =recipe_filter.apply(all_recipes)
+        filtered_recipes = recipe_filter.apply(all_recipes)
         if count >= len(filtered_recipes):
             return filtered_recipes  # Return everything if count exceeds available recipes
         import random
