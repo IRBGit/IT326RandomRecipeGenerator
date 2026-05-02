@@ -132,8 +132,8 @@ class RecipeSearchEngine(SearchEngine):
         recipe = self.service.get_recipe_by_id(recipe_id)
         return recipe
 
-    def search_recipes_by_name(self, name: str) -> list | None:
-        return self.service.find_recipe(name)
+    def search_recipes_by_name(self, name: str) -> list[Recipe]:
+        return self.service.find_recipe(name) or []
 
     def search_recipes_by_ingredients(self, ingredients: list) -> list:
         return self.service.find_recipes_by_ingredients(ingredients)
@@ -182,7 +182,7 @@ class RecipeSearchEngine(SearchEngine):
             dietary_tags
         )  
 
-    def get_random_recipe_with_filter(self, count: int, user: User, recipe_filter: Filter) -> list:
+    def get_random_recipe_with_filter(self, count: int, user: User | None, recipe_filter: Filter) -> list:
         if user:
             all_recipes = self.offer_recipes_with_pantry(user)
         else:           
