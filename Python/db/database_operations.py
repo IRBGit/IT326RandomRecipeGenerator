@@ -11,6 +11,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import Row
 from datetime import datetime
 from typing import TypedDict
+from sqlalchemy.exc import IntegrityError
 
 class PopularSearch(TypedDict):
     query: str
@@ -969,7 +970,16 @@ class SearchService:
             )
             
             uow.searches.add(search)
-            uow.commit()
+            try:
+                uow.commit()
+            except IntegrityError:
+                # Duplicate/unique constraint violation when recording analytics search.
+                # Ignore the duplicate and rollback the transaction so the app continues.
+                try:
+                    if uow.session is not None:
+                        uow.session.rollback()
+                except Exception:
+                    pass
 
     #By Jon Bailey
     def get_popular_searches(
