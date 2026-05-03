@@ -245,7 +245,7 @@ def delete_pantry_item(service: ServiceContainer, user: User):
     
     if items is not None:
         if index < 0 or index >= len(items):
-            print("Invaldi Selection")
+            print("Invalid Selection")
             return
     
         ingredient = service.get_ingredient_by_id(items[index]['ingredient_id'])
@@ -306,7 +306,7 @@ def delete_note_from_recipe(service: ServiceContainer, user: User, recipe: Recip
 
             print("Note deleted successfully.")
         except ValueError:
-            print("Invlaid input")
+            print("Invalid input")
         except Exception as e:
             print(f"Error deleting note: {e}")
     else:
@@ -511,14 +511,14 @@ def get_category():
             print(f"{i}: "+category_list[i])
         try:
             print(str(len(category_list)+1)+": No Desired Category")
-            chosed_option = input()
-            chosed_option = int(chosed_option)
-            if chosed_option == (len(category_list)+1):
+            chosen_option = input()
+            chosen_option = int(chosen_option)
+            if chosen_option == (len(category_list)+1):
                 return ""
-            if chosed_option > (len(category_list)+1):
+            if chosen_option > (len(category_list)+1):
                 input("Invalid Option. Press Enter to Continue")
             else:
-                return category_list[chosed_option]
+                return category_list[chosen_option]
         except ValueError:
             print("Please input a valid input.")
             pass
@@ -530,21 +530,21 @@ def get_dietary():
     category_list = ["Algerian","American","Argentinian","Australian","British","Canadian","Chinese","Croatian","Dutch",
                      "Egyptian","Filipino","French","Greek","Indian","Irish","Italian","Jamaican","Japanese","Kenyan",
                      "Malaysian","Mexican","Moroccan","Norwegian","Polish","Portuguese","Russian","Saudi Arabian","Slovakian",
-                     "Spanish","Syrian","Thai","Tunisian","Turkish","Ukrainian","Uruguayan","Venezulan","Vietnamese"]
+                     "Spanish","Syrian","Thai","Tunisian","Turkish","Ukrainian","Uruguayan","Venezuelan","Vietnamese"]
     while True:
         print("Valid Categories:")
         for i in range(len(category_list)):
             print(f"{i}: "+category_list[i])
         try:
             print(str(len(category_list)+1)+": No Desired Category")
-            chosed_option = input()
-            chosed_option = int(chosed_option)
-            if chosed_option == (len(category_list)+1):
+            chosen_option = input()
+            chosen_option = int(chosen_option)
+            if chosen_option == (len(category_list)+1):
                 return ""
-            if chosed_option > (len(category_list)+1):
+            if chosen_option > (len(category_list)+1):
                 input("Invalid Option. Press Enter to Continue")
             else:
-                return category_list[chosed_option]
+                return category_list[chosen_option]
         except ValueError:
             print("Please input a valid input.")
             pass
@@ -576,7 +576,7 @@ def search_by_name(search_func: SearchEngine.RecipeSearchEngine):
     while will_continue:
         search_str = input("Please input Name of Recipe: ")
         recipe_list = search_func.search_recipes_by_name(search_str)
-        # print("Additonal Features not supported")
+        # print("Additional Features not supported")
         return recipe_list
     pass
 
@@ -801,7 +801,7 @@ def search_not_logged_in(search_func: SearchEngine.RecipeSearchEngine, service: 
                     else:
                         print("No Recipes Found")
                     pass
-                case 3: # Search by Neccessary Ing
+                case 3: # Search by Necessary Ingredients
                     recipe_list = search_by_ing(search_func)
                     if recipe_list != []:
                             recipe_list = rank(recipe_list)
@@ -903,7 +903,7 @@ def register_user(service: ServiceContainer):
             try:
                 user = service.create_user(email,password)
                 will_continue = False
-                print("Account Succesfully Created.")
+                print("Account Successfully Created.")
                 return user
             except ValueError:
                 print("Either your Password or your Email was not valid.\nPlease try again.")
@@ -1239,7 +1239,7 @@ def delete_recipe(service: ServiceContainer, recipe: Recipe):
 # By Jon Bailey
 def recipe_workflow(service: ServiceContainer, recipe: Recipe, user: User | None = None):
     if recipe is None:
-        print("No recipe recieved")
+        print("No recipe received")
         return
     while True:
         print(f"\n --- Recipe: {recipe.get_name()} ---")
@@ -1254,7 +1254,7 @@ def recipe_workflow(service: ServiceContainer, recipe: Recipe, user: User | None
         print("0. Back to Main Menu")
 
         try:
-            choice = int(input("Select an ption: ").strip())
+            choice = int(input("Select an Option: ").strip())
         except ValueError:
             print("Selection was not a number")
             continue
@@ -1280,7 +1280,7 @@ def recipe_workflow(service: ServiceContainer, recipe: Recipe, user: User | None
                 if user is not None:
                     print(" --- Notes ---")
                     print("1) Add a new note")
-                    print("2) Update an exisitng note")
+                    print("2) Update an existing note")
                     print("3) Delete a note")
                     try:
                         note = int(input("Make a choice: ").strip())
