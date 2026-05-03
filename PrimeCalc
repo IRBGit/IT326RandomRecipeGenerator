@@ -15,4 +15,4 @@ def is_prime(n):
     return True
 
 for i in range(1, 99999999999, 2):
-    print(str(i) + "is a prime" if is_prime(i) else "isn't a prime")
+    print(str(i) + " is a prime" if is_prime(i) else str(i)+" isn't a prime")
