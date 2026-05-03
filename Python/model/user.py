@@ -257,15 +257,13 @@ class User(Base):
         ) -> list[str]:
         from model import UserRecipeNote
         key = recipe.id
+        new_note = UserRecipeNote()
+        new_note.user_id = self.id
+        new_note.recipe_id = recipe.id
+        new_note.notes = [note]
 
-        if key in self._recipe_notes:
-            entry = self._recipe_notes[key]
-            entry.notes = entry.notes + [note]
-        else:
-            entry = UserRecipeNote(recipe=recipe, notes=[note])
-            self._recipe_notes[key] = entry
-
-        return entry.notes
+        self._recipe_notes[recipe.id] = new_note
+        return self._recipe_notes[recipe.id].notes
     
     def remove_note(
             self, recipe: "Recipe",

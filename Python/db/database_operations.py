@@ -405,8 +405,10 @@ class UserService:
                 raise ValueError("User not found")
     
             result = []
-            for recipe, notes in user.notes.items():
-                for note in notes:
+            
+            for recipe_id, note_entry in user._recipe_notes.items():
+                recipe = note_entry.recipe
+                for note in note_entry.notes:
                     result.append((recipe, note))
 
             return result
