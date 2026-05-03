@@ -7,7 +7,7 @@ from SearchEngine import SearchEngine, Filter, Rank
 from typing import List
 from datetime import datetime
 from model.conversions import format_converted_amount
-from exportFiles.exporter import export_recipe
+from exportFiles.exporter import export_recipe #if i forget  to uncomment please do so.
 from exportFiles.shopping_list import build_shopping_list, print_shopping_list
 
 load_dotenv()
@@ -126,6 +126,9 @@ def recipe_detail_menu(service: ServiceContainer, recipe: Recipe, user: User | N
         print("1: View recipe details")
         print("2: Export recipe to PDF")
         print("3: Build shopping list")
+        if user is not None:
+            print("4: Save recipe to favorites")
+            print("5: Remove recipe from favorites")
         print("0: Back")
 
         try:
@@ -166,6 +169,21 @@ def recipe_detail_menu(service: ServiceContainer, recipe: Recipe, user: User | N
 
             shopping_list = build_shopping_list(service, user, recipe)
             print_shopping_list(recipe, shopping_list)
+            continue
+        if choice == 4:
+            if user is None:
+                print("Please log in first.")
+                continue
+
+            add_recipe_to_favorites(service, user, recipe)
+            continue
+
+        if choice == 5:
+            if user is None:
+                print("Please log in first.")
+                continue
+
+            remove_recipe_from_favorites(service, user, recipe)
             continue
 
         print("Invalid selection.")
@@ -776,7 +794,7 @@ def search_not_logged_in(search_func: SearchEngine.RecipeSearchEngine, service: 
                     else:
                         print("No Recipes Found")
                 case 2: # Search by Criteria
-                    recipe_list = search_by_category(search_func)
+                    recipe_list = search_by_criteria(search_func)
                     if recipe_list != []:
                             recipe_list = rank(recipe_list)
                             view_recipe_results(recipe_list, service)
@@ -837,7 +855,7 @@ def search_logged_in(search_func: SearchEngine.RecipeSearchEngine, user: User, s
                         print("No Recipes Found")
 
                 case 2:
-                    recipe_list = search_by_category(search_func)
+                    recipe_list = search_by_criteria(search_func)
                     recipe_list = apply_saved_dietary_preferences(recipe_list, user)
 
                     if recipe_list != []:
@@ -1174,7 +1192,7 @@ def update_recipe(service: ServiceContainer, recipe: Recipe):
 
 # By Jon Bailey
 def add_recipe_to_favorites(service: ServiceContainer, user: User, recipe: Recipe):
-    if user is None or Recipe is None:
+    if user is None or recipe is None:
         print("Missing a user or recipe. Could not add")
         return
     if service.add_recipe_to_favorites(user.id, recipe.id):
@@ -1307,6 +1325,7 @@ def main():
     service = ServiceContainer()
     search_func = SearchEngine.RecipeSearchEngine(service)
     user = None
+    logged_in = False
     will_continue = True
     while(will_continue):
         if user != None:
@@ -1314,15 +1333,17 @@ def main():
             print("1: Get Popular Searches") 
             print("2: Get Random Recipe")  
             print("3: Search for Recipe") 
-            print("4: Add Your Own Recipe") 
-            print("5: Add Ingredients to Pantry") 
-            print("6: Update User Information")
-            print("7: Log Out")
-            print("8: Delete Account") 
-            print("9: Exit")
+            print("4: View Favorites")
+            print("5: Add Your Own Recipe") 
+            print("6: Add Ingredients to Pantry") 
+            print("7: Update User Information")
+            print("8: Log Out")
+            print("9: Delete Account") 
+            print("10: Exit")
             try:
                 chosen_option = input("Select your choice:")
                 chosen_option = int(chosen_option)
+                
                 match chosen_option:
                     case 1: # Get Popular Searches
                         recipe_list = get_pop_searches(service,search_func)
@@ -1331,52 +1352,57 @@ def main():
                             view_recipe_results(recipe_list, service, user)
                         else:
                             print("No Recipes Found.")
-                        # print("BROKEN: WILL NOT WORK")
-                        # print("UNCOMMENT OUT WHEN TESTING")
+
                     case 2: # Get Random Recipe
-                        # TODO: NOT OUTPUTTING LIST OF RECIPES
                         recipe_list = random_recipe_helper(search_func, user)
                         if recipe_list != []:
                             view_recipe_results(recipe_list, service, user)
                         else:
                             print("No Recipes Found.")
-                            pass
+
                     case 3: # Search for Recipe
                         search_logged_in(search_func, user, service)
-                    case 4: # Add Recipe
-                        #print("This feature hasn't been implemented yet.")
-                        #pass
+
+                    case 4: # View Favorites
+                        recipe_list = service.get_user_favorites(user.id)
+                        if recipe_list != []:
+                            view_recipe_results(recipe_list, service, user)
+                        else:
+                            print("No favorite recipes found.")
+
+                    case 5: # Add Recipe
                         add_recipe(service)
-                    case 5: # Add Ingredients to Pantry
+
+                    case 6: # Add Ingredients to Pantry
                         add_pantry_item(service, user)
-                        pass
-                    case 6: # Update User Info
+
+                    case 7: # Update User Info
                         update_account_info_helper(service, user)
-                    case 7: # Log Out
+
+                    case 8: # Log Out
                         _, message, user = logout()
                         print(message)
-                    case 8: # Delete Account
-                        # print("This feature hasn't been implemented yet.")
-                        # pass
+
+                    case 9: # Delete Account
                         if delete_account(user=user, service=service):
                             print("Account Successfully deleted.")
                             logged_in = False
                             user = None
                         else:
                             print("Account not deleted")
-                    case 9: # Exit
+
+                    case 10: # Exit
                         will_continue = False
                         print("You will be automatically logged out.\nThank you for using our Program!")
-                        pass
+
                     case _:
                         print("Invalid Option. Please Try Again.")
                         pass
-                if chosen_option != 3:
+                if chosen_option != 3 and chosen_option != 4:
                     input("Press Enter to Continue")
             except ValueError:
                 print("Please input a valid input.")
                 pass
-            input("Press Enter to Continue")
         else:
             print("\nCurrent options are listed below. \nInput the number on the left to select your choice.")
             print("1: Log In")
@@ -1393,11 +1419,11 @@ def main():
                         user = loginHelper(service)
                         if user:
                             logged_in = True
-                        if not logged_in:
+                        else:
+                            logged_in = False
                             reset_password_helper(service)
                             print("Please try to Login Again.")
-                            pass
-                        input("Press Enter to Continue")
+                        
                     case 2: # Get Pop Searches
                         recipe_list = get_pop_searches(service,search_func)
                         if recipe_list != []:

@@ -50,17 +50,11 @@ class User(Base):
         back_populates="favorited_by"
         )
 
-    _ratings: Mapped[dict["Recipe", "Rating"]] = relationship(
+    _ratings: Mapped[dict[int, "Rating"]] = relationship(
         "Rating", 
-        collection_class = attribute_mapped_collection("recipe"),
+        collection_class = attribute_mapped_collection("recipe_id"),
         back_populates = "user", 
         cascade = "all, delete-orphan"
-        )
-    
-    """This cannot be set from the User side. Must be set by methods in the Recipe class."""
-    recipe_rating: AssociationProxy[dict["Recipe", int]] = association_proxy(
-        "_ratings",
-        "rating"
         )
 
     pantry: AssociationProxy[
@@ -83,18 +77,13 @@ class User(Base):
         cascade="all, delete-orphan"
     )
 
-    _recipe_notes: Mapped[dict["Recipe", "UserRecipeNote"]] = relationship(
+    _recipe_notes: Mapped[dict[int, "UserRecipeNote"]] = relationship(
         "UserRecipeNote",
-        collection_class = attribute_mapped_collection("recipe"),
+        collection_class = attribute_mapped_collection("recipe_id"),
         back_populates = "user",
         cascade = "all, delete-orphan"
     )
 
-    notes: AssociationProxy[dict["Recipe", list[str]]] = association_proxy(
-        "_recipe_notes",
-        "notes",
-        creator = lambda r, n: UserRecipeNote(recipe = r, notes = n)
-    )
 
     def __init__(self, email: str, password: str, dietary_preferences: str = ""):
         self.email = email
@@ -266,14 +255,15 @@ class User(Base):
             recipe: "Recipe", 
             note: str
         ) -> list[str]:
-        if recipe in self.notes:
-            notes = self.notes[recipe]
-            notes.append(note)
-            self.notes[recipe] = notes
-        else:
-            self.notes[recipe] = [note]
+        from model import UserRecipeNote
+        key = recipe.id
+        new_note = UserRecipeNote()
+        new_note.user_id = self.id
+        new_note.recipe_id = recipe.id
+        new_note.notes = [note]
 
-        return self.notes[recipe]
+        self._recipe_notes[recipe.id] = new_note
+        return self._recipe_notes[recipe.id].notes
     
     def remove_note(
             self, recipe: "Recipe",
@@ -285,19 +275,22 @@ class User(Base):
         Returns:
             Updated list of notes.
         """
-        if recipe not in self.notes:
-            raise KeyError("No notes found for this recipe")
+        from model import UserRecipeNote
         
-        notes_list = self.notes[recipe]
+        key = recipe.id
 
-        if note not in notes_list:
-            raise ValueError("Note not found")
+        if key not in self._recipe_notes:
+            raise KeyError(f"No notes found for recipe {recipe}.")
         
-        notes_list.remove(note)
+        entry = self._recipe_notes[key]
 
-        self.notes[recipe] = notes_list
-
-        return notes_list
+        if note not in entry.notes:
+            raise ValueError(f"Note '{note}' not found for recipe {recipe}.")
+        
+        updated = entry.notes
+        updated.remove(note)
+        entry.notes = updated
+        return updated
     
     #By Thanvii Ambala
     def delete_account(self):

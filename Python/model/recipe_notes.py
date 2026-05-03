@@ -37,14 +37,6 @@ class UserRecipeNote(Base):
         back_populates = "_user_notes"
         )
 
-    def __init__(
-            self, 
-            notes: Optional[list[str]] = None, 
-            **kwargs
-            ):
-        super().__init__(**kwargs)
-        self.notes = notes or []
-
     # Python-side List Interface
     @property
     def notes(
@@ -96,4 +88,4 @@ class UserRecipeNote(Base):
     def __hash__(
             self
             ) -> int:
-        return hash((type(self), self.id))
+        return hash((type(self), self.user_id, self.recipe_id))

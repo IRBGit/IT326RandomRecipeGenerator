@@ -406,8 +406,10 @@ class UserService:
                 raise ValueError("User not found")
     
             result = []
-            for recipe, notes in user.notes.items():
-                for note in notes:
+            
+            for recipe_id, note_entry in user._recipe_notes.items():
+                recipe = note_entry.recipe
+                for note in note_entry.notes:
                     result.append((recipe, note))
 
             return result
@@ -964,6 +966,8 @@ class SearchService:
             query: str):
         query = query.strip().lower()
         with UnitOfWork() as uow:
+            if not query or query == "":
+                return
 
             search = UserSearch(
                 query = query

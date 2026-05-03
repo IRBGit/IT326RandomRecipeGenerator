@@ -23,11 +23,6 @@ class Rating(Base):
     user: Mapped["User"] = relationship("User", back_populates="_ratings")
     recipe: Mapped["Recipe"] = relationship("Recipe", back_populates="_ratings")
 
-    def __init__(self, user: Optional[User] = None, recipe: Optional[Recipe] = None, rating: int = 0):
-        self.user = user
-        self.recipe = recipe
-        self.rating = rating
-
     def __repr__(self):
         return f"Rating(user_id = {self.user_id}, recipe_id = {self.recipe_id}, rating = {self.rating})>"
     
@@ -39,7 +34,7 @@ class Rating(Base):
             return False
         return (
             self.user_id is not None and
-            self.self.recipe_id is not None and
+            self.recipe_id is not None and
             self.user_id == other.user_id and 
             self.recipe_id == other.recipe_id
         )
@@ -47,4 +42,4 @@ class Rating(Base):
     def __hash__(
             self
             ) -> int:
-        return hash((type(self), self.id))
+        return hash((type(self), self.user_id, self.recipe_id))
