@@ -12,5 +12,9 @@
         "Python/testCases",
         "-p",
         "test_*.py"
+    ],
+    "cSpell.words": [
+        "Alysa",
+        "Thanvii"
     ]
 }
