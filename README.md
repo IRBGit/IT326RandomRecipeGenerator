@@ -10,3 +10,5 @@ for database security: pip install python-dotenv
 for the recipe to pdf use case: pip install json2pdf_converter
 for database managment: SQLAlchemy
 for printing PDF: wkhtmltopdf
+
+run requirements.ps1 from root to automatically install all dependencies 
