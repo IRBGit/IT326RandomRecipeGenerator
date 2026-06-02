@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recipe</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f5f5f5;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 40px;
+        }
+
+        .recipe-header {
+            text-align: center;
+            margin-bottom: 40px;
+            border-bottom: 3px solid #e74c3c;
+            padding-bottom: 30px;
+        }
+
+        .recipe-title {
+            font-size: 42px;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+
+        .recipe-meta {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            flex-wrap: wrap;
+            font-size: 14px;
+            color: #666;
+            margin-top: 10px;
+        }
+
+        .meta-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .meta-label {
+            font-weight: bold;
+            color: #e74c3c;
+            font-size: 12px;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+        }
+
+        .recipe-image {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .recipe-image img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            max-height: 400px;
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+
+        .section {
+            break-inside: avoid;
+        }
+
+        .section-title {
+            font-size: 24px;
+            font-weight: bold;
+            color: #2c3e50;
+            border-bottom: 2px solid #e74c3c;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        .ingredients-list {
+            list-style: none;
+        }
+
+        .ingredients-list li {
+            padding: 8px 0;
+            border-bottom: 1px solid #ecf0f1;
+            font-size: 14px;
+        }
+
+        .ingredients-list li:last-child {
+            border-bottom: none;
+        }
+
+        .ingredient-name {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .ingredient-measure {
+            color: #7f8c8d;
+            font-size: 13px;
+            margin-left: 10px;
+        }
+
+        .instructions {
+            line-height: 1.8;
+            font-size: 14px;
+            color: #444;
+            text-align: justify;
+        }
+
+        .instructions p {
+            margin-bottom: 15px;
+        }
+
+        .source-section {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #ecf0f1;
+            font-size: 12px;
+            color: #7f8c8d;
+        }
+
+        .source-label {
+            font-weight: bold;
+            color: #e74c3c;
+            text-transform: uppercase;
+            font-size: 11px;
+            margin-bottom: 5px;
+        }
+
+        .source-url {
+            word-break: break-all;
+            color: #3498db;
+        }
+
+        .youtube-section {
+            margin-top: 20px;
+        }
+
+        .youtube-label {
+            font-weight: bold;
+            color: #e74c3c;
+            text-transform: uppercase;
+            font-size: 11px;
+            margin-bottom: 5px;
+        }
+
+        .youtube-url {
+            word-break: break-all;
+            color: #e74c3c;
+        }
+
+        .tags {
+            margin-top: 20px;
+        }
+
+        .tags-label {
+            font-weight: bold;
+            color: #e74c3c;
+            text-transform: uppercase;
+            font-size: 11px;
+            margin-bottom: 8px;
+        }
+
+        .tag {
+            display: inline-block;
+            background-color: #ecf0f1;
+            color: #2c3e50;
+            padding: 4px 10px;
+            border-radius: 12px;
+            margin-right: 8px;
+            margin-bottom: 8px;
+            font-size: 12px;
+        }
+
+        @media (max-width: 768px) {
+            .content-grid {
+                grid-template-columns: 1fr;
+                gap: 30px;
+            }
+
+            .recipe-title {
+                font-size: 28px;
+            }
+
+            .recipe-meta {
+                gap: 15px;
+            }
+        }
+
+        @media print {
+            body {
+                background-color: white;
+            }
+
+            .container {
+                padding: 20px;
+                box-shadow: none;
+            }
+
+            .recipe-image img {
+                max-height: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        
+        <div class="recipe-header">
+            <h1 class="recipe-title">Pollo en pepitoria</h1>
+            <div class="recipe-meta">
+                
+                
+            </div>
+        </div>
+
+        
+
+        <div class="content-grid">
+            <!-- Ingredients Section -->
+            <div class="section">
+                <h2 class="section-title">Ingredients</h2>
+                <ul class="ingredients-list">
+                    
+                        
+                        <li>
+                            <span class="ingredient-name">Carrots</span>
+                            <span class="ingredient-measure">1.0</span>
+                        </li>
+                        
+                    
+                        
+                        <li>
+                            <span class="ingredient-name">Onion</span>
+                            <span class="ingredient-measure">1.0</span>
+                        </li>
+                        
+                    
+                        
+                        <li>
+                            <span class="ingredient-name">Almonds</span>
+                            <span class="ingredient-measure">2.0 tbsp</span>
+                        </li>
+                        
+                    
+                        
+                        <li>
+                            <span class="ingredient-name">Extra Virgin Olive Oil</span>
+                            <span class="ingredient-measure">4.0 tbsp</span>
+                        </li>
+                        
+                    
+                        
+                        <li>
+                            <span class="ingredient-name">Garlic Clove</span>
+                            <span class="ingredient-measure">6.0</span>
+                        </li>
+                        
+                    
+                        
+                        <li>
+                            <span class="ingredient-name">Parsley</span>
+                            <span class="ingredient-measure">2.0</span>
+                        </li>
+                        
+                    
+                        
+                        <li>
+                            <span class="ingredient-name">Chicken Stock</span>
+                            <span class="ingredient-measure">350.0 ml</span>
+                        </li>
+                        
+                    
+                        
+                        <li>
+                            <span class="ingredient-name">Saffron</span>
+                            <span class="ingredient-measure"></span>
+                        </li>
+                        
+                    
+                        
+                        <li>
+                            <span class="ingredient-name">Chicken Thighs</span>
+                            <span class="ingredient-measure">8.0</span>
+                        </li>
+                        
+                    
+                        
+                        <li>
+                            <span class="ingredient-name">Egg</span>
+                            <span class="ingredient-measure">2.0</span>
+                        </li>
+                        
+                    
+                        
+                        <li>
+                            <span class="ingredient-name">Dry sherry</span>
+                            <span class="ingredient-measure">250.0 ml</span>
+                        </li>
+                        
+                    
+                        
+                        <li>
+                            <span class="ingredient-name">Cloves</span>
+                            <span class="ingredient-measure"></span>
+                        </li>
+                        
+                    
+                        
+                        <li>
+                            <span class="ingredient-name">Bay Leaves</span>
+                            <span class="ingredient-measure">2.0</span>
+                        </li>
+                        
+                    
+                        
+                        <li>
+                            <span class="ingredient-name">Cinnamon Stick</span>
+                            <span class="ingredient-measure">1.0</span>
+                        </li>
+                        
+                    
+                        
+                        <li>
+                            <span class="ingredient-name">Celery</span>
+                            <span class="ingredient-measure">1.0</span>
+                        </li>
+                        
+                    
+                        
+                        <li>
+                            <span class="ingredient-name">Stale bread</span>
+                            <span class="ingredient-measure">30.0 g</span>
+                        </li>
+                        
+                    
+                        
+                    
+                        
+                    
+                        
+                    
+                        
+                    
+                </ul>
+            </div>
+
+            <!-- Instructions Section -->
+            <div class="section">
+                <h2 class="section-title">Instructions</h2>
+                <div class="instructions">
+                    
+                    <p>step 1</p><p>Put the saffron in a small bowl with 75ml of just-boiled water. Stir and set aside. Heat 2 tbsp of the oil in a broad, shallow casserole dish. Cook the garlic until pale gold in colour, then add the blanched almonds and bread, and continue to fry until everything is golden. Tip into a food processor with some salt and pepper and the parsley, and whizz together.</p><p>step 2</p><p>Heat 2 more tbsp of the oil in the pan and brown the chicken all over, seasoning as you cook. Put in a bowl and set aside.</p><p>step 3</p><p>Remove all but about 2 tbsp of chicken fat from the pan and cook the onion, carrot and celery until golden. Add the sherry, stirring to dislodge any brown bits that have stuck to the pan. Pour in the stock and the saffron (with its water), and bring to the boil, then turn the heat down to a simmer. Add the spices and bay leaves, and put the chicken back in the pan with any juices. Season and gently cook the chicken for about 40 mins with the lid on.</p><p>step 4</p><p>Transfer the chicken to a bowl again, leaving the sauce in the pan, and cover with foil to keep warm. Remove the yolks from the eggs and roughly chop the whites. Mash the egg yolks in a small bowl and gradually mix in a couple of tbsp of the sauce. Bring the remaining sauce to the boil to reduce a bit (you want it to just coat the chicken), then turn the heat down. Remove the bay and cinnamon stick. Add the egg yolks and cook for a few mins until the mixture has thickened. Stir in the almond mixture that you made earlier (this will thicken the sauce, too). Put the chicken back in the pan and heat it for about 3 mins, spooning the sauce over it. Season to taste.</p><p>step 5</p><p>Scatter over the extra parsley, the almonds pieces and the chopped egg whites (if you’re going to use them). You can serve this straight from the dish with some rice, if you like.</p>
+                    
+                </div>
+            </div>
+        </div>
+
+        <!-- Additional Information Footer -->
+        <div class="source-section">
+            
+
+            
+
+            
+        </div>
+        
+    </div>
+</body>
+</html>

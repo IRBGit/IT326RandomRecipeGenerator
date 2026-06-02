@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recipe</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f5f5f5;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 40px;
+        }
+
+        .recipe-header {
+            text-align: center;
+            margin-bottom: 40px;
+            border-bottom: 3px solid #e74c3c;
+            padding-bottom: 30px;
+        }
+
+        .recipe-title {
+            font-size: 42px;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+
+        .recipe-meta {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            flex-wrap: wrap;
+            font-size: 14px;
+            color: #666;
+            margin-top: 10px;
+        }
+
+        .meta-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .meta-label {
+            font-weight: bold;
+            color: #e74c3c;
+            font-size: 12px;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+        }
+
+        .recipe-image {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .recipe-image img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            max-height: 400px;
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+
+        .section {
+            break-inside: avoid;
+        }
+
+        .section-title {
+            font-size: 24px;
+            font-weight: bold;
+            color: #2c3e50;
+            border-bottom: 2px solid #e74c3c;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        .ingredients-list {
+            list-style: none;
+        }
+
+        .ingredients-list li {
+            padding: 8px 0;
+            border-bottom: 1px solid #ecf0f1;
+            font-size: 14px;
+        }
+
+        .ingredients-list li:last-child {
+            border-bottom: none;
+        }
+
+        .ingredient-name {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .ingredient-measure {
+            color: #7f8c8d;
+            font-size: 13px;
+            margin-left: 10px;
+        }
+
+        .instructions {
+            line-height: 1.8;
+            font-size: 14px;
+            color: #444;
+            text-align: justify;
+        }
+
+        .instructions p {
+            margin-bottom: 15px;
+        }
+
+        .source-section {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #ecf0f1;
+            font-size: 12px;
+            color: #7f8c8d;
+        }
+
+        .source-label {
+            font-weight: bold;
+            color: #e74c3c;
+            text-transform: uppercase;
+            font-size: 11px;
+            margin-bottom: 5px;
+        }
+
+        .source-url {
+            word-break: break-all;
+            color: #3498db;
+        }
+
+        .youtube-section {
+            margin-top: 20px;
+        }
+
+        .youtube-label {
+            font-weight: bold;
+            color: #e74c3c;
+            text-transform: uppercase;
+            font-size: 11px;
+            margin-bottom: 5px;
+        }
+
+        .youtube-url {
+            word-break: break-all;
+            color: #e74c3c;
+        }
+
+        .tags {
+            margin-top: 20px;
+        }
+
+        .tags-label {
+            font-weight: bold;
+            color: #e74c3c;
+            text-transform: uppercase;
+            font-size: 11px;
+            margin-bottom: 8px;
+        }
+
+        .tag {
+            display: inline-block;
+            background-color: #ecf0f1;
+            color: #2c3e50;
+            padding: 4px 10px;
+            border-radius: 12px;
+            margin-right: 8px;
+            margin-bottom: 8px;
+            font-size: 12px;
+        }
+
+        @media (max-width: 768px) {
+            .content-grid {
+                grid-template-columns: 1fr;
+                gap: 30px;
+            }
+
+            .recipe-title {
+                font-size: 28px;
+            }
+
+            .recipe-meta {
+                gap: 15px;
+            }
+        }
+
+        @media print {
+            body {
+                background-color: white;
+            }
+
+            .container {
+                padding: 20px;
+                box-shadow: none;
+            }
+
+            .recipe-image img {
+                max-height: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        
+        <div class="recipe-header">
+            <h1 class="recipe-title">Caesar Salad</h1>
+            <div class="recipe-meta">
+                
+                
+            </div>
+        </div>
+
+        
+
+        <div class="content-grid">
+            <!-- Ingredients Section -->
+            <div class="section">
+                <h2 class="section-title">Ingredients</h2>
+                <ul class="ingredients-list">
+                    
+                        
+                        <li>
+                            <span class="ingredient-name">lettuce</span>
+                            <span class="ingredient-measure"></span>
+                        </li>
+                        
+                    
+                        
+                        <li>
+                            <span class="ingredient-name">croutons</span>
+                            <span class="ingredient-measure"></span>
+                        </li>
+                        
+                    
+                        
+                        <li>
+                            <span class="ingredient-name">parmesan</span>
+                            <span class="ingredient-measure"></span>
+                        </li>
+                        
+                    
+                        
+                    
+                        
+                    
+                        
+                    
+                        
+                    
+                        
+                    
+                        
+                    
+                        
+                    
+                        
+                    
+                        
+                    
+                        
+                    
+                        
+                    
+                        
+                    
+                        
+                    
+                        
+                    
+                        
+                    
+                        
+                    
+                        
+                    
+                </ul>
+            </div>
+
+            <!-- Instructions Section -->
+            <div class="section">
+                <h2 class="section-title">Instructions</h2>
+                <div class="instructions">
+                    
+                    <p>Chop Lettuce</p><p>Make Dressing</p><p>Combine Ingredients</p>
+                    
+                </div>
+            </div>
+        </div>
+
+        <!-- Additional Information Footer -->
+        <div class="source-section">
+            
+
+            
+
+            
+        </div>
+        
+    </div>
+</body>
+</html>
